@@ -2,7 +2,7 @@
 layout: global
 title: Data Exploration Using Shark
 prev: data-exploration-using-spark.html
-next: processing-live-data-streams-with-spark-streaming.html
+next: machine-learning-with-spark.html
 skip-chapter-toc: true
 ---
 
@@ -11,14 +11,14 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
 1. First, launch the Shark console:
 
    <pre class="prettyprint lang-bsh">
-   /root/shark-0.2/bin/shark-withinfo
+   /home/imdb_1/spark/shark-0.2.1/bin/shark-withinfo
    </pre>
 
 1. Similar to Apache Hive, Shark can query external tables (i.e., tables that are not created in Shark).
    Before you do any querying, you will need to tell Shark where the data is and define its schema.
 
    <pre class="prettyprint lang-sql">
-   shark> create external table wikistats (dt string, project_code string, page_name string, page_views int, bytes int) row format delimited fields terminated by ' ' location '/wiki/pagecounts';
+   shark> create external table wikistats (dt string, project_code string, page_name string, page_views int, bytes int) row format delimited fields terminated by ' ' location '/dev/ampcamp/data/wikistats';
    <span class="nocode">
    ...
    Time taken: 0.232 seconds
@@ -51,7 +51,7 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
    shark> select count(1) from wikistats_cached;
    <span class="nocode">
    ...
-   122352588
+   15979408
    Time taken: 7.632 seconds
    12/08/18 21:23:13 INFO CliDriver: Time taken: 7.632 seconds</span></pre>
 
@@ -67,13 +67,13 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
    Time taken: 12.614 seconds
    13/02/05 22:05:18 INFO CliDriver: Time taken: 12.614 seconds</span></pre>
 
-1. In the Spark section, we ran a very expensive query to compute pages that were viewed more than 200,000 times. It is fairly simple to do the same thing in SQL.
+1. In the Spark section, we ran a very expensive query to compute pages that were viewed more than 10,000 times. It is fairly simple to do the same thing in SQL.
 
-   To make the query run faster, we increase the number of reducers used in this query to 50 in the first command. Note that the default number of reducers, which we have been using so far in this section, is 1.
+   To make the query run faster, we increase the number of reducers used in this query to 30 in the first command. Note that the default number of reducers, which we have been using so far in this section, is 1.
 
    <pre class="prettyprint lang-sql">
-   shark> set mapred.reduce.tasks=50;
-   shark> select page_name, sum(page_views) as views from wikistats_cached group by page_name having views > 200000;
+   shark> set mapred.reduce.tasks=30;
+   shark> select page_name, sum(page_views) as views from wikistats_cached group by page_name having views > 10000;
    <span class="nocode">
    ...
    index.html      310642
@@ -115,11 +115,11 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
    /* "%" in SQL is a wildcard matching all characters. */</pre>
    </div>
 
-- Generate a histogram for the number of hits for each hour on May 6, 2009; sort the output by date/time. Based on the output, which hour is Wikipedia most popular?
+- Generate a histogram for the number of hits for each hour on May 5, 2009; sort the output by date/time. Based on the output, which hour is Wikipedia most popular?
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
-   select dt, sum(page_views) from wikistats_cached where dt like "20090506%" group by dt order by dt;</pre>
+   select dt, sum(page_views) from wikistats_cached where dt like "20090505%" group by dt order by dt;</pre>
    </div>
 
 To exit Shark, type the following at the Shark command line (and don't forget the semicolon!).

@@ -4,7 +4,7 @@ version := "0.0"
 
 scalaVersion := "2.9.2"
 
-libraryDependencies += "org.spark-project" %% "spark-streaming" % "0.7.0-SNAPSHOT"
+libraryDependencies += "org.spark-project" %% "spark-core" % "0.7.0"
 
 
 mainClass in (Compile, run) := Some("WikipediaKMeans")

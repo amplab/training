@@ -17,11 +17,11 @@ First, launch the Spark shell:
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-/root/spark/spark-shell</pre>
+/home/imdb_1/spark/spark-0.7.0/spark-shell</pre>
 </div>
 <div data-lang="python" markdown="1">
 <pre class="prettyprint lang-bsh">
-/root/spark/pyspark</pre>
+/home/imdb_1/spark/spark-0.7.0/pyspark</pre>
 </div>
 </div>
 
@@ -35,14 +35,16 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
        scala> sc
        res: spark.SparkContext = spark.SparkContext@470d1f30
 
-       scala> val pagecounts = sc.textFile("/wiki/pagecounts")
-       12/08/17 23:35:14 INFO mapred.FileInputFormat: Total input paths to process : 74
+       scala> val pagecounts = sc.textFile("/dev/ampcamp/data/wikistats")
+       13/03/14 20:20:41 INFO storage.MemoryStore: ensureFreeSpace(45825) called with curMem=0, maxMem=23769974046
+       13/03/14 20:20:41 INFO storage.MemoryStore: Block broadcast_0 stored as values to memory (estimated size 44.8 KB, free 22.1 GB)
        pagecounts: spark.RDD[String] = MappedRDD[1] at textFile at <console>:12
+
      </div>
      <div data-lang="python" markdown="1">
        >>> sc
        <pyspark.context.SparkContext object at 0x7f7570783350>
-       >>> pagecounts = sc.textFile("/wiki/pagecounts")
+       >>> pagecounts = sc.textFile("/dev/ampcamp/data/wikistats")
        13/02/01 05:30:43 INFO mapred.FileInputFormat: Total input paths to process : 74
        >>> pagecounts
        <pyspark.rdd.RDD object at 0x217d510>
@@ -110,22 +112,13 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    </div>
    </div>
 
-   This should launch 177 Spark tasks on the Spark cluster.
+   This should launch 81 Spark tasks on the Spark cluster.
    If you look closely at the terminal, the console log is pretty chatty and tells you the progress of the tasks.
-   Because we are reading 20G of data from HDFS, this task is I/O bound and can take a while to scan through all the data (2 - 3 mins).
-￼
-   While it's running, you can open the Spark web console to see the progress.
-   To do this, open your favorite browser, and type in the following URL.
-
-   `http://<master_node_hostname>:8080`
-
-   You should have been given `master_node_hostname` at the beginning of the tutorial, or you might have [launched your own cluster](launching-a-cluster.html) and made a note of it then. You should see the Spark Standalone mode web interface, similar to the following (yours will probably show five slaves).
-
-   ![Spark Standalone Web UI](img/standalone-webui640.png)
+   Because we are reading 3G of data from disk, this task is I/O bound and can take a while to scan through all the data (2 - 3 mins).
 
    When your count does finish running, it should return the following result:
 
-       res: Long = 329641466
+       res: Long = 43095268
 
 4. Recall from above when we described the format of the data set, that the second field is the "project code" and contains information about the language of the pages.
    For example, the project code "en" indicates an English page.
@@ -160,7 +153,7 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    <div data-lang="python" markdown="1">
        >>> enPages.count()
        ...
-       122352588
+       15838066
    </div>
    </div>
 
@@ -219,16 +212,16 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    <div data-lang="scala" markdown="1">
        scala> enPages.map(line => line.split(" ")).map(line => (line(0).substring(0, 8), line(3).toInt)).reduceByKey(_+_, 1).collect
        ...
-       res: Array[(java.lang.String, Int)] = Array((20090506,204190442), (20090507,202617618), (20090505,207698578))
+       res: Array[(java.lang.String, Int)] = Array((20090507,10134249), (20090505,62470319))
    </div>
    <div data-lang="python" markdown="1">
        >>> enPages.map(lambda x: x.split(" ")).map(lambda x: (x[0][:8], int(x[3]))).reduceByKey(lambda x, y: x + y, 1).collect()
        ...
-       [(u'20090506', 204190442), (u'20090507', 202617618), (u'20090505', 207698578)]
+       [(u'20090507', 10134249), (u'20090505', 62470319)]
    </div>
    </div>
 
-7. Suppose we want to find pages that were viewed more than 200,000 times during the three days covered by our dataset.
+7. Suppose we want to find pages that were viewed more than 10,000 times during the three days covered by our dataset.
    Conceptually, this task is similar to the previous query.
    But, given the large number of pages (23 million distinct page names), the new task is very expensive.
    We are doing an expensive group-by with a lot of network shuffling of data.
@@ -236,29 +229,73 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    To recap, first we split each line of data into its respective fields.
    Next, we extract the fields for page name and number of page views.
    We reduce by key again, this time with 40 reducers.
-   Then we filter out pages with less than 200,000 total views over our time window represented by our dataset.
+   Then we filter out pages with less than 10,000 total views over our time window represented by our dataset.
 
    <div class="codetabs">
    <div data-lang="scala" markdown="1">
-       scala> enPages.map(l => l.split(" ")).map(l => (l(2), l(3).toInt)).reduceByKey(_+_, 40).filter(x => x._2 > 200000).map(x => (x._2, x._1)).collect.foreach(println)
-       (203378,YouTube)
-       (17657352,Special:Search)
-       (311465,Special:Watchlist)
-       (248624,Special:Export)
-       (237677,2009_swine_flu_outbreak)
-       (396776,Dom_DeLuise)
-       (5816953,Special:Random)
-       (18730347,Main_Page)
-       (534253,Swine_influenza)
-       (310642,index.html)
-       (464935,Wiki)
-       (382510,Deadpool_(comics))
-       (3521336,Special:Randompage)
-       (204604,X-Men_Origins:_Wolverine)
-       (695817,Cinco_de_Mayo)
-       (317708,The_Beatles)
-       (234855,Scrubs_(TV_series))
-       (43822489,404_error/)
+       scala> enPages.map(l => l.split(" ")).map(l => (l(2), l(3).toInt)).reduceByKey(_+_, 30).filter(x => x._2 > 10000).map(x => (x._2, x._1)).collect.foreach(println)
+       (19751,Headbg.jpg)
+       (22312,Bullet.gif)
+       (12108,Influenza_A_virus_subtype_H1N1)
+       (17857,External.png)
+       (44688,The_Beatles)
+       (12866,Gambit_(comics))
+       (10616,Farrah_Fawcett)
+       (10376,X-Men)
+       (14783,external.png)
+       (15782,Eminem)
+       (23513,Operation_Northwoods)
+       (12449,http://211.245.23.155:2666/index.html)
+       (10281,India)
+       (12870,Heroes_(TV_series))
+       (19345,User.gif)
+       (413765,Special:Randompage)
+       (27772,Swine_flu)
+       (11928,House_(TV_series))
+       (14447,United_States)
+       (10903,Relapse_(album))
+       (2169081,Special:Search)
+       (13711,Facebook)
+       (10050,Ricky_Hatton)
+       (12974,How_I_Met_Your_Mother)
+       (19673,Search)
+       (34209,Special:Watchlist)
+       (72393,Swine_influenza)
+       (31400,index.html)
+       (16865,Deaths_in_2009)
+       (13539,Scrubs_(TV_series))
+       (53959,Wiki)
+       (18170,List_of_House_episodes)
+       (16141,Sabretooth_(comics))
+       (14678,Wikipedia)
+       (21274,Necrotizing_fasciitis)
+       (11289,World_War_II)
+       (16183,World_Snooker_Championship_2009)
+       (21077,Mother%27s_Day)
+       (11064,Wolverine_(film))
+       (606438,Special:Random)
+       (29083,2009_swine_flu_outbreak)
+       (17205,Star_Trek_(film))
+       (2132040,Main_Page)
+       (21737,Manny_Pacquiao)
+       (16651,headbg.jpg)
+       (18802,bullet.gif)
+       (32262,Special:Export)
+       (13555,List_of_How_I_Met_Your_Mother_episodes)
+       (11079,May_5)
+       (22464,YouTube)
+       (25458,Michael_Savage_(commentator))
+       (39592,Deadpool_(comics))
+       (10494,Windows_7)
+       (10740,Mia.)
+       (10824,Portal:Contents)
+       (11279,Lost_(TV_series))
+       (15099,Portal:Current_events)
+       (5356543,404_error/)
+       (22091,Wolverine_(comics))
+       (27394,X-Men_Origins:_Wolverine)
+       (16325,user.gif)
+       (68731,Cinco_de_Mayo)
    </div>
    <div data-lang="python" markdown="1">
        >>> enPages.map(lambda x: x.split(" ")).map(lambda x: (x[2], int(x[3]))).reduceByKey(lambda x, y: x + y, 40).filter(lambda x: x[1] > 200000).map(lambda x: (x[1], x[0])).collect()
@@ -272,14 +309,3 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    To leave the Spark shell, type `exit` at the prompt.
 
 8. You can explore the full RDD API by browsing the [Java/Scala](http://www.cs.berkeley.edu/~pwendell/strataconf/api/core/index.html#spark.RDD) or [Python](http://www.cs.berkeley.edu/~pwendell/strataconf/api/pyspark/index.html) API docs.
-
-## Running Standalone Spark Programs
-
-Because of time constraints, in this tutorial we focus on ad-hoc style analytics using the Spark shell.
-However, for many tasks, it makes more sense to write a standalone Spark program.
-We will return to this in the section on Spark Streaming below, where you will actually write a standalone Spark Streaming job.
-We aren't going to cover how to structure, build, and run standalone Spark jobs here, but before we move on, we list here a few resources about standalone Spark jobs for you to come back and explore later.
-
-First, on the AMI for this tutorial we have included "template" projects for Scala and Java standalone programs for both Spark and Spark streaming.
-The Spark ones can be found in the `/root/scala-app-template` and `/root/java-app-template` directories (we will discuss the Streaming ones later).
-Feel free to browse through the contents of those directories. You can also find examples of building and running Spark standalone jobs <a href="http://www.spark-project.org/docs/0.6.0/quick-start.html#a-standalone-job-in-java">in Java</a> and <a href="http://www.spark-project.org/docs/0.6.0/quick-start.html#a-standalone-job-in-scala">in Scala</a> as part of the Spark Quick Start Guide. For even more details, see Matei Zaharia's <a href="http://ampcamp.berkeley.edu/wp-content/uploads/2012/06/matei-zaharia-part-2-amp-camp-2012-standalone-programs.pdf" target="_blank">slides</a> and <a href="http://www.youtube.com/watch?v=7k4yDKBYOcw&t=59m37s" target="_blank">talk video</a> about Standalone Spark jobs at the <a href="http://ampcamp.berkeley.edu/agenda-2012" target="blank">first AMP Camp</a>.

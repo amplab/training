@@ -5,7 +5,7 @@ prev: data-exploration-using-shark.html
 next: where-to-go-from-here---more-resources-and-further-reading.html
 ---
 
-In this chapter, we will use Spark to implement machine learning algorithms. To complete the machine learning exercises within the time available using our relatively small EC2 clusters, in this section we will work with a restricted set of the Wikipedia traffic statistics data from May 5-7, 2009. In particular, this dataset only includes a subset of all Wikipedia articles. This restricted dataset is pre-loaded in the HDFS on your cluster in `/wikistats_20090505-07_restricted`.
+In this chapter, we will use Spark to implement machine learning algorithms. To complete the machine learning exercises within the time available using our relatively small cluster, in this section we will work with a restricted set of the Wikipedia traffic statistics.
 
 ## Command Line Preprocessing and Featurization
 
@@ -20,7 +20,7 @@ Given our time constraints, in order to focus on the machine learning algorithms
 [K-Means clustering](http://en.wikipedia.org/wiki/K-means_clustering) is a popular clustering algorithm that can be used to partition your dataset into K clusters. We now look at how we can implement K-Means clustering using Spark to cluster the featurized Wikipedia dataset.
 
 ## Setup
-Similar to the Spark streaming exercises above, we will be using a standalone project template for this exercise. In your AMI, this has been setup in `/root/kmeans/[scala|java|python]/`. You should find the following items in the directory.
+Similar to the Spark streaming exercises above, we will be using a standalone project template for this exercise. In your AMI, this has been setup in `~/templates/[scala|java|python]/`. You should find the following items in the directory.
 
 <div class="codetabs">
 <div data-lang="scala">
@@ -81,18 +81,12 @@ object WikipediaKMeans {
 
   def main(args: Array[String]) {
     Logger.getLogger("spark").setLevel(Level.WARN)
-    val sparkHome = "/root/spark"
-    val jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar"
-    val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
-    val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
-
-    val sc = new SparkContext(master, "WikipediaKMeans", sparkHome, Seq(jarFile))
+    val sc = new SparkContext("local[6]", "WikipediaKMeans")
 
     val K = 10
     val convergeDist = 1e-6
 
-    val data = sc.textFile(
-        "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
+    val data = sc.textFile("/dev/ampcamp/imdb_data/wikistats_featurized").map(
             t => (t.split("#")(0), parseVector(t.split("#")(1)))).cache()
 
     // Your code goes here
@@ -122,18 +116,13 @@ public class WikipediaKMeans {
 
   public static void main(String[] args) throws Exception {
     Logger.getLogger("spark").setLevel(Level.WARN);
-    String sparkHome = "/root/spark";
-    String jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar";
-    String master = JavaHelpers.getSparkUrl();
-    String masterHostname = JavaHelpers.getMasterHostname();
-    JavaSparkContext sc = new JavaSparkContext(master, "WikipediaKMeans",
-      sparkHome, jarFile);
+    JavaSparkContext sc = new JavaSparkContext("local[6]", "WikipediaKMeans");
 
     int K = 10;
     double convergeDist = .000001;
 
     JavaPairRDD<String, Vector> data = sc.textFile(
-        "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
+        "/dev/ampcamp/imdb_data/wikistats_featurized").map(
       new PairFunction<String, String, Vector>() {
         public Tuple2<String, Vector> call(String in)
         throws Exception {
@@ -173,16 +162,14 @@ def parseVector(line):
 
 if __name__ == "__main__":
     setClassPath()
-    master = open("/root/spark-ec2/cluster-url").read().strip()
-    masterHostname = open("/root/spark-ec2/masters").read().strip()
-    sc = SparkContext(master, "PythonKMeans")
+    sc = SparkContext("local[6]", "PythonKMeans")
     K = 10
     convergeDist = 1e-5
 
     lines = sc.textFile(
-	"hdfs://" + masterHostname + ":9000/wikistats_featurized")
+        "/dev/ampcamp/imdb_data/wikistats_featurized")
     data = lines.map(
-	lambda x: (x.split("#")[0], parseVector(x.split("#")[1]))).cache()
+        lambda x: (x.split("#")[0], parseVector(x.split("#")[1]))).cache()
 
     # Your code goes here
 ~~~
@@ -194,19 +181,19 @@ Let's first take a closer look at our template code in a text editor on the clus
 <div class="codetabs">
 <div data-lang="scala">
 <pre class="prettyprint lang-bsh">
-cd /root/kmeans/scala
+cd ~/templates/scala
 vim WikipediaKMeans.scala  # If you don't know vim, you can use emacs or nano
 </pre>
 </div>
 <div data-lang="java">
 <pre class="prettyprint lang-bsh">
-cd /root/kmeans/java
+cd ~/templates/java
 vim WikipediaKMeans.java  # If you don't know vim, you can use emacs or nano
 </pre>
 </div>
 <div data-lang="python">
 <pre class="prettyprint lang-bsh">
-cd /root/kmeans/python
+cd ~/templates/python
 vim WikipediaKMeans.py  # If you don't know Vim, you can use emacs or nano
 </pre>
 </div>
@@ -221,12 +208,12 @@ This is what it looks like in our template code:
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-    val sc = new SparkContext(master, "WikipediaKMeans", sparkHome, Seq(jarFile))
+    val sc = new SparkContext(master, "WikipediaKMeans")
 ~~~
 </div>
 <div data-lang="java" markdown="1">
 ~~~
-    JavaSparkContext sc = new JavaSparkContext(master, "WikipediaKMeans", sparkHome, jarFile);
+    JavaSparkContext sc = new JavaSparkContext(master, "WikipediaKMeans");
 ~~~
 </div>
 <div data-lang="python" markdown="1">
@@ -246,7 +233,7 @@ A quick note about the `Vector` class we will using in this exercise: For Scala 
 <div data-lang="scala" markdown="1">
 ~~~
    val data = sc.textFile(
-       "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
+       "/dev/ampcamp/imdb_data/wikistats_featurized").map(
            t => (t.split("#")(0), parseVector(t.split("#")(1)))).cache()
    val count = data.count()
    println("Number of records " + count)
@@ -255,7 +242,7 @@ A quick note about the `Vector` class we will using in this exercise: For Scala 
 <div data-lang="java" markdown="1">
 ~~~
     JavaPairRDD<String, Vector> data = sc.textFile(
-      "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
+      "/dev/ampcamp/imdb_data/wikistats_featurized").map(
         new PairFunction<String, String, Vector>() {
           public Tuple2<String, Vector> call(String in)
           throws Exception {
@@ -271,7 +258,7 @@ A quick note about the `Vector` class we will using in this exercise: For Scala 
 <div data-lang="python" markdown="1">
 ~~~
     lines = sc.textFile(
-        "hdfs://" + masterHostname + ":9000/wikistats_featurized_hash_text")
+        "/dev/ampcamp/imdb_data/wikistats_featurized")
     data = lines.map(
         lambda x: (x.split("#")[0], parseVector(x.split("#")[1]))).cache()
     count = data.count()
@@ -309,26 +296,26 @@ Before we implement the K-Means algorithm, here is quick reminder on how you can
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-cd /root/kmeans/scala
+cd ~/templates/scala
 sbt/sbt package run
 </pre>
 
-This command will compile the `WikipediaKMeans` class and create a JAR file in `/root/kmeans/scala/target/scala-2.9.2/`. Finally, it will run the program. You should see output similar to the following on your screen:
+This command will compile the `WikipediaKMeans` class and create a JAR file in `~/templates/scala/target/scala-2.9.2/`. Finally, it will run the program. You should see output similar to the following on your screen:
 
 </div>
 <div data-lang="java" markdown="1">
 <pre class="prettyprint lang-bsh">
-cd /root/kmeans/java
+cd ~/templates/java
 sbt/sbt package run
 </pre>
 
-This command will compile the `WikipediaKMeans` class and create a JAR file in `/root/kmeans/java/target/scala-2.9.2/`. Finally, it will run the program. You should see output similar to the following on your screen:
+This command will compile the `WikipediaKMeans` class and create a JAR file in `~/templates/java/target/scala-2.9.2/`. Finally, it will run the program. You should see output similar to the following on your screen:
 
 </div>
 <div data-lang="python" markdown="1">
 <pre class="prettyprint lang-bsh">
-cd /root/kmeans/python
-/root/spark/pyspark ./WikipediaKMeans.py
+cd ~/templates/python
+/home/imdb_1/spark/spark-0.7.0/pyspark ./WikipediaKMeans.py
 </pre>
 
 This command will run `WikipediaKMeans` on your Spark cluster. You should see output similar to the following on your screen:
@@ -337,7 +324,7 @@ This command will run `WikipediaKMeans` on your Spark cluster. You should see ou
 </div>
 
 <pre class="prettyprint lang-bsh">
-Number of records 802450
+Number of records 752549
 </pre>
 
 ## K-Means algorithm
@@ -809,18 +796,12 @@ We are now set to start implementing the K-means algorithm, so remove or comment
 
       def main(args: Array[String]) {
         Logger.getLogger("spark").setLevel(Level.WARN)
-        val sparkHome = "/root/spark"
-        val jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar"
-        val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
-        val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
-
-        val sc = new SparkContext(master, "WikipediaKMeans", sparkHome, Seq(jarFile))
+        val sc = new SparkContext("local[6]", "WikipediaKMeans")
 
         val K = 10
         val convergeDist = 1e-6
 
-        val data = sc.textFile(
-            "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
+        val data = sc.textFile("/dev/ampcamp/imdb_data/wikistats_featurized").map(
                 t => (t.split("#")(0), parseVector(t.split("#")(1)))).cache()
 
         val count = data.count()
@@ -899,18 +880,13 @@ We are now set to start implementing the K-means algorithm, so remove or comment
 
       public static void main(String[] args) throws Exception {
         Logger.getLogger("spark").setLevel(Level.WARN);
-        String sparkHome = "/root/spark";
-        String jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar";
-        String master = JavaHelpers.getSparkUrl();
-        String masterHostname = JavaHelpers.getMasterHostname();
-        JavaSparkContext sc = new JavaSparkContext(master, "WikipediaKMeans",
-          sparkHome, jarFile);
+        JavaSparkContext sc = new JavaSparkContext("local[6]", "WikipediaKMeans");
 
         int K = 10;
         double convergeDist = .000001;
 
         JavaPairRDD<String, Vector> data = sc.textFile(
-          "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
+          "/dev/ampcamp/imdb_data/wikistats_featurized").map(
           new PairFunction<String, String, Vector>() {
             public Tuple2<String, Vector> call(String in) throws Exception {
               String[] parts = in.split("#");
@@ -1016,14 +992,11 @@ We are now set to start implementing the K-means algorithm, so remove or comment
 
    if __name__ == "__main__":
        setClassPath()
-       master = open("/root/spark-ec2/cluster-url").read().strip()
-       masterHostname = open("/root/spark-ec2/masters").read().strip()
-       sc = SparkContext(master, "PythonKMeans")
+       sc = SparkContext("local[6]", "PythonKMeans")
        K = 10
        convergeDist = 1e-5
 
-       lines = sc.textFile(
-           "hdfs://" + masterHostname + ":9000/wikistats_featurized")
+       lines = sc.textFile("/dev/ampcamp/imdb_data/wikistats_featurized")
 
        data = lines.map(
            lambda x: (x.split("#")[0], parseVector(x.split("#")[1]))).cache()

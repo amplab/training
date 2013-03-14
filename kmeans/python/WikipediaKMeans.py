@@ -19,14 +19,11 @@ def parseVector(line):
 
 if __name__ == "__main__":
     setClassPath()
-    master = open("/root/spark-ec2/cluster-url").read().strip()
-    masterHostname = open("/root/spark-ec2/masters").read().strip()
-    sc = SparkContext(master, "PythonKMeans")
+    sc = SparkContext("local[6]", "PythonKMeans")
     K = 10
     convergeDist = 1e-5
 
-    lines = sc.textFile(
-	"hdfs://" + masterHostname + ":9000/wikistats_featurized")
+    lines = sc.textFile("/dev/ampcamp/imdb_data/wikistats_featurized")
     data = lines.map(
 	lambda x: (x.split("#")[0], parseVector(x.split("#")[1]))).cache()
 

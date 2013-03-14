@@ -15,18 +15,13 @@ public class WikipediaKMeans {
 
   public static void main(String[] args) throws Exception {
     Logger.getLogger("spark").setLevel(Level.WARN);
-    String sparkHome = "/root/spark";
-    String jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar";
-    String master = JavaHelpers.getSparkUrl();
-    String masterHostname = JavaHelpers.getMasterHostname();
-    JavaSparkContext sc = new JavaSparkContext(master, "WikipediaKMeans", 
-      sparkHome, jarFile);
+    JavaSparkContext sc = new JavaSparkContext("local[6]", "WikipediaKMeans");
 
     int K = 10;
     double convergeDist = .000001;
 
     JavaPairRDD<String, Vector> data = sc.textFile(
-        "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
+      "/dev/ampcamp/imdb_data/wikistats_featurized").map(
       new PairFunction<String, String, Vector>() {
         public Tuple2<String, Vector> call(String in)
         throws Exception {

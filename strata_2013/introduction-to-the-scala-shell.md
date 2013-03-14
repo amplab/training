@@ -78,18 +78,18 @@ However, reading through that whole tutorial and trying the examples at the cons
 
    <pre class="prettyprint lang-scala linenums">
    import scala.io.Source
-   val lines = Source.fromFile("/root/mesos/README").getLines.toArray
+   val lines = Source.fromFile("/home/imdb_1/spark/spark-0.7.0/README.md").getLines.toArray
    </pre>
 
-   Then, instantiate a `collection.mutable.HashMap[String,Int]` and use functional methods to populate it with wordcounts. Hint, in our solution, which is inspired by <a href="http://bit.ly/6mhGvo" target="_blank">this solution online</a>, we use <a href="http://richard.dallaway.com/in-praise-of-flatmap" target="_blank">`flatMap`</a> and then `map`.
+   Then, instantiate a `collection.mutable.HashMap[String,Int]` and use functional methods to populate it with wordcounts. Hint, in our solution, we use <a href="http://richard.dallaway.com/in-praise-of-flatmap" target="_blank">`flatMap`</a> and then `map`.
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-scala">
    scala> import scala.io.Source
    import scala.io.Source
 
-   scala> val  lines = Source.fromFile("/root/mesos/README").getLines.toArray
-   lines: Array[String] = Array(hlep, help, plot, set terminal pdf, pdf, set terminal pdf color, set output "monolithic-utilization-thru-day.pdf", set terminal pdf enhanced color, set terminal pdf monochrome, set terminal pdf mono, set output "graph.pdf", set terminal x11 enhanced color, help terminal, x11, quit, plot "utilization" using 1:2, plot "utilization" using 1/2:2, #plot "utilization" using 1:($2/), RadDeg, x!, Inv, sin, ln, π, cos, log, e, tan, √, Ans, EXP, xy, (, ), %, AC, 7, 8, 9, ÷, 4, 5, 6, ×, 1, 2, 3, -, 0, ., =, +, plot "utilization" using 1:($2/278400), plot "utilization.cpu.and.mem" using 1:($3/556800), plot "7-day-mono-ya-c_0.01-stdout-UTILIZATION" using 1:2, plot "7-day-mono-ya-c_0.01-stdout-UTILIZATION" using 1:($2/12500*8), plot [0:1] "7-day-mono-ya-c_0.01-stdout...
+   scala> val  lines = Source.fromFile("/home/imdb_1/spark/spark-0.7.0/README.md").getLines.toArray
+   lines: Array[String] = Array(# Spark, "", Lightning-Fast Cluster Computing - <http://www.spark-project.org/>, "", "", ## Online Documentation, "", You can find the latest Spark documentation, including a programming, guide, on the project webpage at <http://spark-project.org/documentation.html>., This README file only contains basic setup instructions., "", "", ## Building, "", Spark requires Scala 2.9.2. The project is built using Simple Build Tool (SBT),, which is packaged with it. To build Spark and its example programs, run:, "", "    sbt/sbt package", "", To run Spark, you will need to have Scala's bin directory in your `PATH`, or, you will need to set the `SCALA_HOME` environment variable to point to where, you've installed Scala. Scala must be accessible through one of these, met...
 
    scala> val counts = new collection.mutable.HashMap[String, Int].withDefaultValue(0)
    counts: scala.collection.mutable.Map[String,Int] = Map()
@@ -98,6 +98,6 @@ However, reading through that whole tutorial and trying the examples at the cons
    res: Array[Unit] = Array((), (), (), (), (), (), (), (),...
 
    scala> counts
-   res: scala.collection.mutable.Map[String,Int] = Map(2.6) -> 1, will -> 4, contain -> 1, Once -> 1, might -> 3, (requires -> 1, cluster. -> 3, up -> 2, There -> 1, addition, -> 1, host -> 3, distribution -> 2, [build] -> 2, Then -> 1, tests -> 3, ========================== -> 1, ZooKeeper -> 1, JAVA_HOME, -> 1, deploy -> 1, is -> 3, Cluster -> 1, [build]/bin/mesos-build-env.sh.in). -> 1, require -> 1, see -> 1, specific -> 3, necessary -> 2, JAVA_CPPFLAGS, -> 1, via: -> 1, collection -> 1, always, -> 1, configure -> 3, CPPFLAGS -> 1, email: -> 1, a -> 18, for -> 8, --localstatedir -> 1, building -> 1, slave(s) -> 1, After -> 2, populated -> 1, located -> 1, necessary) -> 1, we -> 3, doing: -> 2, with -> 4, Building -> 1, are: -> 1, JAR -> 1, [build]/src -> 1, --help -> 1, JAVA_CPPFLAGS...
+   res2: scala.collection.mutable.Map[String,Int] = Map(so. -> 1, request, -> 1, will -> 4, Documentation -> 1, might -> 1, webpage -> 1, accessible -> 1, Linux. -> 1, master. -> 1, `SCALA_HOME` -> 1, `project/SparkBuild.scala`, -> 1, `/usr/local/lib/libmesos.so` -> 1, To -> 3, is -> 5, Cluster -> 1, requires -> 1, (only -> 1, gladly -> 1, original -> 2, configure -> 1, example -> 3, a -> 5, for -> 1, programs -> 1, locally -> 3, two -> 1, contribution -> 1, with -> 4, Building -> 1, Please -> 1, one -> 3, guide -> 1, given. -> 1, legal -> 1, by -> 2, accepted -> 1, version -> 2, built -> 1, take -> 1, submitting -> 1, Each -> 1, your -> 4, have -> 2, # -> 1, For -> 2, - -> 3, Scala. -> 1, documentation, -> 1, against -> 1, rebuilding -> 1, <http://www.spark-project.org/> -> 1, including -...
    </pre>
    </div>
