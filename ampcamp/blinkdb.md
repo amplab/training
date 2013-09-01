@@ -116,9 +116,9 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
    Time taken: 2.993 seconds</span></pre>
 
    Notice that our sampled query produces a slightly incorrect answer, but it runs faster.  (The answer you see will be slightly different from our example output, but it should be close.)  Also, the query result now includes some additional text, which tells us how close BlinkDB thinks it is to the true answer. In this case, BlinkDB reports that the interval [122114540, 122566392] (this is just subtracting or adding 225926.0 to 122340466) probably contains the true count.
-   
+
    Technically, this interval is a 99% confidence interval.  Confidence intervals come with the guarantee that, if you were to repeatedly create new samples using the `samplewith` operator and then perform this query on each sample, the confidence interval reported by BlinkDB would contain the true answer (122352588) at least 99% of the time. A simpler (though not entirely correct) interpretation is that there is a 99% chance that the true count is inside the confidence interval.
-   
+
 8. Now we would like to find out the average number of hits on pages with "San Francisco" in the title throughout the entire period:
 
    <pre class="prettyprint lang-sql">
@@ -143,15 +143,15 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
    blinkdb> select dt, approx_sum(page_views) as views from wikistats_sample_cached group by dt order by views;
    <span class="nocode">
    OK
-   20090505-060000	1.0786954974766022E7 +/- 146937.0 (99% Confidence) 
-   20090507-040000	1.0887732096864136E7 +/- 147621.0 (99% Confidence) 
+   20090505-060000	1.0786954974766022E7 +/- 146937.0 (99% Confidence)
+   20090507-040000	1.0887732096864136E7 +/- 147621.0 (99% Confidence)
    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
    20090506-120000	1.6188188397563733E7 +/- 183528.0 (99% Confidence)
    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-   20090506-180000	2.1917472869256794E7 +/- 270395.0 (99% Confidence) 
-   20090505-200001	5.331630157237396E7 +/- 1256778.0 (99% Confidence) 
+   20090506-180000	2.1917472869256794E7 +/- 270395.0 (99% Confidence)
+   20090505-200001	5.331630157237396E7 +/- 1256778.0 (99% Confidence)
    Time taken: 1.195 seconds</span></pre>
 
    <b>NOTE:</b> alpha-0.1.0 only supports lexographic ordering using the `orderby` operator. We will introduce numerical ordering in alpha-0.2.0.
@@ -195,7 +195,7 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
     OK
     3.6420454545454546 +/- 1.7610655103860877 (99% Confidence)
     Time taken: 3.407 seconds</span></pre>
-    
+
     Also try computing the true average on the original table.  You'll probably notice that the 99% confidence interval provided by BlinkDB doesn't cover the true answer.
 
 13. Let's investigate this a bit further.  The kind of sampling supported in alpha-0.1.0 (simple random sampling) typically works poorly on data that contains large, important outliers.  Let's check what the raw distribution of `page_views` looks like.  (You can also try this on `wikistats_sample_cached`; percentiles on samples are not officially supported yet, but unofficially they work quite well!)
@@ -206,9 +206,9 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
     OK
     [1.0,1.0,1.0,1.0,1.9999999999999998,4.867578875914043,35.00000000000001,151.9735162220546]
     Time taken: 31.241 seconds</span></pre>
-    
+
     Note that `percentile_approx` is not one of the BlinkDB approximation operators (which are _prefixed_ by "`approx_`").  It is a normal Hive SQL operator that computes approximate percentiles on a given column.
-    
+
     Most pages have only a few views, but there are some pages with a very large number of views.  If a sample misses one of these outliers, it will look very different from the original table, and accuracy of both approximations and confidence intervals will suffer.
 
 14. If you like, continue to explore the Wikipedia dataset.  BlinkDB alpha-0.1.0 supports the following approximate aggregation functions: `approx_sum`, `approx_count`, and `approx_avg`, with more to come soon.
