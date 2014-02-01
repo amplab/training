@@ -1,5 +1,5 @@
-import spark.streaming.api.java.*;
-import spark.storage.StorageLevel;
+import org.apache.spark.streaming.api.java.*;
+import org.apache.spark.storage.StorageLevel;
 import scala.io.Source;
 import java.io.*;
 import java.util.List;
@@ -11,8 +11,8 @@ import java.lang.*;
 
 class TutorialHelper {
   static {
-    Logger.getLogger("spark").setLevel(Level.WARN);
-    Logger.getLogger("spark.streaming.NetworkInputTracker").setLevel(Level.INFO);
+    Logger.getLogger("org.apache.spark").setLevel(Level.WARN);
+    Logger.getLogger("org.apache.spark.streaming.NetworkInputTracker").setLevel(Level.INFO);
   }
 
   static void configureTwitterCredentials() throws Exception {

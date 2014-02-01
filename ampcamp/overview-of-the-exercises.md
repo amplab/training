@@ -6,11 +6,11 @@ navigation:
   show: true
 ---
 
-The exercises in this mini course are divided into sections designed to give a hands-on experience with various software components of the Berkeley Data Analytics Stack (BDAS).
+These exercises are divided into sections designed to give a hands-on experience with various software components of the Berkeley Data Analytics Stack (BDAS).
 For Spark, we will walk you through using the Spark shell for interactive exploration of data. You have the choice of doing the exercises using Scala or using Python.
 For Shark, you will be using SQL in the Shark console to interactively explore the same data.
 For Spark Streaming, we will walk you through writing stand alone Spark programs in Scala to processing Twitter's sample stream of tweets.
-Finally, you will have to complete a complex machine learning exercise which will test your understanding of Spark.
+
 
 ## Cluster Details
 Your cluster contains 6 m1.xlarge Amazon EC2 nodes.
@@ -23,23 +23,20 @@ Once you've used SSH to log into the master, run the `ls` command and you will s
 Some of the more important ones are listed below:
 
 - Templates for exercises:
-   - `kmeans`: Template for the k-means clustering exercise
    - `streaming`: Standalone program for Spark Streaming exercises
    - `java-app-template`: Template for standalone Spark programs written in Java
    - `scala-app-template`: Template for standalone Spark programs written in Scala
-   - `shark-0.2`: Shark installation
+   - `shark`: Shark installation
    - `spark`: Spark installation
 
 - Useful scripts/documentation:
-   - `mesos-ec2`: Suite of scripts to manage Mesos on EC2
    - `spark-ec2`: Suite of scripts to manage Spark on EC2
    - `training`: Documentation and code used for training exercises
 
 - Infrastructure:
    - `ephemeral-hdfs`: Hadoop installation
-   - `scala-2.9.2`: Scala installation
-   - `hive-0.9.0-bin`: Hive installation
-   - `mesos`: Mesos installation
+   - `scala-2.10.3`: Scala installation
+   - `hive`: Hive installation
 
 You can find a list of your 5 slave nodes in spark-ec2/slaves:
 

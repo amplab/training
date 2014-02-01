@@ -6,7 +6,19 @@ navigation:
   show: true
 skip-chapter-toc: true
 ---
-Let's log into your cluster (if you still need to launch your own cluster, [go do that first](launching-a-bdas-cluster-on-ec2.html)). Select the tab below that corresponds to the operating system you are running to find instructions for SSH-ing into your cluster on EC2.
+Let's log into your cluster.
+
+<p class="alert alert-warn" style="overflow:hidden" markdown="1">
+<i class="icon-info-sign">    </i>
+Note, if you are <em>not attending the training in person</em> you need to launch your own cluster, so if you haven't done that yet [go do it now](launching-a-bdas-cluster-on-ec2.html).
+</p>
+
+<p class="alert alert-warn">
+<i class="icon-info-sign">    </i>
+We sent the email to the address you used to registered with. If you don't see the email, first check your spam filter, then ask a TA, and finally you can try emailing {{ site.organizers-email }}, though during the training event we may not be able to keep up on email, so talking to us in person is definitely best.
+</p>
+
+First, click the tab below that corresponds to the operating system you are running to find instructions for SSH-ing into your cluster on EC2.
 
 <ul class="nav nav-tabs" data-tabs="tabs">
   <li class="active"><a data-toggle="tab" href="#login_linux">Linux, Cygwin, or OS X</a></li>
