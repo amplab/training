@@ -156,7 +156,7 @@ The code you are going to fill in will do the following:
 * Take a sample from most rated movies and ask you for ratings.
 * Split training data into three subsets for model training and selection.
 * Train multiple models with different sets of training parameters and select the best.
-* Compute movie recommendation for you.
+* Compute movie recommendations for you.
 
 ## Setup
 
