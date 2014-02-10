@@ -49,7 +49,7 @@ these latent factors.
   <!-- Images are downsized intentionally to improve quality on retina displays -->
 </p>
 
-##Setup
+##Overview
 
 We will be using a standalone project template for this exercise. In your AMI,
 this has been setup in `/root/machine-learning/scala/`. You should find the following items
@@ -62,7 +62,7 @@ in the directory.
 <ul style="margin-bottom:0px">
 <li><code>sbt</code>: Directory containing the SBT tool</li>
 <li><code>build.sbt</code>: SBT project file</li>
-<li><code>MovieLensALS.scala</code>: Main Scala program that you are going to edit, compile and run</li>
+<li><code>MovieLensALS.scala</code>: Outline of the Scala program that you are going to edit, compile, and run</li>
 <li><code>solution</code>: Directory containing the solution code</li>
 </ul>
 </div>
@@ -150,6 +150,15 @@ object MovieLensALS {
 ~~~
 </div>
 </div>
+
+The code you are going to fill in will do the following:
+
+* Take a sample from most rated movies and ask you for ratings.
+* Split training data into three subsets for model training and selection.
+* Train multiple models with different sets of training parameters and select the best.
+* Compute movie recommendation for you.
+
+## Setup
 
 Let's first take a closer look at our template code in a text editor on the
 cluster itself, then we'll start adding code to the template. Locate the
