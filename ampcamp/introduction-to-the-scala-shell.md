@@ -114,15 +114,13 @@ However, reading through that whole tutorial and trying the examples at the cons
    scala> val lines = Source.fromFile("/root/spark/README.md").getLines.toArray
    lines: Array[String] = Array(# Apache Spark, "", Lightning-Fast Cluster Computing - <http://spark.incubator.apache.org/>, "", "", ## Online Documentation, "", You can find the latest Spark documentation, including a programming, guide, on the project webpage at <http://spark.incubator.apache.org/documentation.html>., This README file only contains basic setup instructions., "", "", ## Building, "", Spark requires Scala 2.9.3 (Scala 2.10 is not yet supported). The project is, built using Simple Build Tool (SBT), which is packaged with it. To build, Spark and its example programs, run:, "", "    sbt/sbt assembly", "", Once you've built Spark, the easiest way to start using it is the shell:, "", "    ./bin/spark-shell", "", Or, for the Python API, the Python shell (`./bin/pyspark`)., "", Spark als...
 
-   scala> val emptyCounts = Map[String,Int]().withDefaultValue(0)
-   emptyCounts: scala.collection.immutable.Map[String,Int] = Map()
-
    scala> val words = lines.flatMap(line => line.split(" "))
    words: Array[java.lang.String] = Array(Building, and, Installing, =======================, "", For, the, impatient:,...
 
-   scala> val counts = words.foldLeft(emptyCounts)({(currentCounts: Map[String,Int], word: String) => currentCounts.updated(word, currentCounts(word) + 1)})
-   counts: scala.collection.immutable.Map[String,Int] = Map(used -> 3, "deploy" -> 2, launch -> 1,...
+   scala> val wordCounts = words.map((_, 1)).reduceByKey((x, y) => x + y)
+   wordCounts: org.apache.spark.rdd.RDD[(String, Int)] = MapPartitionsRDD[11] at reduceByKey at <console>:19
 
-   scala> counts
+   scala> val counts = wordCounts.colllectAsMap()
+   counts: scala.collection.Map[String,Int] = Map(used -> 3, "deploy" -> 2, launch -> 1,...
    </pre>
    </div>
