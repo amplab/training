@@ -19,11 +19,15 @@ navigation:
 
 <!-- In this chapter we use GraphX to analyze Wikipedia data and implement graph algorithms in Spark. As with other exercises we will work with a subset of the Wikipedia traffic statistics data from May 5-7, 2009. In particular, this dataset only includes a subset of all Wikipedia articles. -->
 
+
+
 GraphX is the new (alpha) Spark API for graphs (e.g., Web-Graphs and Social Networks) and graph-parallel computation (e.g., PageRank and Collaborative Filtering).
 At a high-level, GraphX extends the Spark RDD abstraction by introducing the [Resilient Distributed Property Graph](#property_graph): a directed multigraph with properties attached to each vertex and edge.
 To support graph computation, GraphX exposes a set of fundamental operators (e.g., [subgraph][subgraph], [joinVertices][joinVertices], and [mapReduceTriplets][mapReduceTriplets]) as well as an optimized variant of the [Pregel](http://spark.incubator.apache.org/docs/latest/graphx-programming-guide.html#pregel) API.
 In addition, GraphX includes a growing collection of graph [algorithms](http://spark.incubator.apache.org/docs/latest/graphx-programming-guide.html#graph_algorithms) and
 [builders](http://spark.incubator.apache.org/docs/latest/graphx-programming-guide.html#graph_builders) to simplify graph analytics tasks.
+
+Slides from the talk describing GraphX are available in both [PowerPoint with animations](slides/graphx@strata2014_final.pptx) and [pdf without animations](slides/graphx@strata2014_final.pdf).
 
 [subgraph]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.Graph@subgraph((EdgeTriplet[VD,ED])⇒Boolean,(VertexId,VD)⇒Boolean):Graph[VD,ED]
 
