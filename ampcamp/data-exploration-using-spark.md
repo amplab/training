@@ -4,7 +4,7 @@ title: Data Exploration Using Spark
 categories: [module]
 navigation:
   weight: 50
-  show: true
+  show: false                                   
 skip-chapter-toc: true
 ---
 

@@ -7,46 +7,31 @@ navigation:
 ---
 
 # Welcome
-Welcome to the AMP Camp 4 hands-on exercises! These exercises are extended and enhanced from those given at previous <a href="http://ampcamp.berkeley.edu">AMP Camp Big Data Bootcamps</a>. They were written by volunteer graduate students and postdocs in the <a href="https://amplab.cs.berkeley.edu/">UC Berkeley AMPLab</a>. Many of those same graduate students are present today as teaching assistants. The exercises we cover today will have you working directly with the Spark specific components of the AMPLab's open-source software stack,
-called the <a href="https://amplab.cs.berkeley.edu/software/">Berkeley Data Analytics Stack
-(BDAS)</a>.
+Welcome to the Spark Summit 2014 Training hands-on exercises! Much of this material 
+is extended and enhanced from those given at previous <a
+href="http://ampcamp.berkeley.edu">AMP Camp Big Data Bootcamps</a>.
 
+<img id="intro-components" src="img/spark-components.png"> These hands-on exercises 
+will have you walk through examples of how to use the higher-level libraries in the Spark project: 
+Spark SQL, Spark Streaming, MLlib, & GraphX.
 
-You can navigate around the exercises by looking in the page header or footer and clicking on the arrows or the dropdown button that shows the current page title (as shown in the figure below).
+# Prerequisites
 
-<p style="margin-bottom:15px"><img src="img/header-nav-dropdown-button-summit.png" class="shadow" style="height:auto; width:498px"/></p>
+## Assumptions
+In order to get the most out of this course, we assume:
 
-The components we will cover at the first Spark Training are listed below.
+ * You have experience using the core Spark APIs 
+ * You have a laptop
+ * Your laptop has Java 6 or 7 installed
+ 
+If you would like a quick primer on Scala, check out the following doc in the appendix:
 
-## Introductory Exercises
-The tutorial begins with a set of introductory excercises which should be done _**sequentially**_.
+ * [Introduction to the Scala Shell](introduction-to-the-scala-shell.html)
+ 
+# Exercises Overview
 
-1. [Scala](introduction-to-the-scala-shell.html) - a quick crashcourse on the Scala language and command line interface.
-2. [Spark](data-exploration-using-spark.html) [(project homepage)](http://spark.incubator.apache.org) - a fast cluster compute engine.
-3. [Shark](data-exploration-using-shark.html) [(project homepage)](http://shark.cs.berkeley.edu) - a SQL layer on top of Spark.
-
-## Advanced Exercises
-These can be done _**in any order**_ according to your interests.
-
-<ol start="4">
-  <li><a href="realtime-processing-with-spark-streaming.html">Spark Streaming</a> <a href="http://spark-project.org/docs/latest/streaming-programming-guide.html">(project homepage)</a> - A stream processing layer on top of Spark.</li>
-  <li><a href="movie-recommendation-with-mllib.html">Machine Learning with MLLib</a> <a href="http://spark.incubator.apache.org/docs/latest/mllib-guide.html">(project homepage)</a> - Build a movie recommender with Spark.</li>
-  <li><a href="graph-analytics-with-graphx.html">Graph Analytics with GraphX</a> <a href="http://spark.incubator.apache.org/docs/latest/graphx-programming-guide.html">(project homepage)</a> - Explore graph-structured data (e.g., Web-Graph) and graph algorithms (e.g., PageRank) with GraphX.</li>
-  <li><a href="tachyon.html">Tachyon</a> <a href="http://tachyon-project.org/">(project homepage)</a> - Deploy a reliable in-memory filesystem across the cluster.</li>
-  <li><a href="blinkdb.html">BlinkDB</a> <a href="http://blinkdb.org/">(project homepage)</a> - Use SQL with statistical sampling to decrease latency.</li>
-</ol>
-
-
-# Course Prerequisites
-A few of the components support multiple languages. In some sections of this training material, you can choose which language you want to use as you follow along and gain experience with the tools. The following table shows which languages this mini course supports for each section. You are welcome to mix and match languages depending on your preferences and interests.
-
-<center>
-<style type="text/css">
-table td, table th {
-  padding: 5px;
-}
-</style>
-<table class="bordered">
+## Languages Used
+<table class="bordered" id="langs-table">
 <thead>
 <tr>
   <th>Section</th>
@@ -57,47 +42,55 @@ table td, table th {
 </tr>
 </thead><tbody>
 <tr>
-  <td>Spark Interactive</td>
+<!--  <td>Spark Interactive</td>
   <td class="yes">yes</td>
   <td class="no">no</td>
   <td class="yes">yes</td>
+-->
 </tr><tr>
-  <td>Shark Interactive</td>
-  <td colspan="3" class="yes">All SQL</td>
+  <td>Spark SQL Interactive</td>
+  <td class="yes">yes</td>
+  <td class="no">no</td>
+  <td class="yes">yes</td>
 </tr><tr>
   <td>Spark Streaming</td>
   <td class="yes">yes</td>
   <td class="yes">yes</td>
   <td class="no">no</td>
 </tr><tr>
-  <td>Machine Learning</td>
+  <td>MLlib - Machine Learning</td>
   <td class="yes">yes</td>
   <td class="no">no</td>
-  <td class="no">no</td>
+  <td class="yes">yes</td>
 </tr><tr>
   <td>GraphX - Graph Analytics</td>
   <td class="yes">yes</td>
   <td class="no">no</td>
   <td class="no">no</td>
-</tr><tr>
-  <td>BlinkDB - SQL With Sampling</td>
-  <td colspan="3" class="yes">All SQL</td>
 </tr>
-
 </tbody>
 </table>
-</center>
+
+In several of the proceeding training modules, you can choose which language 
+you want to use as you follow along and gain experience with the tools. 
+The following table shows which languages this mini course supports for each section. 
+You are welcome to mix and match languages depending on your preferences and interests.
+
+
+## Exercise Content
+The modules we will cover at the advanced Spark training are listed below.
+These can be done _**in any order**_ according to your interests.
+
+{:.bordered}
+| Exercise                                          |   Description                                         | Length |   More Documentation                                                                  |
+|---------------------------------------------------|-------------------------------------------------------|:------:|:------------------------------------------------------------------------------:|
+| [Spark SQL](data-exploration-using-spark-sql.html) | Use the Spark shell to write interactive SQL queries  | Short |[Programming Guide](http://spark.apache.org/docs/latest/sql-programming-guide.html)   |
+| [Spark Streaming](realtime-processing-with-spark-streaming.html) | Process a sample of Twitter tweet streams | Medium |[Programming Guide](http://spark.apache.org/docs/latest/streaming-programming-guide.html)   |
+| [MLlib](movie-recommendation-with-mllib.html) | Build a movie recommender with Spark | Medium |[Programming Guide](http://spark.apache.org/docs/latest/mllib-guide.html)   |
+| [GraphX](graph-analytics-with-graphx.html) | Explore graph-structured data and graph algorithms  | Long | [Programming Guide](http://spark.apache.org/docs/latest/sql-programming-guide.html)   |
 
 # Providing feedback
-We are using the cutting edge versions (i.e., the master branches) of most of our software components, which means you may run into a few issues. If you do, please call over a TA and explain what's going on. To report a problem, please create a new issue at the <a href="https://github.com/amplab/training/issues">AMPLab's training docs Github issue Tracker</a> (there is also a link to this in the footer on all pages of the exercises).
+Once you complete the course, we would appreciate hearing your feedback. Please fill out the following survey:
 
-# Getting Started
+ * [Spark Summit 2014 Advanced Workshop Survey](survey.html)
 
-If you are attending Spark Training in person, the TAs will be handing out cluster hostnames and you can obtain the private key from the TinyURL address on the projector.  Once you have your cluster hostname and private key you can [follow the directions to log into your cluster](logging-into-the-cluster.html).
-
-<!-- <p class="alert alert-warn">
-<i class="icon-info-sign">    </i>
-We sent the email to the address you used to registered with. If you don't see the email, first check your spam filter, then ask a TA.
-</p> -->
-
-If you are participating in the exercises from a remote location, you will want to [launch a BDAS cluster on Amazon EC2](launching-a-bdas-cluster-on-ec2.html) for yourself.
