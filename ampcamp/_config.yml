@@ -2,7 +2,7 @@ relative_permalinks: true
 markdown: kramdown
 title: Hands-on Exercises
 exclude: [README.md, tachyon.md, blinkdb.md, logging-into-the-cluster.md, overview-of-the-exercises.md, where-to-go-from-here.md, less]
-organizers-email: "training-organizers@spark-summit.org"
+organizers-email: "ampcamp@cs.berkeley.edu"
 kramdown:
   use_coderay: true
   coderay:

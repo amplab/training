@@ -7,7 +7,7 @@ navigation:
 ---
 
 # Welcome
-Welcome to the Spark Summit 2014 Training hands-on exercises! Much of this material 
+Welcome to the AMP Camp 5 Training hands-on exercises! Much of this material 
 is extended and enhanced from those given at previous <a
 href="http://ampcamp.berkeley.edu">AMP Camp Big Data Bootcamps</a>.
 
