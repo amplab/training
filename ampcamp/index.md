@@ -6,6 +6,8 @@ navigation:
   show: true
 ---
 
+[SparkR](sparkr.html)
+
 # Welcome
 Welcome to the Spark Summit 2014 Training hands-on exercises! Much of this material 
 is extended and enhanced from those given at previous <a
