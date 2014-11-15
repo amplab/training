@@ -11,6 +11,18 @@ skip-chapter-toc: true
 #### TODOs
 - Adapt/change all the text descriptions.
 - Dry runs.
+- Installation process.
+- Add a table of contents like the [GraphX exercise](graph-analytics-with-graphx.html).
+
+## Prerequisite: getting the dataset
+<pre class="prettyprint lang-bsh">
+# first, cd into the root directory of the USB drive
+$ mkdir data/pagecounts && cd data/pagecounts
+# download two text files from S3
+$ wget -c http://s3.amazonaws.com/ampcamp-data/wikistats_20090505_restricted-01/part-00001
+$ wget -c http://s3.amazonaws.com/ampcamp-data/wikistats_20090505_restricted-07/part-00053
+# you're good to go!
+</pre>
 
 In this chapter, we will first use the Spark shell to interactively explore the Wikipedia data.
 Then, we will give a brief introduction to writing standalone Spark programs. Remember, Spark is an open source computation engine built on top of the popular Hadoop Distributed File System (HDFS).
@@ -45,14 +57,14 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
        scala> sc
        res: spark.SparkContext = spark.SparkContext@470d1f30
 
-       scala> val pagecounts = sc.textFile("/wiki/pagecounts")
+       scala> val pagecounts = sc.textFile("data/pagecounts")
        12/08/17 23:35:14 INFO mapred.FileInputFormat: Total input paths to process : 74
        pagecounts: spark.RDD[String] = MappedRDD[1] at textFile at <console>:12
      </div>
      <div data-lang="python" markdown="1">
        >>> sc
        <pyspark.context.SparkContext object at 0x7f7570783350>
-       >>> pagecounts = sc.textFile("/wiki/pagecounts")
+       >>> pagecounts = sc.textFile("data/pagecounts")
        13/02/01 05:30:43 INFO mapred.FileInputFormat: Total input paths to process : 74
        >>> pagecounts
        <pyspark.rdd.RDD object at 0x217d510>
@@ -63,7 +75,7 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
        [1] "Java-Object{org.apache.spark.api.java.JavaSparkContext@7a856d3b}" 
        
        # FIXME: fix below by running on actual file
-       > pagecounts <- textFile(sc, "/wiki/pagecounts")
+       > pagecounts <- textFile(sc, "data/pagecounts")
        
        > pagecounts
        An object of class "RDD"
@@ -71,7 +83,7 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
        <environment: 0x7fae86040838>
        
        Slot "jrdd":
-       [1] "Java-Object{/wiki/pagecounts MappedRDD[1] at textFile at <unknown>:0}"</pre>
+       [1] "Java-Object{data/pagecounts MappedRDD[1] at textFile at <unknown>:0}"</pre>
      </div>    
    </div>
 
@@ -294,6 +306,11 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
 
      The `collect` method at the end converts the result from an RDD to an array.
    </div>
+   <div data-lang="r" markdown="1">
+   <pre class="prettyprint lang-r"> 
+       > collect(reduceByKey(enKeyValuePairs, "+", 1L)) 
+   </pre>
+   </div>
    </div>
 
 
@@ -309,6 +326,17 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
        >>> enPages.map(lambda x: x.split(" ")).map(lambda x: (x[0][:8], int(x[3]))).reduceByKey(lambda x, y: x + y, 1).collect()
        ...
        [(u'20090506', 204190442), (u'20090507', 202617618), (u'20090505', 207698578)]
+   </div>
+   <div data-lang="r" markdown="1">
+   <pre class="prettyprint lang-r"> 
+       # TODO: this is cumbersome; consider using the magrittr package to simplify pipelining? 
+       > collect(
+        reduceByKey(
+          lapply(
+            lapply(enPages, function(l) { strsplit(l, " ") }),
+            function(l) { list(substr(l[[1]], 0, 8), as.integer(l[[4]])) }),
+          "+", 1L))
+   </pre>
    </div>
    </div>
 
