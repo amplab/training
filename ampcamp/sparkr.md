@@ -32,96 +32,58 @@ Then, we will give a brief introduction to writing standalone Spark programs. Re
 Let's now use Spark to do some order statistics on the data set.
 First, launch the Spark shell:
 
-<div class="codetabs">
-<div data-lang="r" markdown="1">
-<pre class="prettyprint lang-bash">
-/root/SparkR/sparkR # FIXME</pre>
-</div>
-</div>
+<pre class="lang-bash">
+/root/SparkR/sparkR # FIXME: add installation instructions
+</pre>
 
 The prompt should appear within a few seconds. __Note:__ You may need to hit `[Enter]` once to clear the log output.
 
 1. Warm up by creating an RDD (Resilient Distributed Dataset) named `pagecounts` from the input files.
    In the Spark shell, the SparkContext is already created for you as variable `sc`.
 
-   <div class="codetabs">
-     <div data-lang="r" markdown="1">
      <pre class="prettyprint lang-r">
-       > sc
-       [1] "Java-Object{org.apache.spark.api.java.JavaSparkContext@7a856d3b}" 
-       
-       # FIXME: fix below by running on actual file
-       > pagecounts <- textFile(sc, "data/pagecounts")
-       > pagecounts <- textFile(sc, "/Users/zongheng/Downloads/pagecounts")
-       
-       > pagecounts
-       An object of class "RDD"
-       Slot "env":
-       <environment: 0x7fae86040838>
-       
-       Slot "jrdd":
-       [1] "Java-Object{data/pagecounts MappedRDD[1] at textFile at <unknown>:0}"</pre>
-     </div>    
-   </div>
+> sc
+[1] "Java-Object{org.apache.spark.api.java.JavaSparkContext@7a856d3b}" 
+# FIXME: fix below by running on actual file
+> pagecounts <- textFile(sc, "data/pagecounts")
+> pagecounts <- textFile(sc, "/Users/zongheng/Downloads/pagecounts")
+> pagecounts
+An object of class "RDD"
+Slot "env":
+<environment: 0x7fae86040838>
+Slot "jrdd":
+[1] "Java-Object{data/pagecounts MappedRDD[1] at textFile at <unknown>:0}"</pre>
 
 2. Let's take a peek at the data. You can use the take operation of an RDD to get the first K records. Here, K = 10.
 
-   <div class="codetabs">
-   <div data-lang="r" markdown="1">
-   <pre class="prettyprint lang-r"> 
-       > take(pagecounts, 10)
-       ...
-       [[1]]
-       [1] "20090505-000000 aa Main_Page 2 9980"
-       
-       [[2]]
-       [1] "20090505-000000 ab %D0%90%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%BD%D0%B5%D1%82 1 465"
-       
-       [[3]]
-       [1] "20090505-000000 ab %D0%98%D1%85%D0%B0%D0%B4%D0%BE%D1%83_%D0%B0%D0%B4%D0%B0%D2%9F%D1%8C%D0%B0 1 16086"
-       
-       [[4]]
-       [1] "20090505-000000 af.b Tuisblad 1 36236"
-       
-       [[5]]
-       [1] "20090505-000000 af.d Tuisblad 4 189738"
-       
-       [[6]]
-       [1] "20090505-000000 af.q Tuisblad 2 56143"
-       
-       [[7]]
-       [1] "20090505-000000 af Afrika 1 46833"
-       
-       [[8]]
-       [1] "20090505-000000 af Afrikaans 2 53577"
-       
-       [[9]]
-       [1] "20090505-000000 af Australi%C3%AB 1 132432"
-       
-       [[10]]
-       [1] "20090505-000000 af Barack_Obama 1 23368"       
-   </pre>
-   </div>
-   </div>
-
-   Unfortunately this is not very readable because `take()` returns an array and Scala simply prints the array with each element separated by a comma.
-   We can make it prettier by traversing the array to print each record on its own line.
-
-   <div class="codetabs">
-   <div data-lang="r" markdown="1">
-       # TODO: already reasonably pretty-printed?
-   </div>
-   </div>
+     <pre class="prettyprint lang-r">> take(pagecounts, 10)
+...
+[[1]]
+[1] "20090505-000000 aa Main_Page 2 9980"
+[[2]]
+[1] "20090505-000000 ab %D0%90%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%BD%D0%B5%D1%82 1 465"
+[[3]]
+[1] "20090505-000000 ab %D0%98%D1%85%D0%B0%D0%B4%D0%BE%D1%83_%D0%B0%D0%B4%D0%B0%D2%9F%D1%8C%D0%B0 1 16086"
+[[4]]
+[1] "20090505-000000 af.b Tuisblad 1 36236"
+[[5]]
+[1] "20090505-000000 af.d Tuisblad 4 189738"
+[[6]]
+[1] "20090505-000000 af.q Tuisblad 2 56143"
+[[7]]
+[1] "20090505-000000 af Afrika 1 46833"
+[[8]]
+[1] "20090505-000000 af Afrikaans 2 53577"
+[[9]]
+[1] "20090505-000000 af Australi%C3%AB 1 132432"
+[[10]]
+[1] "20090505-000000 af Barack_Obama 1 23368"</pre>
 
 2. Let's see how many records in total are in this data set (this command will take a while, so read ahead while it is running).
 
-   <div class="codetabs">
-   <div data-lang="r" markdown="1">
-       > count(pagecounts)
-       [1] 1398882
-   </div>
-   
-   </div>
+     <pre class="prettyprint lang-r">
+> count(pagecounts)
+[1] 1398882</pre>
 
    This should launch 177 Spark tasks on the Spark cluster.
    If you look closely at the terminal, the console log is pretty chatty and tells you the progress of the tasks.
@@ -167,29 +129,17 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    To avoid reading from disks each time we perform any operations on the RDD, we also __cache the RDD into memory__.
     This is where Spark really starts to to shine.
 
-   <div class="codetabs">
-   <div data-lang="r" markdown="1">
-   <pre class="prettyprint lang-r"> 
-       > enPages <- Filter(function(x) { unlist(strsplit(x, " "))[[2]] == "en" }, pagecounts) 
-       > cache(enPages)
-       ...<some metadata output that can be ignored>...
-   </pre>
-   </div>
-   </div>
+   <pre class="prettyprint lang-r">> enPages <- Filter(function(x) { unlist(strsplit(x, " "))[[2]] == "en" }, pagecounts) 
+> cache(enPages)
+...(some metadata output that can be ignored)...</pre>
 
    When you type this command into the Spark shell, Spark defines the RDD, but because of lazy evaluation, no computation is done yet.
    Next time any action is invoked on `enPages`, Spark will cache the data set in memory across the 5 slaves in your cluster.
 
 5. How many records are there for English pages?
 
-   <div class="codetabs">
-   <div data-lang="r" markdown="1">
-   <pre class="prettyprint lang-r"> 
-       > count(enPages)
-       [1] 970545
-   </pre>
-   </div>
-   </div>
+   <pre class="prettyprint lang-r">> count(enPages)
+[1] 970545</pre>
 
    The first time this command is run, similar to the last count we did, it will take 2 - 3 minutes while Spark scans through the entire data set on disk.
    __But since enPages was marked as "cached" in the previous step, if you run count on the same RDD again, it should return an order of magnitude faster__.
@@ -203,18 +153,13 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    The high level idea of what we'll be doing is as follows.
    First, we generate a key value pair for each line; the key is the date (the first eight characters of the first field), and the value is the number of pageviews for that date (the fourth field).
 
-   <div class="codetabs">
-   <div data-lang="r" markdown="1">
-   <pre class="prettyprint lang-r"> 
-       # lapply() and map() are aliases of each other; both should work!
-       > enTuples <- lapply(enPages, function(x) { unlist(strsplit(x, " ")) })
-       > enKeyValuePairs <- lapply(enTuples, 
-                                   function(x) { 
-                                     list(substr(x[[1]], 0, 8), as.integer(x[[4]])) 
-                                   })
+   <pre class="prettyprint lang-r"># lapply() and map() are aliases of each other; both should work!
+> enTuples <- lapply(enPages, function(x) { unlist(strsplit(x, " ")) })
+> enKeyValuePairs <- lapply(enTuples, 
+                            function(x) { 
+                              list(substr(x[[1]], 0, 8), as.integer(x[[4]])) 
+                            })
    </pre>
-   </div>
-   </div>
 
    Next, we shuffle the data and group all values of the same key together.
    Finally we sum up the values for each key.
@@ -223,45 +168,29 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    By default, Spark assumes that the reduce function is commutative and associative and applies combiners on the mapper side.
    Since we know there is a very limited number of keys in this case (because there are only 3 unique dates in our data set), let's use only one reducer.
 
-   <div class="codetabs">
-   <div data-lang="r" markdown="1">
-   <pre class="prettyprint lang-r"> 
-   # FIXME: 1 reducer is awefully slow; 5 is better but still slow
-       > collect(reduceByKey(enKeyValuePairs, "+", 1L)) 
+   <pre class="prettyprint lang-r"># FIXME: 1 reducer is awefully slow; 5 is better but still slow
+> collect(reduceByKey(enKeyValuePairs, "+", 1L)) 
 [[1]]
 [[1]][[1]]
 [1] "20090507"
-
 [[1]][[2]]
 [1] 6175726
-
-
 [[2]]
 [[2]][[1]]
 [1] "20090505"
-
 [[2]][[2]]
-[1] 7076855       
-   </pre>
-   </div>
-   </div>
+[1] 7076855</pre>
 
 
    We can combine the previous three commands into one:
 
-   <div class="codetabs">
-   <div data-lang="r" markdown="1">
-   <pre class="prettyprint lang-r"> 
-       # TODO: this is cumbersome; consider using the magrittr package to simplify pipelining? 
-       > collect(
-        reduceByKey(
-          lapply(
-            lapply(enPages, function(l) { unlist(strsplit(l, " ")) }),
-            function(l) { list(substr(l[[1]], 0, 8), as.integer(l[[4]])) }),
-          "+", 1L))
-   </pre>
-   </div>
-   </div>
+   <pre class="prettyprint lang-r"># TODO: this is cumbersome; consider using the magrittr package to simplify pipelining? 
+> collect(
+      reduceByKey(
+        lapply(
+          lapply(enPages, function(l) { unlist(strsplit(l, " ")) }),
+          function(l) { list(substr(l[[1]], 0, 8), as.integer(l[[4]])) }),
+        "+", 1L))</pre>
 
 7. Suppose we want to find pages that were viewed more than 200,000 times during the three days covered by our dataset.
    Conceptually, this task is similar to the previous query.
