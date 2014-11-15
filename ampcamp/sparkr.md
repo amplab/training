@@ -48,7 +48,6 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
 [1] "Java-Object{org.apache.spark.api.java.JavaSparkContext@7a856d3b}" 
 # FIXME: fix below by running on actual file
 > pagecounts <- textFile(sc, "data/pagecounts")
-> pagecounts <- textFile(sc, "/Users/zongheng/Downloads/pagecounts")
 > pagecounts
 An object of class "RDD"
 Slot "env":
