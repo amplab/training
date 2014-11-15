@@ -8,11 +8,13 @@ navigation:
 skip-chapter-toc: true
 ---
 
-#### TODOs
+#### TODOs & FIXMEs
 - Adapt/change all the text descriptions.
 - Dry runs.
 - Installation process.
 - Add a table of contents like the [GraphX exercise](graph-analytics-with-graphx.html).
+- Add instruction for RStudio?
+- `localhost:8080` doesn't show the UI?
 
 ## Prerequisite: getting the dataset
 <pre class="prettyprint lang-bsh">
@@ -82,10 +84,11 @@ Slot "jrdd":
 2. Let's see how many records in total are in this data set (this command will take a while, so read ahead while it is running).
 
      <pre class="prettyprint lang-r">
-> count(pagecounts)
-[1] 1398882</pre>
+> count(pagecounts)</pre>
 
-   This should launch 177 Spark tasks on the Spark cluster.
+   This should take about 10 seconds.
+
+   FIXME: This should launch 177 (FIXME) Spark tasks on the Spark cluster.
    If you look closely at the terminal, the console log is pretty chatty and tells you the progress of the tasks.
    Because we are reading 20G of data from HDFS, this task is I/O bound and can take a while to scan through all the data (2 - 3 mins).
 
@@ -118,7 +121,7 @@ Slot "jrdd":
 
    When your query finishes running, it should return the following count:
 
-       329641466
+       [1] 1398882
 
 4. Recall from above when we described the format of the data set, that the second field is the "project code" and contains information about the language of the pages.
    For example, the project code "en" indicates an English page.
@@ -129,7 +132,7 @@ Slot "jrdd":
    To avoid reading from disks each time we perform any operations on the RDD, we also __cache the RDD into memory__.
     This is where Spark really starts to to shine.
 
-   <pre class="prettyprint lang-r">> enPages <- Filter(function(x) { unlist(strsplit(x, " "))[[2]] == "en" }, pagecounts) 
+   <pre class="prettyprint lang-r">> enPages <- Filter(function(x) { unlist(strsplit(x, " "))[[2]] == "en" }, pagecounts)
 > cache(enPages)
 ...(some metadata output that can be ignored)...</pre>
 
@@ -141,12 +144,8 @@ Slot "jrdd":
    <pre class="prettyprint lang-r">> count(enPages)
 [1] 970545</pre>
 
-   The first time this command is run, similar to the last count we did, it will take 2 - 3 minutes while Spark scans through the entire data set on disk.
+   The first time this command is run, it will take about 30 seconds to 1 minute while Spark scans through the entire data set on disk.
    __But since enPages was marked as "cached" in the previous step, if you run count on the same RDD again, it should return an order of magnitude faster__.
-
-   If you examine the console log closely, you will see lines like this, indicating some data was added to the cache:
-
-       13/02/05 20:29:01 INFO storage.BlockManagerMasterActor$BlockManagerInfo: Added rdd_2_172 in memory on ip-10-188-18-127.ec2.internal:42068 (size: 271.8 MB, free: 5.5 GB)
 
 6. Let's try something fancier.
    Generate a histogram of total page views on Wikipedia English pages for the date range represented in our dataset (May 5 to May 7, 2009).
@@ -166,10 +165,12 @@ Slot "jrdd":
    There is a convenient method called `reduceByKey` in Spark for exactly this pattern.
    Note that the second argument to `reduceByKey` determines the number of reducers to use.
    By default, Spark assumes that the reduce function is commutative and associative and applies combiners on the mapper side.
-   Since we know there is a very limited number of keys in this case (because there are only 3 unique dates in our data set), let's use only one reducer.
+   Since we know there is a very limited number of keys in this case (because there are only 2 unique dates in our data set), let's use only one reducer. 
+   
+   **Note.** This will take a couple of minutes (on our laptop it takes two and a half) depending on your machine setup. If it's too slow, try increasing the number of reducers to a larger value (say, `5L`).
 
    <pre class="prettyprint lang-r"># FIXME: 1 reducer is awefully slow; 5 is better but still slow
-> collect(reduceByKey(enKeyValuePairs, "+", 1L)) 
+> collect(reduceByKey(enKeyValuePairs, "+", 1L))
 [[1]]
 [[1]][[1]]
 [1] "20090507"
@@ -201,34 +202,18 @@ Slot "jrdd":
    Next, we extract the fields for page name and number of page views.
    We reduce by key again, this time with 40 reducers.
    Then we filter out pages with less than 200,000 total views over our time window represented by our dataset.
+   
+   **FIXME**: this is really slow.
 
-   <div class="codetabs">
-   <div data-lang="scala" markdown="1">
-       scala> enPages.map(l => l.split(" ")).map(l => (l(2), l(3).toInt)).reduceByKey(_+_, 40).filter(x => x._2 > 200000).map(x => (x._2, x._1)).collect.foreach(println)
-       (203378,YouTube)
-       (17657352,Special:Search)
-       (311465,Special:Watchlist)
-       (248624,Special:Export)
-       (237677,2009_swine_flu_outbreak)
-       (396776,Dom_DeLuise)
-       (5816953,Special:Random)
-       (18730347,Main_Page)
-       (534253,Swine_influenza)
-       (310642,index.html)
-       (464935,Wiki)
-       (382510,Deadpool_(comics))
-       (3521336,Special:Randompage)
-       (204604,X-Men_Origins:_Wolverine)
-       (695817,Cinco_de_Mayo)
-       (317708,The_Beatles)
-       (234855,Scrubs_(TV_series))
-       (43822489,404_error/)
-   </div>
-   <div data-lang="python" markdown="1">
-       >>> enPages.map(lambda x: x.split(" ")).map(lambda x: (x[2], int(x[3]))).reduceByKey(lambda x, y: x + y, 40).filter(lambda x: x[1] > 200000).map(lambda x: (x[1], x[0])).collect()
-       [(5816953, u'Special:Random'), (18730347, u'Main_Page'), (534253, u'Swine_influenza'), (382510, u'Deadpool_(comics)'), (204604, u'X-Men_Origins:_Wolverine'), (203378, u'YouTube'), (43822489, u'404_error/'), (234855, u'Scrubs_(TV_series)'), (248624, u'Special:Export'), (695817, u'Cinco_de_Mayo'), (311465, u'Special:Watchlist'), (396776, u'Dom_DeLuise'), (310642, u'index.html'), (317708, u'The_Beatles'), (237677, u'2009_swine_flu_outbreak'), (3521336, u'Special:Randompage'), (464935, u'Wiki'), (17657352, u'Special:Search')]
-   </div>
-   </div>
+   <pre class="prettyprint lang-r">pageNameAndView <- 
+        lapply(enPages, 
+          function(l) { 
+            splits <- unlist(strsplit(l, " "))
+            list(splits[[3]], as.integer(splits[[4]]))
+          })
+reduced <- reduceByKey(pageNameAndView, "+", 4L)
+filteredByView <- Filter( function(x) { x[[2]] > 6000 }, reduced)
+collect(lapply(filteredByView, function(x) { list(x[[2]], x[[1]] )}))</pre>
 
    There is no hard and fast way to calculate the optimal number of reducers for a given problem; you will
    build up intuition over time by experimenting with different values.
