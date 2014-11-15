@@ -33,14 +33,6 @@ Let's now use Spark to do some order statistics on the data set.
 First, launch the Spark shell:
 
 <div class="codetabs">
-<div data-lang="scala" markdown="1">
-<pre class="prettyprint lang-bsh">
-/root/spark/bin/spark-shell</pre>
-</div>
-<div data-lang="python" markdown="1">
-<pre class="prettyprint lang-bsh">
-/root/spark/bin/pyspark</pre>
-</div>
 <div data-lang="r" markdown="1">
 <pre class="prettyprint lang-bash">
 /root/SparkR/sparkR # FIXME</pre>
@@ -53,22 +45,6 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    In the Spark shell, the SparkContext is already created for you as variable `sc`.
 
    <div class="codetabs">
-     <div data-lang="scala" markdown="1">
-       scala> sc
-       res: spark.SparkContext = spark.SparkContext@470d1f30
-
-       scala> val pagecounts = sc.textFile("data/pagecounts")
-       12/08/17 23:35:14 INFO mapred.FileInputFormat: Total input paths to process : 74
-       pagecounts: spark.RDD[String] = MappedRDD[1] at textFile at <console>:12
-     </div>
-     <div data-lang="python" markdown="1">
-       >>> sc
-       <pyspark.context.SparkContext object at 0x7f7570783350>
-       >>> pagecounts = sc.textFile("data/pagecounts")
-       13/02/01 05:30:43 INFO mapred.FileInputFormat: Total input paths to process : 74
-       >>> pagecounts
-       <pyspark.rdd.RDD object at 0x217d510>
-     </div>
      <div data-lang="r" markdown="1">
      <pre class="prettyprint lang-r">
        > sc
@@ -76,6 +52,7 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
        
        # FIXME: fix below by running on actual file
        > pagecounts <- textFile(sc, "data/pagecounts")
+       > pagecounts <- textFile(sc, "/Users/zongheng/Downloads/pagecounts")
        
        > pagecounts
        An object of class "RDD"
@@ -90,21 +67,39 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
 2. Let's take a peek at the data. You can use the take operation of an RDD to get the first K records. Here, K = 10.
 
    <div class="codetabs">
-   <div data-lang="scala" markdown="1">
-       scala> pagecounts.take(10)
-       ...
-       res: Array[String] = Array(20090505-000000 aa.b ?71G4Bo1cAdWyg 1 14463, 20090505-000000 aa.b Special:Statistics 1 840, 20090505-000000 aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019, 20090505-000000 aa.b Wikibooks:About 1 15719, 20090505-000000 aa ?14mFX1ildVnBc 1 13205, 20090505-000000 aa ?53A%2FuYP3FfnKM 1 13207, 20090505-000000 aa ?93HqrnFc%2EiqRU 1 13199, 20090505-000000 aa ?95iZ%2Fjuimv31g 1 13201, 20090505-000000 aa File:Wikinews-logo.svg 1 8357, 20090505-000000 aa Main_Page 2 9980)
-   </div>
-   <div data-lang="python" markdown="1">
-       >>> pagecounts.take(10)
-       ...
-       [u'20090505-000000 aa.b ?71G4Bo1cAdWyg 1 14463', u'20090505-000000 aa.b Special:Statistics 1 840', u'20090505-000000 aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019', u'20090505-000000 aa.b Wikibooks:About 1 15719', u'20090505-000000 aa ?14mFX1ildVnBc 1 13205', u'20090505-000000 aa ?53A%2FuYP3FfnKM 1 13207', u'20090505-000000 aa ?93HqrnFc%2EiqRU 1 13199', u'20090505-000000 aa ?95iZ%2Fjuimv31g 1 13201', u'20090505-000000 aa File:Wikinews-logo.svg 1 8357', u'20090505-000000 aa Main_Page 2 9980']
-   </div>
    <div data-lang="r" markdown="1">
    <pre class="prettyprint lang-r"> 
        > take(pagecounts, 10)
        ...
-       TODO: add actual contents
+       [[1]]
+       [1] "20090505-000000 aa Main_Page 2 9980"
+       
+       [[2]]
+       [1] "20090505-000000 ab %D0%90%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%BD%D0%B5%D1%82 1 465"
+       
+       [[3]]
+       [1] "20090505-000000 ab %D0%98%D1%85%D0%B0%D0%B4%D0%BE%D1%83_%D0%B0%D0%B4%D0%B0%D2%9F%D1%8C%D0%B0 1 16086"
+       
+       [[4]]
+       [1] "20090505-000000 af.b Tuisblad 1 36236"
+       
+       [[5]]
+       [1] "20090505-000000 af.d Tuisblad 4 189738"
+       
+       [[6]]
+       [1] "20090505-000000 af.q Tuisblad 2 56143"
+       
+       [[7]]
+       [1] "20090505-000000 af Afrika 1 46833"
+       
+       [[8]]
+       [1] "20090505-000000 af Afrikaans 2 53577"
+       
+       [[9]]
+       [1] "20090505-000000 af Australi%C3%AB 1 132432"
+       
+       [[10]]
+       [1] "20090505-000000 af Barack_Obama 1 23368"       
    </pre>
    </div>
    </div>
@@ -113,35 +108,6 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    We can make it prettier by traversing the array to print each record on its own line.
 
    <div class="codetabs">
-   <div data-lang="scala" markdown="1">
-       scala> pagecounts.take(10).foreach(println)
-       ...
-       20090505-000000 aa.b ?71G4Bo1cAdWyg 1 14463
-       20090505-000000 aa.b Special:Statistics 1 840
-       20090505-000000 aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019
-       20090505-000000 aa.b Wikibooks:About 1 15719
-       20090505-000000 aa ?14mFX1ildVnBc 1 13205
-       20090505-000000 aa ?53A%2FuYP3FfnKM 1 13207
-       20090505-000000 aa ?93HqrnFc%2EiqRU 1 13199
-       20090505-000000 aa ?95iZ%2Fjuimv31g 1 13201
-       20090505-000000 aa File:Wikinews-logo.svg 1 8357
-       20090505-000000 aa Main_Page 2 9980
-   </div>
-   <div data-lang="python" markdown="1">
-       >>> for x in pagecounts.take(10):
-       ...    print x
-       ...
-       20090505-000000 aa.b ?71G4Bo1cAdWyg 1 14463
-       20090505-000000 aa.b Special:Statistics 1 840
-       20090505-000000 aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019
-       20090505-000000 aa.b Wikibooks:About 1 15719
-       20090505-000000 aa ?14mFX1ildVnBc 1 13205
-       20090505-000000 aa ?53A%2FuYP3FfnKM 1 13207
-       20090505-000000 aa ?93HqrnFc%2EiqRU 1 13199
-       20090505-000000 aa ?95iZ%2Fjuimv31g 1 13201
-       20090505-000000 aa File:Wikinews-logo.svg 1 8357
-       20090505-000000 aa Main_Page 2 9980
-   </div>
    <div data-lang="r" markdown="1">
        # TODO: already reasonably pretty-printed?
    </div>
@@ -150,14 +116,9 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
 2. Let's see how many records in total are in this data set (this command will take a while, so read ahead while it is running).
 
    <div class="codetabs">
-   <div data-lang="scala" markdown="1">
-       scala> pagecounts.count
-   </div>
-   <div data-lang="python" markdown="1">
-       >>> pagecounts.count()
-   </div>
    <div data-lang="r" markdown="1">
        > count(pagecounts)
+       [1] 1398882
    </div>
    
    </div>
@@ -207,17 +168,11 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
     This is where Spark really starts to to shine.
 
    <div class="codetabs">
-   <div data-lang="scala" markdown="1">
-       scala> val enPages = pagecounts.filter(_.split(" ")(1) == "en").cache
-       enPages: spark.RDD[String] = FilteredRDD[2] at filter at <console>:14
-   </div>
-   <div data-lang="python" markdown="1">
-       >>> enPages = pagecounts.filter(lambda x: x.split(" ")[1] == "en").cache()
-   </div>
    <div data-lang="r" markdown="1">
    <pre class="prettyprint lang-r"> 
-       > enPages <- Filter(function(x) { strsplit(x, " ")[[2]] == "en" }, pagecounts) 
-       > enPages <- cache(enPages)
+       > enPages <- Filter(function(x) { unlist(strsplit(x, " "))[[2]] == "en" }, pagecounts) 
+       > cache(enPages)
+       ...<some metadata output that can be ignored>...
    </pre>
    </div>
    </div>
@@ -228,21 +183,10 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
 5. How many records are there for English pages?
 
    <div class="codetabs">
-   <div data-lang="scala" markdown="1">
-       scala> enPages.count
-       ...
-       res: Long = 122352588
-   </div>
-   <div data-lang="python" markdown="1">
-       >>> enPages.count()
-       ...
-       122352588
-   </div>
    <div data-lang="r" markdown="1">
    <pre class="prettyprint lang-r"> 
        > count(enPages)
-       ...
-       122352588
+       [1] 970545
    </pre>
    </div>
    </div>
@@ -260,21 +204,10 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    First, we generate a key value pair for each line; the key is the date (the first eight characters of the first field), and the value is the number of pageviews for that date (the fourth field).
 
    <div class="codetabs">
-   <div data-lang="scala" markdown="1">
-       scala> val enTuples = enPages.map(line => line.split(" "))
-       enTuples: spark.RDD[Array[java.lang.String]] = MappedRDD[3] at map at <console>:16
-
-       scala> val enKeyValuePairs = enTuples.map(line => (line(0).substring(0, 8), line(3).toInt))
-       enKeyValuePairs: spark.RDD[(java.lang.String, Int)] = MappedRDD[4] at map at <console>:18
-   </div>
-   <div data-lang="python" markdown="1">
-       >>> enTuples = enPages.map(lambda x: x.split(" "))
-       >>> enKeyValuePairs = enTuples.map(lambda x: (x[0][:8], int(x[3])))
-   </div>
    <div data-lang="r" markdown="1">
    <pre class="prettyprint lang-r"> 
        # lapply() and map() are aliases of each other; both should work!
-       > enTuples <- lapply(enPages, function(x) { strsplit(x, " ") })
+       > enTuples <- lapply(enPages, function(x) { unlist(strsplit(x, " ")) })
        > enKeyValuePairs <- lapply(enTuples, 
                                    function(x) { 
                                      list(substr(x[[1]], 0, 8), as.integer(x[[4]])) 
@@ -291,24 +224,24 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    Since we know there is a very limited number of keys in this case (because there are only 3 unique dates in our data set), let's use only one reducer.
 
    <div class="codetabs">
-   <div data-lang="scala" markdown="1">
-       scala> enKeyValuePairs.reduceByKey(_+_, 1).collect
-       ...
-       res: Array[(java.lang.String, Int)] = Array((20090506,204190442), (20090507,202617618), (20090505,207698578))
-
-     The `collect` method at the end converts the result from an RDD to an array.
-     Note that when we don't specify a name for the result of a command (e.g. `val enTuples` above), a variable with name `res`<i>N</i> is automatically created.
-   </div>
-   <div data-lang="python" markdown="1">
-       >>> enKeyValuePairs.reduceByKey(lambda x, y: x + y, 1).collect()
-       ...
-       [(u'20090506', 204190442), (u'20090507', 202617618), (u'20090505', 207698578)]
-
-     The `collect` method at the end converts the result from an RDD to an array.
-   </div>
    <div data-lang="r" markdown="1">
    <pre class="prettyprint lang-r"> 
+   # FIXME: 1 reducer is awefully slow; 5 is better but still slow
        > collect(reduceByKey(enKeyValuePairs, "+", 1L)) 
+[[1]]
+[[1]][[1]]
+[1] "20090507"
+
+[[1]][[2]]
+[1] 6175726
+
+
+[[2]]
+[[2]][[1]]
+[1] "20090505"
+
+[[2]][[2]]
+[1] 7076855       
    </pre>
    </div>
    </div>
@@ -317,23 +250,13 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    We can combine the previous three commands into one:
 
    <div class="codetabs">
-   <div data-lang="scala" markdown="1">
-       scala> enPages.map(line => line.split(" ")).map(line => (line(0).substring(0, 8), line(3).toInt)).reduceByKey(_+_, 1).collect
-       ...
-       res: Array[(java.lang.String, Int)] = Array((20090506,204190442), (20090507,202617618), (20090505,207698578))
-   </div>
-   <div data-lang="python" markdown="1">
-       >>> enPages.map(lambda x: x.split(" ")).map(lambda x: (x[0][:8], int(x[3]))).reduceByKey(lambda x, y: x + y, 1).collect()
-       ...
-       [(u'20090506', 204190442), (u'20090507', 202617618), (u'20090505', 207698578)]
-   </div>
    <div data-lang="r" markdown="1">
    <pre class="prettyprint lang-r"> 
        # TODO: this is cumbersome; consider using the magrittr package to simplify pipelining? 
        > collect(
         reduceByKey(
           lapply(
-            lapply(enPages, function(l) { strsplit(l, " ") }),
+            lapply(enPages, function(l) { unlist(strsplit(l, " ")) }),
             function(l) { list(substr(l[[1]], 0, 8), as.integer(l[[4]])) }),
           "+", 1L))
    </pre>
