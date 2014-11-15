@@ -6,8 +6,6 @@ navigation:
   show: true
 ---
 
-[SparkR](sparkr.html)
-
 # Welcome
 Welcome to the Spark Summit 2014 Training hands-on exercises! Much of this material 
 is extended and enhanced from those given at previous <a
@@ -69,6 +67,11 @@ If you would like a quick primer on Scala, check out the following doc in the ap
   <td class="yes">yes</td>
   <td class="no">no</td>
   <td class="no">no</td>
+</tr><tr>
+  <td>SparkR</td>
+  <td class="yes">R only</td>
+  <td class="yes">R only</td>
+  <td class="yes">R only</td>
 </tr>
 </tbody>
 </table>
@@ -84,12 +87,13 @@ The modules we will cover at the advanced Spark training are listed below.
 These can be done _**in any order**_ according to your interests.
 
 {:.bordered}
-| Exercise                                          |   Description                                         | Length |   More Documentation                                                                  |
-|---------------------------------------------------|-------------------------------------------------------|:------:|:------------------------------------------------------------------------------:|
-| [Spark SQL](data-exploration-using-spark-sql.html) | Use the Spark shell to write interactive SQL queries  | Short |[Programming Guide](http://spark.apache.org/docs/latest/sql-programming-guide.html)   |
-| [Spark Streaming](realtime-processing-with-spark-streaming.html) | Process a sample of Twitter tweet streams | Medium |[Programming Guide](http://spark.apache.org/docs/latest/streaming-programming-guide.html)   |
-| [MLlib](movie-recommendation-with-mllib.html) | Build a movie recommender with Spark | Medium |[Programming Guide](http://spark.apache.org/docs/latest/mllib-guide.html)   |
-| [GraphX](graph-analytics-with-graphx.html) | Explore graph-structured data and graph algorithms  | Long | [Programming Guide](http://spark.apache.org/docs/latest/sql-programming-guide.html)   |
+| Exercise                                                         | Description                                             | Length   | More Documentation                                                                                                |
+| ---------------------------------------------------              | ------------------------------------------------------- | :------: | :------------------------------------------------------------------------------:                                  |
+| [Spark SQL](data-exploration-using-spark-sql.html)               | Use the Spark shell to write interactive SQL queries    | Short    | [Programming Guide](http://spark.apache.org/docs/latest/sql-programming-guide.html)                               |
+| [Spark Streaming](realtime-processing-with-spark-streaming.html) | Process a sample of Twitter tweet streams               | Medium   | [Programming Guide](http://spark.apache.org/docs/latest/streaming-programming-guide.html)                         |
+| [MLlib](movie-recommendation-with-mllib.html)                    | Build a movie recommender with Spark                    | Medium   | [Programming Guide](http://spark.apache.org/docs/latest/mllib-guide.html)                                         |
+| [GraphX](graph-analytics-with-graphx.html)                       | Explore graph-structured data and graph algorithms      | Long     | [Programming Guide](http://spark.apache.org/docs/latest/sql-programming-guide.html)                               |
+| [SparkR](sparkr.html)                                            | Interactive Data Analytics using Spark in R             | Short    | [Project Page](http://amplab-extras.github.io/SparkR-pkg/); [Github](https://github.com/amplab-extras/SparkR-pkg) |
 
 # Providing feedback
 Once you complete the course, we would appreciate hearing your feedback. Please fill out the following survey:
