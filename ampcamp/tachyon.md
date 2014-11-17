@@ -17,10 +17,28 @@ navigation:
 </p>
  -->
 
-In-memory data processing has gained tremendous attention recently. People use in-memory computation
-frameworks to perform fast and interactive queries. However, there are still several problems that
-remain unsolved.
+Memory is the key to fast Big Data processing. This has been realized by many, and frameworks such
+as Spark already leverage memory performance. As data sets continue to grow, storage is increasingly
+becoming a critical bottleneck in many workloads.
 
+To address this need, we have developed [Tachyon](http://tachyon-project.org/), a memory centric
+fault-tolerant distributed file system, which enables reliable file sharing at memory-speed across
+cluster frameworks, such as Spark and MapReduce. The result of over two years of research, Tachyon
+achieves memory-speed and fault-tolerance by using memory aggressively and leveraging lineage
+information. Tachyon caches working set files in memory, and enables different jobs/queries and
+frameworks to access cached files at memory speed. Thus, Tachyon avoids going to disk to load
+datasets that are frequently read.
+
+Tachyon is Hadoop compatible. Existing Spark and MapReduce programs can run on top of it without any
+code changes. Tachyon is the default off-heap option in Spark, which means that RDDs can
+automatically be stored inside Tachyon to make Spark more resilient and avoid GC overheads. The
+project is open source and is already deployed at multiple companies. In addition, Tachyon has more
+than [50 contributors](https://github.com/amplab/tachyon/graphs/contributors) from over 20
+institutions, including Yahoo, Intel, Redhat, and Pivotal. The project is the storage layer of the
+[Berkeley Data Analytics Stack (BDAS)](https://amplab.cs.berkeley.edu/software/) and also part of
+the [Fedora distribution](http://timothysc.github.io/blog/2014/02/17/bdas-tachyon/).
+
+<!--
 1. Slow data sharing in a workflow: Companies build complicated workflows to process data, and use
 distributed file systems, such as HDFS or S3, to share one job's output as other jobs' input. Even
 though in-memory computation is fast, writing output data is slow, which is bounded by either disk
@@ -35,13 +53,7 @@ memory needed.
 JVM in computation frameworks, such as Spark. In this case, if the JVM crashes, all the in-memory
 data is lost, and the next program has to load the data into memory again, which could be time
 consuming.
-
-The Tachyon project to address the above issues. Tachyon is a fault tolerant distributed file
-system, which enables reliable file sharing at memory-speed across cluster frameworks, such as Spark
-and MapReduce. It achieves high performance by leveraging lineage (alpha) information and using
-memory aggressively. Tachyon caches working set files in memory, and enables different jobs/queries
-and frameworks to access cached files at memory speed. Thus, Tachyon avoids going to disk to load
-datasets that are frequently read.
+ -->
 
 In this chapter we first go over basic operations of Tachyon, and then run a Spark program on top of
 it. For more information, please visit Tachyon's [website](http://tachyon-project.org) or Github
@@ -58,13 +70,13 @@ memory is configured on each worker node?
 <div class="solution" markdown="1">
 ~~~
 $ grep "TACHYON_WORKER_MEMORY_SIZE=" conf/tachyon-env.sh
-$ export TACHYON_WORKER_MEMORY_SIZE=12936MB
+$ export TACHYON_WORKER_MEMORY_SIZE=1GB
 ~~~
 </div>
 
 You can also read the through the file and try to understand those parameters. For more information
-on configuration, you can visit
-[Tachyon's Configuration Settings webpage](http://tachyon-project.org/Configuration-Settings.html).
+on configuration, you can visit Tachyon
+[Configuration Settings webpage](http://tachyon-project.org/Configuration-Settings.html).
 
 ### Format the storage
 
@@ -79,26 +91,27 @@ $ ./bin/tachyon
 <div class="solution" markdown="1">
 ~~~
 $ ./bin/tachyon format
-$ Formatting Tachyon @ localhost
-$ Deleting /home/haoyuan/Tachyon/tachyon/libexec/../journal/
-$ Formatting hdfs://localhost:9000/tmp/tachyon/data
-$ Formatting hdfs://localhost:9000/tmp/tachyon/workers
+$ Connection to localhost... Formatting Tachyon Worker @ HYMac-2.local
+$ Removing local data under folder: /Users/haoyuan/Downloads/test/tachyon/libexec/../ramdisk/tachyonworker/
+$ Formatting Tachyon Master @ localhost
+$ Formatting JOURNAL_FOLDER: /Users/haoyuan/Downloads/test/tachyon/libexec/../journal/
+$ Formatting UNDERFS_DATA_FOLDER: /Users/haoyuan/Downloads/test/tachyon/libexec/../../data/tmp/tachyon/data
+$ Formatting UNDERFS_WORKERS_FOLDER: /Users/haoyuan/Downloads/test/tachyon/libexec/../../data/tmp/tachyon/workers
 ~~~
 </div>
 
 ### Start the system
 
-After formatting the storeage, we can finally try to start the system. This can be done by using
+After formatting the storage, we can try to start the system. This can be done by using
 `tachyon/bin/tachyon-start.sh` script.
 
 ~~~
-$ ./bin/tachyon-start.sh all Mount
+$ ./bin/tachyon-start.sh local
 $ Killed 0 processes
 $ Killed 0 processes
-$ localhost: Killed 0 processes
-$ Formatting RamFS: /mnt/ramdisk (1.1gb)
+$ Connection to localhost... Killed 0 processes
 $ Starting master @ localhost
-$ Starting worker @ hy-ubuntu
+$ Starting worker @ HYMac-2.local
 ~~~
 
 ## Interacting with Tachyon
@@ -136,6 +149,8 @@ $        [fileinfo <path>]
 $        [location <path>]
 $        [report <path>]
 $        [request <tachyonaddress> <dependencyId>]
+$        [pin <path>]
+$        [unpin <path>]
 ~~~
 
 Please try to put the local file `tachyon/LICENSE` into Tachyon file system as /LICENSE.txt using
@@ -157,7 +172,7 @@ $ 11.40 KB  02-07-2014 23:23:44:008  In Memory      /LICENSE.txt
 ~~~
 </div>
 
-Now, you want to check out the conent of the file:
+Now, you want to check out the content of the file:
 
 <div class="solution" markdown="1">
 ~~~
@@ -174,8 +189,8 @@ $ ....
 ### Application Programming Interface
 
 After using command line to interact with Tachyon, you can also use its API. We have several sample
-[applications](https://github.com/amplab/tachyon/tree/master/main/src/main/java/tachyon/examples).
-For example, [BasicOperations.java](https://github.com/amplab/tachyon/blob/master/main/src/main/java/tachyon/examples/BasicOperations.java)
+[applications](https://github.com/amplab/tachyon/tree/master/core/src/main/java/tachyon/examples).
+For example, [BasicOperations.java](https://github.com/amplab/tachyon/blob/master/core/src/main/java/tachyon/examples/BasicOperations.java)
 shows how to user file create, write, and read operations.
 
 You have put these into our script, you can simply use the following command to run this sample
@@ -213,10 +228,11 @@ $ ...
 ### Web User Interface
 
 After using commands and API to interact with Tachyon, let's take a look at its web user interface.
-The URI is `http://ec2masterhost:19999`.
+The URI is `http://localhost:19999`.
 
-The first page is the cluster's summary. If you click on the `Browse File System`, it shows you
-all the files you just created and copied.
+The first page is the overview of the running system. The second page is the system configuration
+
+If you click on the `Browse File System`, it shows you all the files you just created and copied.
 
 You can also click a particular file or folder. e.g. `/LICENSE.txt` file, and then you will see the
 detailed information about it.
@@ -235,9 +251,9 @@ $ ./bin/spark-shell
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-var file = sc.textFile("tachyon://ec2masterhostname:19998/LICENSE.txt")
+var file = sc.textFile("tachyon://localhost:19998/LICENSE.txt")
 val counts = file.flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey(_ + _)
-counts.saveAsTextFile("tachyon://ec2masterhostname:19998/result")
+counts.saveAsTextFile("tachyon://localhost:19998/result")
 ~~~
 </div>
 <div data-lang="java" markdown="1">
