@@ -18,8 +18,10 @@ skip-chapter-toc: true
 <pre class="prettyprint lang-bsh">
 # first, cd into the root directory of the USB drive
 $ mkdir data/tsv_wiki && cd data/tsv_wiki
-# download the data from the following URL
-$ http://cs.berkeley.edu/~shivaram/ampcamp-data/tsv_wiki.zip
+# download the data (49MB compressed; 140MB uncompressed) from the following URL
+$ wget -c http://cs.berkeley.edu/~shivaram/ampcamp-data/tsv_wiki.zip
+# unzip the archive
+$ unzip tsv_wiki.zip
 # you're good to go!
 </pre>
 
@@ -55,6 +57,12 @@ Slot "jrdd":
      <pre class="prettyprint lang-r">> take(data, 2)
 ...</pre>
 
+    You should see that a list of two strings is printed out. Each element is a
+    character vector (string) containing the content of a Wikipedia page, as you can inspect like so:
+
+     <pre class="prettyprint lang-r">> typeof(take(data, 2)[[1]])
+[1] "character"</pre>
+
 2. Let's see how many records in total are in this data set (this command will take a while, so read ahead while it is running).
 
      <pre class="prettyprint lang-r">
@@ -62,7 +70,7 @@ Slot "jrdd":
 
    This should take about 10-20 seconds.
 
-   This should launch 8 Spark tasks on the Spark cluster.
+   This should launch 3 Spark tasks on the Spark cluster.
    While it's running, you can open the Spark web console to see the progress.
    To do this, open your favorite browser, and type in the following URL.
 
@@ -70,7 +78,7 @@ Slot "jrdd":
 
    Note that this page is only available if you have an active job or Spark shell.  
 
-   ![Spark Application Status Web UI](img/application-webui640.png)
+   ![Spark Application Status Web UI](img/sparkr-ui.png)
 
    The links in this interface allow you to track the job's progress and
    various metrics about its execution, including task durations and cache
@@ -78,11 +86,11 @@ Slot "jrdd":
 
    When your query finishes running, it should return the following count:
 
-       [1] 7597
+       [1] 7967
 
-4. Recall from the SparkSQL exercise that the schema of the data is `pageId, title, modifiedTime, text, username`
+4. Recall from the [SparkSQL exercise](data-exploration-using-spark-sql.html) that the schema of the data is `(pageId, title, modifiedTime, text, username)`.
    Let's parse our data and create an RDD containing these fields in a list. 
-   This can be done using `lapply` on the RDD. For each record, we will then split it by the field delimiter (i.e. a tab) using `strsplit` .
+   This can be done using `lapply()` (alias to the familiar `map()`) on the RDD. For each record, we will then split it by the field delimiter (i.e. a tab) using `strsplit()` .
 
    To avoid reading from disks each time we perform any operations on the RDD, we also __cache the RDD into memory__.
 
@@ -91,8 +99,8 @@ Slot "jrdd":
       parts <- strsplit(record, "\t")[[1]]; 
       list(id=parts[1], title=parts[2], modified=parts[3], text=parts[4], username=parts[5])
     }
-    parsedRDD <- lapply(data, parsedRDD <- lapply(rdd, parseFields)
-    cache(parseFields)</pre>
+    parsedRDD <- lapply(data, parseFields)
+    cache(parsedRDD)</pre>
 
    When you type this command into the Spark shell, Spark defines the RDD, but because of lazy evaluation, no computation is done yet.
    Next time any action is invoked on `parsedRDD`, Spark will cache the data set in memory.
