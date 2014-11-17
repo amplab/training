@@ -60,6 +60,14 @@ it. For more information, please visit Tachyon's [website](http://tachyon-projec
 [repository](https://github.com/amplab/tachyon). We also host regular
 [meetups](http://www.meetup.com/Tachyon/) in the bay area.
 
+# Prerequisites
+
+## Assumptions
+
+ * You have a laptop
+ * Your laptop has Java 6 or 7 installed
+ * Mac OS or Linux
+
 ## Launch Tachyon
 
 ### Configurations
@@ -232,6 +240,8 @@ detailed information about it.
 
 ## Run Spark on Tachyon
 
+### Input/Output with Tachyon
+
 In this section, we run a Spark program to interact with Tachyon. The first one is to do a word
 count on `/LICENSE` file. In `/root/spark` folder, execute the following command to start
 Spark shell.
@@ -251,7 +261,7 @@ counts.saveAsTextFile("tachyon://localhost:19998/result")
 </div>
 <div data-lang="java" markdown="1">
 ~~~
-JavaRDD<String> file = spark.textFile("tachyon://ec2masterhostname:19998/LICENSE");
+JavaRDD<String> file = spark.textFile("tachyon://localhost:19998/LICENSE");
 JavaRDD<String> words = file.flatMap(new FlatMapFunction<String, String>()
   public Iterable<String> call(String s) { return Arrays.asList(s.split(" ")); }
 });
@@ -261,16 +271,16 @@ JavaPairRDD<String, Integer> pairs = words.map(new PairFunction<String, String, 
 JavaPairRDD<String, Integer> counts = pairs.reduceByKey(new Function2<Integer, Integer>()
   public Integer call(Integer a, Integer b) { return a + b; }
 });
-counts.saveAsTextFile("tachyon://ec2masterhostname:19998/result");
+counts.saveAsTextFile("tachyon://localhost:19998/result");
 ~~~
 </div>
 <div data-lang="python" markdown="1">
 ~~~
-file = spark.textFile("tachyon://ec2masterhostname:19998/LICENSE")
+file = spark.textFile("tachyon://localhost:19998/LICENSE")
 counts = file.flatMap(lambda line: line.split(" ")) \
              .map(lambda word: (word, 1)) \
              .reduceByKey(lambda a, b: a + b)
-counts.saveAsTextFile("tachyon://ec2masterhostname:19998/result")
+counts.saveAsTextFile("tachyon://localhost:19998/result")
 ~~~
 </div>
 </div>
@@ -280,7 +290,15 @@ Because `/LICENSE` is in memory, when a new Spark program comes up, it can load 
 directly from Tachyon. In the meantime, we are also working on other features to make Tachyon
 further enhance Spark's performance.
 
-Then we can try to store Spark's RDD as OFF_HEAP storage in Tachyon.
+### Store RDD OFF_HEAP in Tachyon
+
+Storing RDD as OFF_HEAP storage in Tachyon has several advantages ([more info](http://spark.apache.org/docs/latest/programming-guide.html)):
+
+* It allows multiple executors to share the same pool of memory in Tachyon.
+* It significantly reduces garbage collection costs.
+* Cached data is not lost if individual executors crash.
+
+Please try to the following example:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
