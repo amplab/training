@@ -1,6 +1,6 @@
 ---
 layout: global
-title: Tachyon - Reliable File Sharing at Memory Speed Across Cluster Frameworks
+title: Explore In-Memory Data Store Tachyon
 categories: [module]
 navigation:
   weight: 90
@@ -43,9 +43,10 @@ memory aggressively. Tachyon caches working set files in memory, and enables dif
 and frameworks to access cached files at memory speed. Thus, Tachyon avoids going to disk to load
 datasets that are frequently read.
 
-In this chapter we first go over basic operations of Tachyon, and then run a Spark program on top
-of it. For more information, please visit Tachyon's [website](http://tachyon-project.org) or Github
-[repository](https://github.com/amplab/tachyon).
+In this chapter we first go over basic operations of Tachyon, and then run a Spark program on top of
+it. For more information, please visit Tachyon's [website](http://tachyon-project.org) or Github
+[repository](https://github.com/amplab/tachyon). We also host regular
+[meetups](http://www.meetup.com/Tachyon/) in the bay area.
 
 ## Launch Tachyon
 
