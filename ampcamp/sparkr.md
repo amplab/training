@@ -96,7 +96,8 @@ Slot "jrdd":
 
    <pre class="prettyprint lang-r">
     parseFields <- function(record) {
-      parts <- strsplit(record, "\t")[[1]]; 
+      Sys.setlocale("LC_ALL", "C") # necessary for strsplit() to work correctly
+      parts <- strsplit(record, "\t")[[1]]
       list(id=parts[1], title=parts[2], modified=parts[3], text=parts[4], username=parts[5])
     }
     parsedRDD <- lapply(data, parseFields)
