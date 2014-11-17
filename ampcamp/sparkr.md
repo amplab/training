@@ -8,13 +8,26 @@ navigation:
 skip-chapter-toc: true
 ---
 
+<!--
+
 #### TODOs & FIXMEs
 - Dry runs.
 - Installation process.
-- Add a table of contents like the [GraphX exercise](graph-analytics-with-graphx.html).
 - Add instruction for RStudio?
+-->
 
-## Prerequisite: getting the dataset
+## Prerequisites: 
+
+### Installing R, rJava
+To do the SparkR exercises you will need to install R and rJava. We have included
+binaries for this in the USB stick. You can check if rJava is installed correctly
+by launching R and running  
+
+<pre class="prettyprint lang-r">
+library(rJava)
+</pre>
+
+### Getting the dataset
 <pre class="prettyprint lang-bsh">
 # first, cd into the root directory of the USB drive
 $ mkdir data/tsv_wiki && cd data/tsv_wiki
@@ -135,7 +148,7 @@ nonEmptyUsernames <- Filter(function(x) { !is.na(x) }, usernames)
    This is usually a good heuristic, unless you know the detailed data distribution and/or job characteristics to optimize for.
    
    <pre class="prettyprint lang-r">
-    userContributions <- lapply(nonEmptyUsernames, function(x) { (x, 1L) })
+    userContributions <- lapply(nonEmptyUsernames, function(x) { list(x, 1L) })
     userCounts <- collect(reduceByKey(userContributions, "+", 8L))</pre>
 
    Now `userCounts` is a local list and we can explore the data using any available R commands.
@@ -145,11 +158,11 @@ nonEmptyUsernames <- Filter(function(x) { !is.na(x) }, usernames)
     top10users <- tail(userCounts[order(unlist(sapply(userCounts, `[`, 2)))], 10)
     top10users</pre>
 
-   We can also plot a histogram of user contributions using R's `hist` command
+   We can also plot a histogram of user contributions using R's `plot` command
 
    <pre class="prettyprint lang-r">
     counts <- unlist(sapply(userCounts, `[`, 2))
-    hist(counts)</pre>
+    plot(sort(counts), log="y", type="h", lwd=10, lend=2)</pre>
 
 7. As an exercise try to answer the following question using the commands from above:
    How many articles contain the word “California”?
