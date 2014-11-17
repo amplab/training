@@ -64,13 +64,13 @@ it. For more information, please visit Tachyon's [website](http://tachyon-projec
 
 ### Configurations
 
-All system's configuration is under `tachyon/conf` folder. Please find them, and see how much
-memory is configured on each worker node?
+All system's configuration is under `tachyon/conf` folder. Please find them, and
+see how much memory is configured on each worker node.
 
 <div class="solution" markdown="1">
 ~~~
 $ grep "TACHYON_WORKER_MEMORY_SIZE=" conf/tachyon-env.sh
-$ export TACHYON_WORKER_MEMORY_SIZE=1GB
+export TACHYON_WORKER_MEMORY_SIZE=1GB
 ~~~
 </div>
 
@@ -80,25 +80,23 @@ on configuration, you can visit Tachyon
 
 ### Format the storage
 
-Before starting Tachyon for the first time, we need to format the system. It can be done by using
-`tachyon` script in the `tachyon/bin` folder. Please type the following command first, and then
-learn how to format the Tachyon file system for the first time.
+Note that if you are running Linux, Tachyon will need root permission to create
+and use a RAM disk. To start a superuser shell, run `sudo su` and enter your
+password.
 
-~~~
-$ ./bin/tachyon
-~~~
+Before starting Tachyon for the first time, we need to format the system. It can
+be done by using `tachyon` script in the `tachyon/bin` folder. Please type the
+following command:
 
-<div class="solution" markdown="1">
 ~~~
 $ ./bin/tachyon format
-$ Connection to localhost... Formatting Tachyon Worker @ HYMac-2.local
-$ Removing local data under folder: /Users/haoyuan/Downloads/test/tachyon/libexec/../ramdisk/tachyonworker/
-$ Formatting Tachyon Master @ localhost
-$ Formatting JOURNAL_FOLDER: /Users/haoyuan/Downloads/test/tachyon/libexec/../journal/
-$ Formatting UNDERFS_DATA_FOLDER: /Users/haoyuan/Downloads/test/tachyon/libexec/../../data/tmp/tachyon/data
-$ Formatting UNDERFS_WORKERS_FOLDER: /Users/haoyuan/Downloads/test/tachyon/libexec/../../data/tmp/tachyon/workers
+Connection to localhost... Formatting Tachyon Worker @ HYMac-2.local
+Removing local data under folder: /Users/haoyuan/Downloads/test/tachyon/libexec/../ramdisk/tachyonworker/
+Formatting Tachyon Master @ localhost
+Formatting JOURNAL_FOLDER: /Users/haoyuan/Downloads/test/tachyon/libexec/../journal/
+Formatting UNDERFS_DATA_FOLDER: /Users/haoyuan/Downloads/test/tachyon/libexec/../../data/tmp/tachyon/data
+Formatting UNDERFS_WORKERS_FOLDER: /Users/haoyuan/Downloads/test/tachyon/libexec/../../data/tmp/tachyon/workers
 ~~~
-</div>
 
 ### Start the system
 
@@ -107,11 +105,11 @@ After formatting the storage, we can try to start the system. This can be done b
 
 ~~~
 $ ./bin/tachyon-start.sh local
-$ Killed 0 processes
-$ Killed 0 processes
-$ Connection to localhost... Killed 0 processes
-$ Starting master @ localhost
-$ Starting worker @ HYMac-2.local
+Killed 0 processes
+Killed 0 processes
+Connection to localhost... Killed 0 processes
+Starting master @ localhost
+Starting worker @ HYMac-2.local
 ~~~
 
 ## Interacting with Tachyon
@@ -133,56 +131,53 @@ $ ./bin/tachyon tfs
 Then, it will return a list of options:
 
 ~~~
-$ Usage: java TFsShell
-$        [cat <path>]
-$        [count <path>]
-$        [ls <path>]
-$        [lsr <path>]
-$        [mkdir <path>]
-$        [rm <path>]
-$        [tail <path>]
-$        [touch <path>]
-$        [mv <src> <dst>]
-$        [copyFromLocal <src> <remoteDst>]
-$        [copyToLocal <src> <localDst>]
-$        [fileinfo <path>]
-$        [location <path>]
-$        [report <path>]
-$        [request <tachyonaddress> <dependencyId>]
-$        [pin <path>]
-$        [unpin <path>]
+Usage: java TFsShell
+       [cat <path>]
+       [count <path>]
+       [ls <path>]
+       [lsr <path>]
+       [mkdir <path>]
+       [rm <path>]
+       [tail <path>]
+       [touch <path>]
+       [mv <src> <dst>]
+       [copyFromLocal <src> <remoteDst>]
+       [copyToLocal <src> <localDst>]
+       [fileinfo <path>]
+       [location <path>]
+       [report <path>]
+       [request <tachyonaddress> <dependencyId>]
+       [pin <path>]
+       [unpin <path>]
 ~~~
 
-Please try to put the local file `tachyon/LICENSE` into Tachyon file system as /LICENSE.txt using
+Please try to put the local file `tachyon/LICENSE` into Tachyon file system as /LICENSE using
 command line.
 
 <div class="solution" markdown="1">
 ~~~
-$ ./bin/tachyon tfs copyFromLocal LICENSE /LICENSE.txt
-$ Copied LICENSE to /LICENSE.txt
+$ ./bin/tachyon tfs copyFromLocal LICENSE /LICENSE
+Copied LICENSE to /LICENSE
 ~~~
 </div>
 
 You can also use command line interface to verify this:
 
-<div class="solution" markdown="1">
 ~~~
 $ ./bin/tachyon tfs ls /
-$ 11.40 KB  02-07-2014 23:23:44:008  In Memory      /LICENSE.txt
+11.40 KB  02-07-2014 23:23:44:008  In Memory      /LICENSE
 ~~~
-</div>
 
 Now, you want to check out the content of the file:
 
 <div class="solution" markdown="1">
 ~~~
-$ ./bin/tachyon tfs cat /LICENSE.txt
-$                                  Apache License
-$                           Version 2.0, January 2004
-$                        http://www.apache.org/licenses/
-$
-$   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
-$ ....
+$ ./bin/tachyon tfs cat /LICENSE
+                                 Apache License
+                          Version 2.0, January 2004
+                       http://www.apache.org/licenses/
+  TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+....
 ~~~
 </div>
 
@@ -197,7 +192,6 @@ You have put these into our script, you can simply use the following command to 
 program. The following command runs [BasicOperations.java], and also verifies Tachyon's
 installation.
 
-<div class="solution" markdown="1">
 ~~~
 $ ./bin/tachyon runTests
 $ /root/tachyon/bin/tachyon runTest Basic MUST_CACHE
@@ -223,7 +217,6 @@ $ 2014-02-07 23:46:58,914 INFO   (BlockOutStream.java:<init>) - /mnt/ramdisk/tac
 $ Passed the test!
 $ ...
 ~~~
-</div>
 
 ### Web User Interface
 
@@ -234,32 +227,31 @@ The first page is the overview of the running system. The second page is the sys
 
 If you click on the `Browse File System`, it shows you all the files you just created and copied.
 
-You can also click a particular file or folder. e.g. `/LICENSE.txt` file, and then you will see the
+You can also click a particular file or folder. e.g. `/LICENSE` file, and then you will see the
 detailed information about it.
 
 ## Run Spark on Tachyon
 
 In this section, we run a Spark program to interact with Tachyon. The first one is to do a word
-count on `/LICENSE.txt` file. In `/root/spark` folder, execute the following command to start
+count on `/LICENSE` file. In `/root/spark` folder, execute the following command to start
 Spark shell.
 
 ~~~
 $ ./bin/spark-shell
 ~~~
 
-<div class="solution" markdown="1">
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
 sc.hadoopConfiguration.set("fs.tachyon.impl", "tachyon.hadoop.TFS")
-var file = sc.textFile("tachyon://localhost:19998/LICENSE.txt")
+var file = sc.textFile("tachyon://localhost:19998/LICENSE")
 val counts = file.flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey(_ + _)
 counts.saveAsTextFile("tachyon://localhost:19998/result")
 ~~~
 </div>
 <div data-lang="java" markdown="1">
 ~~~
-JavaRDD<String> file = spark.textFile("tachyon://ec2masterhostname:19998/LICENSE.txt");
+JavaRDD<String> file = spark.textFile("tachyon://ec2masterhostname:19998/LICENSE");
 JavaRDD<String> words = file.flatMap(new FlatMapFunction<String, String>()
   public Iterable<String> call(String s) { return Arrays.asList(s.split(" ")); }
 });
@@ -274,7 +266,7 @@ counts.saveAsTextFile("tachyon://ec2masterhostname:19998/result");
 </div>
 <div data-lang="python" markdown="1">
 ~~~
-file = spark.textFile("tachyon://ec2masterhostname:19998/LICENSE.txt")
+file = spark.textFile("tachyon://ec2masterhostname:19998/LICENSE")
 counts = file.flatMap(lambda line: line.split(" ")) \
              .map(lambda word: (word, 1)) \
              .reduceByKey(lambda a, b: a + b)
@@ -282,20 +274,19 @@ counts.saveAsTextFile("tachyon://ec2masterhostname:19998/result")
 ~~~
 </div>
 </div>
-</div>
 
 The results are stored in `/result` folder. You can verfy the results through Web UI or commands.
-Because `\LICENSE.txt` is in memory, when a new Spark program comes up, it can load in memory data
+Because `/LICENSE` is in memory, when a new Spark program comes up, it can load in memory data
 directly from Tachyon. In the meantime, we are also working on other features to make Tachyon
 further enhance Spark's performance.
 
 Then we can try to store Spark's RDD as OFF_HEAP storage in Tachyon.
 
-<div class="solution" markdown="1">
 <div class="codetabs">
+<div data-lang="scala" markdown="1">
 ~~~
 sc.hadoopConfiguration.set("fs.tachyon.impl", "tachyon.hadoop.TFS")
-var file = sc.textFile("tachyon://localhost:19998/LICENSE.txt")
+var file = sc.textFile("tachyon://localhost:19998/LICENSE")
 val counts = file.flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey(_ + _)
 counts.persist(org.apache.spark.storage.StorageLevel.OFF_HEAP)
 counts.take(10)
