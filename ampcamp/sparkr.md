@@ -70,7 +70,7 @@ Slot "jrdd":
 
    This should take about 10-20 seconds.
 
-   This should launch 3 Spark tasks on the Spark cluster.
+   This should launch 8 Spark tasks on the Spark cluster.
    While it's running, you can open the Spark web console to see the progress.
    To do this, open your favorite browser, and type in the following URL.
 
@@ -90,7 +90,9 @@ Slot "jrdd":
 
 4. Recall from the [SparkSQL exercise](data-exploration-using-spark-sql.html) that the schema of the data is `(pageId, title, modifiedTime, text, username)`.
    Let's parse our data and create an RDD containing these fields in a list. 
-   This can be done using `lapply()` (alias to the familiar `map()`) on the RDD. For each record, we will then split it by the field delimiter (i.e. a tab) using `strsplit()` .
+   This can be done using `lapply()` (alias to the familiar `map()`) on the RDD. For each record, we will then split it by the field delimiter (i.e. a tab) using the R function `strsplit()` .
+
+   (_Hint_: to look at a function's documentation, you could enter `?functionName` into the shell.)
 
    To avoid reading from disks each time we perform any operations on the RDD, we also __cache the RDD into memory__.
 
@@ -130,7 +132,7 @@ nonEmptyUsernames <- Filter(function(x) { !is.na(x) }, usernames)
    Note that the second argument to `reduceByKey` determines the number of reducers to use.
    By default, Spark assumes that the reduce function is commutative and associative and applies combiners on the mapper side.
    Lets use 8 reducers in this example as it is the same number of partitions our input RDD had.
-   This is usually a good heuristic unless you know the 
+   This is usually a good heuristic, unless you know the detailed data distribution and/or job characteristics to optimize for.
    
    <pre class="prettyprint lang-r">
     userContributions <- lapply(nonEmptyUsernames, function(x) { (x, 1L) })
@@ -152,7 +154,7 @@ nonEmptyUsernames <- Filter(function(x) { !is.na(x) }, usernames)
 7. As an exercise try to answer the following question using the commands from above:
    How many articles contain the word “California”?
 
-   Hint: You can use the R command `grepl` to determine if a word is present in a string
+   _Hint_: You can use the R command `grepl` to determine if a word is present in a string.
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-r">
