@@ -17,7 +17,7 @@ called the <a href="https://amplab.cs.berkeley.edu/software/">Berkeley Data Anal
 (BDAS)</a>.
 
 <img id="intro-components" src="img/spark-components.png">
-<img id="intro-components" src="img/tachyon-logo.png">
+<img id="intro-components" src="img/tachyon-logo.png" width="60%">
 
 These hands-on exercises will have you walk through examples of how to use
 <a href="http://tachyon-project.org/">Tachyon</a> project and the
