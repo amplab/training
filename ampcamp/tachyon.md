@@ -251,6 +251,7 @@ $ ./bin/spark-shell
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
+sc.hadoopConfiguration.set("fs.tachyon.impl", "tachyon.hadoop.TFS")
 var file = sc.textFile("tachyon://localhost:19998/LICENSE.txt")
 val counts = file.flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey(_ + _)
 counts.saveAsTextFile("tachyon://localhost:19998/result")
@@ -287,6 +288,24 @@ The results are stored in `/result` folder. You can verfy the results through We
 Because `\LICENSE.txt` is in memory, when a new Spark program comes up, it can load in memory data
 directly from Tachyon. In the meantime, we are also working on other features to make Tachyon
 further enhance Spark's performance.
+
+Then we can try to store Spark's RDD as OFF_HEAP storage in Tachyon.
+
+<div class="solution" markdown="1">
+<div class="codetabs">
+~~~
+sc.hadoopConfiguration.set("fs.tachyon.impl", "tachyon.hadoop.TFS")
+var file = sc.textFile("tachyon://localhost:19998/LICENSE.txt")
+val counts = file.flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey(_ + _)
+counts.persist(org.apache.spark.storage.StorageLevel.OFF_HEAP)
+counts.take(10)
+counts.take(10)
+~~~
+</div>
+</div>
+
+You will notice the second time take(10) is much faster than the first time because that the counts
+RDD has been stored OFF_HEAP in Tachyon.
 
 This brings us to the end of the Tachyon chapter of the tutorial. We encourage you to continue
 playing with the code and to check out the [project website](http://tachyon-project.org/) or Github
