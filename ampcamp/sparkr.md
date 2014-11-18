@@ -3,7 +3,7 @@ layout: global
 title: Interactive Data Analytics in SparkR
 categories: [module]
 navigation:
-  weight: 60
+  weight: 90
   show: true
 skip-chapter-toc: true
 ---

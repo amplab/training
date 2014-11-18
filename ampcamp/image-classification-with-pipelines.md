@@ -3,7 +3,7 @@ layout: global
 title: Image Classification with Pipelines
 categories: [module]
 navigation:
-  weight: 70
+  weight: 80
   show: true
 ---
 
