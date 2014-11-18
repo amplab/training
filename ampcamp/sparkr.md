@@ -16,6 +16,8 @@ skip-chapter-toc: true
 - Add instruction for RStudio?
 -->
 
+In this chapter, we will use the SparkR shell to interactively explore the Wikipedia data.
+
 ## Prerequisites: 
 
 ### Installing R, rJava
@@ -35,15 +37,17 @@ library(rJava)
 ### Getting the dataset
 <pre class="prettyprint lang-bsh">
 # first, cd into the root directory of the USB drive
-$ mkdir data/tsv_wiki && cd data/tsv_wiki
+$ mkdir data
+$ cd data
 # download the data (49MB compressed; 140MB uncompressed) from the following URL
 $ wget -c http://cs.berkeley.edu/~shivaram/ampcamp-data/tsv_wiki.zip
 # unzip the archive
 $ unzip tsv_wiki.zip
-# you're good to go!
 </pre>
 
-## Prerequisite: installing SparkR from the USB
+Now you're good to go!
+
+## Installation and Creating a SparkContext
 The below assumes a Mac OS, but Linux and Windows should be supported as well.
 
 <pre class="prettyprint lang-bsh">
@@ -64,21 +68,12 @@ $ R
 [1] "Java-Object{org.apache.spark.api.java.JavaSparkContext@514f2bd7}"
 </pre>
 
-In this chapter, we will use the SparkR shell to interactively explore the Wikipedia data.
-
 ## Interactive Analysis
 
 Let's now use Spark to do some order statistics on the data set.
-First, launch the Spark shell:
-
-<pre class="lang-bash">
-SPARK_MEM=1g MASTER="local[4]" SparkR/sparkR
-</pre>
-
-The prompt should appear within a few seconds. __Note:__ You may need to hit `[Enter]` once to clear the log output.
 
 1. Warm up by creating an RDD (Resilient Distributed Dataset) named `data` from the input files.
-   In the Spark shell, the SparkContext is already created for you as variable `sc`.
+   In the SparkR shell, following the last subsection should get you a `SparkContext`, available as the variable `sc`.
 
      <pre class="prettyprint lang-r">
 > sc
