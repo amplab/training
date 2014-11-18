@@ -20,9 +20,8 @@ called the <a href="https://amplab.cs.berkeley.edu/software/">Berkeley Data Anal
 <img id="intro-components" src="img/tachyon-logo.png" width="60%">
 
 These hands-on exercises will have you walk through examples of how to use
-<a href="http://tachyon-project.org/">Tachyon</a> project and the
-higher-level libraries in the
-<a href="http://spark.apache.org/">Spark</a> project: Spark SQL, MLlib, & GraphX.
+<a href="http://tachyon-project.org/">Tachyon</a>, 
+<a href="http://spark.apache.org/">Spark</a>, and related projects.
 
 # Prerequisites
 
@@ -99,8 +98,10 @@ You are welcome to mix and match languages depending on your preferences and int
 
 ## Exercise Content
 
-The modules we will cover at the Tachyon training and the advanced Spark training are listed below.
-These can be done _**in any order**_ according to your interests.
+The modules we will cover at the AMPCamp training are listed below.
+These can be done _**in any order**_ according to your interests, though we recommend that new users start with Spark.
+
+### Day 1
 
 {:.bordered}
 | Exercise                                                         | Description                                             | Length   | More Documentation                                                                                                |
@@ -108,8 +109,15 @@ These can be done _**in any order**_ according to your interests.
 | [Spark](data-exploration-using-spark.html)                       | Use the Spark shell to write interactive queries        | Short    | [Programming Guide](http://spark.apache.org/docs/latest/sql-programming-guide.html)                               |
 | [Spark SQL](data-exploration-using-spark-sql.html)               | Use the Spark shell to write interactive SQL queries    | Short    | [Programming Guide](http://spark.apache.org/docs/latest/sql-programming-guide.html)                               |
 | [Tachyon](tachyon.html)                                          | Deploy Tachyon and try simple functionalities.          | Medium   | [Project Website](http://tachyon-project.org/)                               |
-| [GraphX](graph-analytics-with-graphx.html)                       | Explore graph-structured data and graph algorithms      | Long     | [Programming Guide](http://spark.apache.org/docs/latest/sql-programming-guide.html)                               |
 | [MLlib](movie-recommendation-with-mllib.html)                    | Build a movie recommender with Spark                    | Medium   | [Programming Guide](http://spark.apache.org/docs/latest/mllib-guide.html)                                         |
+| [GraphX](graph-analytics-with-graphx.html)                       | Explore graph-structured data and graph algorithms      | Long     | [Programming Guide](http://spark.apache.org/docs/latest/sql-programming-guide.html)                               |
+
+
+### Day 2
+
+{:.bordered}
+| Exercise                                                         | Description                                             | Length   | More Documentation                                                                                                |
+| ---------------------------------------------------              | ------------------------------------------------------- | :------: | :------------------------------------------------------------------------------:                                  |
 | [Pipelines](image-classification-with-pipelines.html)            | Image classification with pipelines                     | Medium   | |
 | [SparkR](sparkr.html)                                            | Interactive Data Analytics using Spark in R             | Short    | [Project Page](http://amplab-extras.github.io/SparkR-pkg/); [Github](https://github.com/amplab-extras/SparkR-pkg) |
 | [ADAM](genome-analysis-with-adam.html)                           | Genome analysis with ADAM                               | Medium   | |
