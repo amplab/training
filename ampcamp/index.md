@@ -104,12 +104,13 @@ These can be done _**in any order**_ according to your interests.
 {:.bordered}
 | Exercise                                                         | Description                                             | Length   | More Documentation                                                                                                |
 | ---------------------------------------------------              | ------------------------------------------------------- | :------: | :------------------------------------------------------------------------------:                                  |
-| [Tachyon](tachyon.html)                                          | Deploy Tachyon and try simple functionalities.          | Medium   | [Project Website](http://tachyon-project.org/)                               |
+| [Spark](data-exploration-using-spark.html)               | Use the Spark shell to write interactive queries    | Short    | [Programming Guide](http://spark.apache.org/docs/latest/sql-programming-guide.html)                               |
 | [Spark SQL](data-exploration-using-spark-sql.html)               | Use the Spark shell to write interactive SQL queries    | Short    | [Programming Guide](http://spark.apache.org/docs/latest/sql-programming-guide.html)                               |
 | [Spark Streaming](realtime-processing-with-spark-streaming.html) | Process a sample of Twitter tweet streams               | Medium   | [Programming Guide](http://spark.apache.org/docs/latest/streaming-programming-guide.html)                         |
 | [MLlib](movie-recommendation-with-mllib.html)                    | Build a movie recommender with Spark                    | Medium   | [Programming Guide](http://spark.apache.org/docs/latest/mllib-guide.html)                                         |
 | [GraphX](graph-analytics-with-graphx.html)                       | Explore graph-structured data and graph algorithms      | Long     | [Programming Guide](http://spark.apache.org/docs/latest/sql-programming-guide.html)                               |
 | [SparkR](sparkr.html)                                            | Interactive Data Analytics using Spark in R             | Short    | [Project Page](http://amplab-extras.github.io/SparkR-pkg/); [Github](https://github.com/amplab-extras/SparkR-pkg) |
+| [Tachyon](tachyon.html)                                          | Deploy Tachyon and try simple functionalities.          | Medium   | [Project Website](http://tachyon-project.org/)                               |
 
 # Providing feedback
 Once you complete the course, we would appreciate hearing your feedback. Please fill out the following survey:
