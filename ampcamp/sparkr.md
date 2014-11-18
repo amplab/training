@@ -38,6 +38,27 @@ $ unzip tsv_wiki.zip
 # you're good to go!
 </pre>
 
+## Prerequisite: installing SparkR from the USB
+The below assumes a Mac OS, but Linux and Windows should be supported as well.
+
+<pre class="prettyprint lang-bsh">
+# first, cd into the root directory of the USB drive
+$ cd SparkR/mac
+$ tar xvzf SparkR_0.1.tgz
+$ R CMD INSTALL SparkR/
+</pre>
+
+Now SparkR is installed and can be loaded into a normal R session:
+
+<pre class="prettyprint lang-bsh">
+$ R
+> library(SparkR)
+> Sys.setenv(SPARK_MEM="1g")
+> sc <- sparkR.init(master="local[*]") # creating a SparkContext
+> sc
+[1] "Java-Object{org.apache.spark.api.java.JavaSparkContext@514f2bd7}"
+</pre>
+
 In this chapter, we will use the SparkR shell to interactively explore the Wikipedia data.
 
 ## Interactive Analysis
