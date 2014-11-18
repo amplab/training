@@ -37,7 +37,8 @@ library(rJava)
 ### Getting the dataset
 <pre class="prettyprint lang-bsh">
 # first, cd into the root directory of the USB drive
-$ mkdir data/tsv_wiki && cd data/tsv_wiki
+$ mkdir data
+$ cd data
 # download the data (49MB compressed; 140MB uncompressed) from the following URL
 $ wget -c http://cs.berkeley.edu/~shivaram/ampcamp-data/tsv_wiki.zip
 # unzip the archive
