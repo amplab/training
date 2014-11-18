@@ -20,8 +20,13 @@ skip-chapter-toc: true
 
 ### Installing R, rJava
 To do the SparkR exercises you will need to install R and rJava. We have included
-binaries for this in the USB stick. You can check if rJava is installed correctly
-by launching R and running  
+binaries for this in the USB stick.  Or you can also try the following in an `R` shell:
+
+<pre class="prettyprint lang-r">
+install.packages(rJava)
+</pre>
+
+You can check if rJava is installed correctly by running
 
 <pre class="prettyprint lang-r">
 library(rJava)
