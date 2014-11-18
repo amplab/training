@@ -4,7 +4,7 @@ title: Data Exploration Using Spark
 categories: [module]
 navigation:
   weight: 50
-  show: false                                   
+  show: true
 skip-chapter-toc: true
 ---
 
@@ -47,14 +47,14 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
        scala> sc
        res: spark.SparkContext = spark.SparkContext@470d1f30
 
-       scala> val pagecounts = sc.textFile("data/wiki/pagecounts")
+       scala> val pagecounts = sc.textFile("data/pagecounts")
        12/08/17 23:35:14 INFO mapred.FileInputFormat: Total input paths to process : 74
        pagecounts: spark.RDD[String] = MappedRDD[1] at textFile at <console>:12
      </div>
      <div data-lang="python" markdown="1">
        >>> sc
        <pyspark.context.SparkContext object at 0x7f7570783350>
-       >>> pagecounts = sc.textFile("data/wiki/pagecounts")
+       >>> pagecounts = sc.textFile("data/pagecounts")
        13/02/01 05:30:43 INFO mapred.FileInputFormat: Total input paths to process : 74
        >>> pagecounts
        <pyspark.rdd.RDD object at 0x217d510>

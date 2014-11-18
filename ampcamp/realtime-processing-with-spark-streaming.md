@@ -4,7 +4,7 @@ title: Stream Processing w/ Spark Streaming
 categories: [module]
 navigation:
   weight: 65
-  show: true
+  show: false
 ---
  
 In this chapter, we will walk you through using Spark Streaming to process live
