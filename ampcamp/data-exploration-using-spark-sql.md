@@ -37,7 +37,9 @@ scala> sqlContext.setConf("spark.sql.parquet.binaryAsString", "true")
 <div data-lang="python" markdown="1">
 <pre class="prettyprint lang-bsh">
 from pyspark.sql import SQLContext
-sqlCtx = SQLContext(sc)</pre>
+sqlCtx = SQLContext(sc)
+sqlCtx.sql("SET spark.sql.parquet.binaryAsString=true")
+</pre>
 </div>
 </div>
 
