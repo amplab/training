@@ -9,10 +9,7 @@ skip-chapter-toc: true
 
 # Getting Started With Your USB Stick
 
-If you are attending Spark Training in person, you should have a USB stick containing training material.
-If you do not have the USB stick,  <s>you can download a zip file with the contents</s>
- __This link is removed temporarily to avoid attendees accidentally kicking off a download.
-If you need the usb files to follow along from a remote location, please email__ *training-feedback@databricks.com*
+You should have a USB stick containing training material.
 
 ## Quick Start
 After loading the USB key, you should perform the following steps:

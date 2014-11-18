@@ -3,7 +3,7 @@ layout: global
 title: Graph Analytics With GraphX
 categories: [module]
 navigation:
-  weight: 80
+  weight: 60
   show: true
 ---
 
