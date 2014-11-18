@@ -43,7 +43,7 @@ The below assumes a Mac OS, but Linux and Windows should be supported as well.
 
 <pre class="prettyprint lang-bsh">
 # first, cd into the root directory of the USB drive
-$ cd SparkR/mac
+$ cd SparkR/mac # accordingly use {windows, linux} folders
 $ tar xvzf SparkR_0.1.tgz
 $ R CMD INSTALL SparkR/
 </pre>
@@ -190,9 +190,14 @@ nonEmptyUsernames <- Filter(function(x) { !is.na(x) }, usernames)
 
    _Hint_: You can use the R command `grepl` to determine if a word is present in a string.
 
+   _Hint_: if you run into locale issues with `grepl`, the same `Sys.setlocale()` call used above should fix it.
+
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-r">
-     calArticles <- Filter(function(item) { grepl("California", item$text) }, parsedRDD)
+     calArticles <- Filter(function(item) {
+       Sys.setlocale("LC_ALL", "C")
+       grepl("California", item$text)
+     }, parsedRDD)
      count(calArticles)
    </pre>
    </div>
