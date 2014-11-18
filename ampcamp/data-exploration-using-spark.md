@@ -139,6 +139,7 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    various metrics about its execution, including task durations and cache
    statistics.
 
+<!--
    In addition, the Spark Standalone cluster status web interface displays
    information that pertains to the entire Spark cluster.  To view this UI,
    browse to
@@ -148,8 +149,9 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    You should see a page similar to the following (yours will probably show five slaves):
 
    ![Spark Cluster Status Web UI](img/standalone-webui640.png)
+-->
 
-   When your query finishes running, it should return the following count:
+   When your query finishes running, it should return a count similar to:
 
        329641466
 

@@ -31,6 +31,7 @@ Once you have launched the Spark shell, the next step is to create a SQLContext.
 <pre class="prettyprint lang-bsh">
 scala> val sqlContext = new org.apache.spark.sql.SQLContext(sc)
 sqlContext: org.apache.spark.sql.SQLContext = org.apache.spark.sql.SQLContext@52955821
+scala> sqlContext.setConf("spark.sql.parquet.binaryAsString", "true")
 </pre>
 </div>
 <div data-lang="python" markdown="1">
