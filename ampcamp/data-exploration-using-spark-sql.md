@@ -41,7 +41,7 @@ sqlCtx = SQLContext(sc)</pre>
 </div>
 </div>
 
-Now we can load a set of data in that is stored in the Parquet format.  Parquet is a self-describing columnar format.  Since it is self-describing, Spark SQL will automatically be able to infer all of the column names and their datatypes.  For this exercise we have provided a set of data that contains all of the pages on wikipedia that contain the word "berkeley".  You can load this data using the parquetFile method provided by the SQLContext.
+Now we can load a set of data in that is stored in the Parquet format.  Parquet is a self-describing columnar format.  Since it is self-describing, Spark SQL will automatically be able to infer all of the column names and their datatypes. The `spark.sql.parquet.binaryAsString` flag tells Spark SQL to treat binary-encoded data as strings ([more doc](http://spark.apache.org/docs/1.1.0/sql-programming-guide.html#configuration)). For this exercise we have provided a set of data that contains all of the pages on wikipedia that contain the word "berkeley".  You can load this data using the parquetFile method provided by the SQLContext.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
