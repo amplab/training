@@ -208,7 +208,7 @@ We've already built the pipeline for you, so try running it on the input data li
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-usb/$ cd machine-learning/scala
+usb/$ cd pipelines/scala
 
 scala/$ SPARK_MEM=8g bash run-main.sh pipelines.LinearPixels local[2] data/cifar_train.bin data/cifar_test.bin
 </pre>
