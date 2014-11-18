@@ -8,14 +8,6 @@ navigation:
 skip-chapter-toc: true
 ---
 
-<!--
-
-#### TODOs & FIXMEs
-- Dry runs.
-- Installation process.
-- Add instruction for RStudio?
--->
-
 In this chapter, we will use the SparkR shell to interactively explore the Wikipedia data.
 
 ## Prerequisites: 
@@ -25,7 +17,7 @@ To do the SparkR exercises you will need to install R and rJava. We have include
 binaries for this in the USB stick.  Or you can also try the following in an `R` shell:
 
 <pre class="prettyprint lang-r">
-install.packages(rJava)
+install.packages("rJava")
 </pre>
 
 You can check if rJava is installed correctly by running
@@ -34,33 +26,42 @@ You can check if rJava is installed correctly by running
 library(rJava)
 </pre>
 
+If you get no output after the above command, it means that `rJava` has been installed successfully!
+If you get an error message while installing `rJava`, then you might need to the following to
+configure Java with R. Exit R, run the following command in a shell and relaunch R to install
+`rJava`.
+
+<pre class="prettyprint lang-bsh">
+R CMD javareconf -e
+</pre>
+
 ### Getting the dataset
 <pre class="prettyprint lang-bsh">
-# first, cd into the root directory of the USB drive
+# first, cd into the base directory for the tutorial 
 $ mkdir data
 $ cd data
 # download the data (49MB compressed; 140MB uncompressed) from the following URL
 $ wget -c http://cs.berkeley.edu/~shivaram/ampcamp-data/tsv_wiki.zip
 # unzip the archive
 $ unzip tsv_wiki.zip
+$ cd -
 </pre>
 
 Now you're good to go!
 
 ## Installation and Creating a SparkContext
-The below assumes a Mac OS, but Linux and Windows should be supported as well.
+The code below assumes Mac OS X, but Linux and Windows should be supported as well.
 
 <pre class="prettyprint lang-bsh">
-# first, cd into the root directory of the USB drive
-$ cd SparkR/mac # accordingly use {windows, linux} folders
-$ tar xvzf SparkR_0.1.tgz
-$ R CMD INSTALL SparkR/
+# first, cd into the base directory for the tutorial and launch R.
+$ R
+> pkgPath <- "SparkR/mac/SparkR_0.1.tgz" # accordingly use {windows, linux} folders
+> install.packages(pkgPath)
 </pre>
 
 Now SparkR is installed and can be loaded into a normal R session:
 
 <pre class="prettyprint lang-bsh">
-$ R
 > library(SparkR)
 > Sys.setenv(SPARK_MEM="1g")
 > sc <- sparkR.init(master="local[*]") # creating a SparkContext
@@ -160,7 +161,7 @@ usernames <- lapply(parsedRDD, function(x) { x$username })
 nonEmptyUsernames <- Filter(function(x) { !is.na(x) }, usernames)
    </pre>
 
-   Next, we will create a tuple with (username, 1L) and shuffle the data and group all values of the same key together.
+   Next, we will create a tuple with (username, 1) and shuffle the data and group all values of the same key together.
    Finally we sum up the values for each key.
    There is a convenient method called `reduceByKey` in Spark for exactly this pattern.
    Note that the second argument to `reduceByKey` determines the number of reducers to use.
@@ -169,7 +170,7 @@ nonEmptyUsernames <- Filter(function(x) { !is.na(x) }, usernames)
    This is usually a good heuristic, unless you know the detailed data distribution and/or job characteristics to optimize for.
    
    <pre class="prettyprint lang-r">
-    userContributions <- lapply(nonEmptyUsernames, function(x) { list(x, 1L) })
+    userContributions <- lapply(nonEmptyUsernames, function(x) { list(x, 1) })
     userCounts <- collect(reduceByKey(userContributions, "+", 8L))</pre>
 
    Now `userCounts` is a local list and we can explore the data using any available R commands.
@@ -199,6 +200,7 @@ nonEmptyUsernames <- Filter(function(x) { !is.na(x) }, usernames)
        grepl("California", item$text)
      }, parsedRDD)
      count(calArticles)
+       [1] 5795
    </pre>
    </div>
 
