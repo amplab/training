@@ -16,9 +16,11 @@ working directly with the Spark specific components of the AMPLab's open-source 
 called the <a href="https://amplab.cs.berkeley.edu/software/">Berkeley Data Analytics Stack
 (BDAS)</a>.
 
-<img id="intro-components" src="img/spark-components.png">
-<img id="intro-components" src="img/tachyon-logo.png" width="60%">
+<img id="intro-components" src="img/BDAS-log.png" width="70%">
 
+<!-- <img id="intro-components" src="img/spark-components.png">
+<img id="intro-components" src="img/tachyon-logo.png" width="60%">
+ -->
 These hands-on exercises will have you walk through examples of how to use
 <a href="http://tachyon-project.org/">Tachyon</a> project and the
 higher-level libraries in the
