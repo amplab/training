@@ -4,12 +4,22 @@ title: Data Exploration Using Spark
 categories: [module]
 navigation:
   weight: 50
-  show: false                                   
+  show: true
 skip-chapter-toc: true
 ---
 
 In this chapter, we will first use the Spark shell to interactively explore the Wikipedia data.
-Then, we will give a brief introduction to writing standalone Spark programs. Remember, Spark is an open source computation engine built on top of the popular Hadoop Distributed File System (HDFS).
+Then, we will give a brief introduction to writing standalone Spark programs. 
+
+## Prerequisite: getting the dataset
+<pre class="prettyprint lang-bsh">
+# first, cd into the root directory of the USB drive
+$ mkdir data/pagecounts && cd data/pagecounts
+# download two text files from S3
+$ wget -c http://s3.amazonaws.com/ampcamp-data/wikistats_20090505_restricted-01/part-00001
+$ wget -c http://s3.amazonaws.com/ampcamp-data/wikistats_20090505_restricted-07/part-00053
+# you're good to go!
+</pre>
 
 ## Interactive Analysis
 
@@ -19,11 +29,11 @@ First, launch the Spark shell:
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-/root/spark/bin/spark-shell</pre>
+usb/$ spark/bin/spark-shell</pre>
 </div>
 <div data-lang="python" markdown="1">
 <pre class="prettyprint lang-bsh">
-/root/spark/bin/pyspark</pre>
+usb/$ spark/bin/pyspark</pre>
 </div>
 </div>
 
@@ -37,14 +47,14 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
        scala> sc
        res: spark.SparkContext = spark.SparkContext@470d1f30
 
-       scala> val pagecounts = sc.textFile("/wiki/pagecounts")
+       scala> val pagecounts = sc.textFile("data/pagecounts")
        12/08/17 23:35:14 INFO mapred.FileInputFormat: Total input paths to process : 74
        pagecounts: spark.RDD[String] = MappedRDD[1] at textFile at <console>:12
      </div>
      <div data-lang="python" markdown="1">
        >>> sc
        <pyspark.context.SparkContext object at 0x7f7570783350>
-       >>> pagecounts = sc.textFile("/wiki/pagecounts")
+       >>> pagecounts = sc.textFile("data/pagecounts")
        13/02/01 05:30:43 INFO mapred.FileInputFormat: Total input paths to process : 74
        >>> pagecounts
        <pyspark.rdd.RDD object at 0x217d510>
@@ -114,18 +124,14 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
 
    This should launch 177 Spark tasks on the Spark cluster.
    If you look closely at the terminal, the console log is pretty chatty and tells you the progress of the tasks.
-   Because we are reading 20G of data from HDFS, this task is I/O bound and can take a while to scan through all the data (2 - 3 mins).
 
    While it's running, you can open the Spark web console to see the progress.
    To do this, open your favorite browser, and type in the following URL.
 
-   `http://<master_node_hostname>:4040`
+   `http://localhost:4040`
 
    Note that this page is only available if you have an active job or Spark shell.  
-   You should have been given `master_node_hostname` at the beginning of the
-   tutorial, or you might have [launched your own
-   cluster](launching-a-bdas-cluster-on-ec2.html) and made a note of it then. You should
-   see the Spark application status web interface, similar to the following:
+   You should see the Spark application status web interface, similar to the following:
 
    ![Spark Application Status Web UI](img/application-webui640.png)
 
@@ -137,7 +143,7 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    information that pertains to the entire Spark cluster.  To view this UI,
    browse to
 
-   `http://<master_node_hostname>:8080`
+   `http://localhost:8080`
 
    You should see a page similar to the following (yours will probably show five slaves):
 
@@ -167,7 +173,7 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    </div>
 
    When you type this command into the Spark shell, Spark defines the RDD, but because of lazy evaluation, no computation is done yet.
-   Next time any action is invoked on `enPages`, Spark will cache the data set in memory across the 5 slaves in your cluster.
+   Next time any action is invoked on `enPages`, Spark will cache the data set in memory across the workers in your cluster.
 
 5. How many records are there for English pages?
 

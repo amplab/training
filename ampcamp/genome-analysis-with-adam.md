@@ -3,8 +3,8 @@ layout: global
 title: Genome Analysis with ADAM
 categories: [module]
 navigation:
-  weight: 50
-  show: false                                   
+  weight: 150
+  show: true
 skip-chapter-toc: true
 ---
 
