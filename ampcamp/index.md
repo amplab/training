@@ -52,16 +52,22 @@ If you would like a quick primer on Scala, check out the following doc in the ap
 </tr>
 </thead><tbody>
 <tr>
-  <td>Spark Interactive</td>
+  <td>Spark</td>
   <td class="yes">yes</td>
   <td class="no">no</td>
   <td class="yes">yes</td>
 </tr><tr>
-  <td>Spark SQL Interactive</td>
+  <td>Spark SQL</td>
   <td class="yes">yes</td>
   <td class="no">no</td>
   <td class="yes">yes</td>
-  <!--
+</tr><tr>
+  <td>Tachyon</td>
+  <td class="no">no</td>
+  <td class="yes">yes</td>
+  <td class="no">no</td>
+</tr>
+<!--
 </tr><tr>
   <td>Spark Streaming</td>
   <td class="yes">yes</td>
@@ -69,14 +75,19 @@ If you would like a quick primer on Scala, check out the following doc in the ap
   <td class="no">no</td>
   -->
 </tr><tr>
-  <td>MLlib - Machine Learning</td>
+  <td>MLlib</td>
   <td class="yes">yes</td>
   <td class="no">no</td>
   <td class="yes">yes</td>
 </tr><tr>
-  <td>GraphX - Graph Analytics</td>
+  <td>GraphX</td>
   <td class="yes">yes</td>
   <td class="no">no</td>
+  <td class="no">no</td>
+</tr><tr>
+  <td>Pipelines</td>
+  <td class="no">no</td>
+  <td class="yes">yes</td>
   <td class="no">no</td>
 </tr><tr>
   <td>SparkR</td>
@@ -84,7 +95,7 @@ If you would like a quick primer on Scala, check out the following doc in the ap
   <td class="yes">R only</td>
   <td class="yes">R only</td>
 </tr><tr>
-  <td>Tachyon</td>
+  <td>ADAM</td>
   <td class="no">no</td>
   <td class="yes">yes</td>
   <td class="no">no</td>
