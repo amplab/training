@@ -122,7 +122,7 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    </div>
    </div>
 
-   This should launch 177 Spark tasks on the Spark cluster.
+   This should launch 2 tasks on the your Spark cluster.
    If you look closely at the terminal, the console log is pretty chatty and tells you the progress of the tasks.
 
    While it's running, you can open the Spark web console to see the progress.
@@ -151,9 +151,9 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    ![Spark Cluster Status Web UI](img/standalone-webui640.png)
 -->
 
-   When your query finishes running, it should return a count similar to:
+   When your query finishes running, it should return the following count:
 
-       329641466
+       1398882
 
 4. Recall from above when we described the format of the data set, that the second field is the "project code" and contains information about the language of the pages.
    For example, the project code "en" indicates an English page.
@@ -183,12 +183,12 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    <div data-lang="scala" markdown="1">
        scala> enPages.count
        ...
-       res: Long = 122352588
+       res: Long = 970545
    </div>
    <div data-lang="python" markdown="1">
        >>> enPages.count()
        ...
-       122352588
+       970545
    </div>
    </div>
 
@@ -229,7 +229,7 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    <div data-lang="scala" markdown="1">
        scala> enKeyValuePairs.reduceByKey(_+_, 1).collect
        ...
-       res: Array[(java.lang.String, Int)] = Array((20090506,204190442), (20090507,202617618), (20090505,207698578))
+       res: Array[(String, Int)] = Array((20090507,6175726), (20090505,7076855))
 
      The `collect` method at the end converts the result from an RDD to an array.
      Note that when we don't specify a name for the result of a command (e.g. `val enTuples` above), a variable with name `res`<i>N</i> is automatically created.
@@ -237,7 +237,7 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    <div data-lang="python" markdown="1">
        >>> enKeyValuePairs.reduceByKey(lambda x, y: x + y, 1).collect()
        ...
-       [(u'20090506', 204190442), (u'20090507', 202617618), (u'20090505', 207698578)]
+       [(u'20090507', 6175726), (u'20090505', 7076855)]
 
      The `collect` method at the end converts the result from an RDD to an array.
    </div>
@@ -250,12 +250,12 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    <div data-lang="scala" markdown="1">
        scala> enPages.map(line => line.split(" ")).map(line => (line(0).substring(0, 8), line(3).toInt)).reduceByKey(_+_, 1).collect
        ...
-       res: Array[(java.lang.String, Int)] = Array((20090506,204190442), (20090507,202617618), (20090505,207698578))
+       res: Array[(String, Int)] = Array((20090507,6175726), (20090505,7076855))
    </div>
    <div data-lang="python" markdown="1">
        >>> enPages.map(lambda x: x.split(" ")).map(lambda x: (x[0][:8], int(x[3]))).reduceByKey(lambda x, y: x + y, 1).collect()
        ...
-       [(u'20090506', 204190442), (u'20090507', 202617618), (u'20090505', 207698578)]
+       [(u'20090507', 6175726), (u'20090505', 7076855)]
    </div>
    </div>
 
@@ -272,28 +272,13 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    <div class="codetabs">
    <div data-lang="scala" markdown="1">
        scala> enPages.map(l => l.split(" ")).map(l => (l(2), l(3).toInt)).reduceByKey(_+_, 40).filter(x => x._2 > 200000).map(x => (x._2, x._1)).collect.foreach(println)
-       (203378,YouTube)
-       (17657352,Special:Search)
-       (311465,Special:Watchlist)
-       (248624,Special:Export)
-       (237677,2009_swine_flu_outbreak)
-       (396776,Dom_DeLuise)
-       (5816953,Special:Random)
-       (18730347,Main_Page)
-       (534253,Swine_influenza)
-       (310642,index.html)
-       (464935,Wiki)
-       (382510,Deadpool_(comics))
-       (3521336,Special:Randompage)
-       (204604,X-Men_Origins:_Wolverine)
-       (695817,Cinco_de_Mayo)
-       (317708,The_Beatles)
-       (234855,Scrubs_(TV_series))
-       (43822489,404_error/)
+       (468159,Special:Search)
+       (451126,Main_Page)
+       (1066734,404_error/)
    </div>
    <div data-lang="python" markdown="1">
        >>> enPages.map(lambda x: x.split(" ")).map(lambda x: (x[2], int(x[3]))).reduceByKey(lambda x, y: x + y, 40).filter(lambda x: x[1] > 200000).map(lambda x: (x[1], x[0])).collect()
-       [(5816953, u'Special:Random'), (18730347, u'Main_Page'), (534253, u'Swine_influenza'), (382510, u'Deadpool_(comics)'), (204604, u'X-Men_Origins:_Wolverine'), (203378, u'YouTube'), (43822489, u'404_error/'), (234855, u'Scrubs_(TV_series)'), (248624, u'Special:Export'), (695817, u'Cinco_de_Mayo'), (311465, u'Special:Watchlist'), (396776, u'Dom_DeLuise'), (310642, u'index.html'), (317708, u'The_Beatles'), (237677, u'2009_swine_flu_outbreak'), (3521336, u'Special:Randompage'), (464935, u'Wiki'), (17657352, u'Special:Search')]
+       [(451126, u'Main_Page'), (1066734, u'404_error/'), (468159, u'Special:Search')]
    </div>
    </div>
 
