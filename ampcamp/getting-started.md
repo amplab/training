@@ -9,7 +9,7 @@ skip-chapter-toc: true
 
 # Getting Started With Your USB Stick
 
-You should have a USB stick containing training material.  If you do not have one, please ask a TA.
+You should have received a USB stick containing training material.  If you do not have one, please ask a TA.
 
 ## Quick Start
 
@@ -18,9 +18,9 @@ are a windows user, please consider using Powershell, or otherwise replace `cd`
 with `dir` and any forward slash (`/`) with a backwards slash (`\`) when
 navigating directories.
 
-1. (Recommended, but not required) Copy the content of the USB drive to somewhere on your hard drive.
+1. (Recommended, but not required) Copy the contents of the USB drive to somewhere on your hard drive.
 It is possible to run the exercises directly from the USB drive, although the exercises will run
-more slowly.
+much more slowly.
 
     <p class="alert alert-warn">
     <i class="icon-info-sign">    </i>
@@ -28,7 +28,7 @@ more slowly.
     </p>
 
 2. Rename the folder containing all exercise content (either on your hard-drive
-   or on the USB key) to `AMPCAMP` (or any other name without a space).  If you
+   or on the USB key) to `AMPCAMP` (or any other pathname without spaces).  If you
    skip this step, you will see your sbt builds fail.
 
 3. Change directories in to the folder containing all exercise content (either on your hard-drive or on the USB key)
@@ -58,21 +58,17 @@ Please ask a TA if you are having trouble getting the simple application to buil
 
 ## Additional Required Download
 
-Some of the proceeding exercises require you to download addtional project templates and/or data. The
-following instructions explain how to incorporate this material with the content of the USB stick.
+Some of the exercises require you to download addtional project templates and/or data. The
+following instructions explain how to incorporate this material with the content of the USB drive.
 
-1. Download the following two files: <a
-   href="JEY-TODO">training-downloads.zip</a> and <a
-   href="JEY-TODO">training-downloads-adam.zip</a>. Note that the second file
-   is only needed for the second day of exercises.
+1. Download the following zip file: <a
+   href="http://www.cs.berkeley.edu/~jey/ampcamp5/training-downloads.zip">training-downloads.zip</a>.
 
-2. Unzip both zip files.
+2. Unzip the `training-downloads.zip` file to your [usb root directory].
 
-3. Copy all resulting folders to your [usb root directory]. [JEY-TODO: IS THIS CORRECT?] 
+## USB Contents
 
-## USB Contents [JEY-TODO: IS THIS CORRECT?] 
-
-You'll find the following contents in the USB stick (this info is taken from the README):
+You'll find the following contents in the USB drive (this info is taken from the README):
 
  * **spark** - spark binary distribution
      * conf/log4j.properties - WARN used for default level, Snappy warnings silenced
