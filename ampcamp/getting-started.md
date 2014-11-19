@@ -62,15 +62,15 @@ Some of the proceeding exercises require you to download addtional project templ
 following instructions explain how to incorporate this material with the content of the USB stick.
 
 1. Download the following two files: <a
-   href="JEYFILLIN">training-downloads.zip</a> and <a
-   href="JEYFILLIN">training-downloads-adam.zip</a>. Note that the second file
+   href="JEY-TODO">training-downloads.zip</a> and <a
+   href="JEY-TODO">training-downloads-adam.zip</a>. Note that the second file
    is only needed for the second day of exercises.
 
 2. Unzip both zip files.
 
-3. Copy all resulting folders to your [usb root directory]. [JEY: IS THIS CORRECT?] 
+3. Copy all resulting folders to your [usb root directory]. [JEY-TODO: IS THIS CORRECT?] 
 
-## USB Contents
+## USB Contents [JEY-TODO: IS THIS CORRECT?] 
 
 You'll find the following contents in the USB stick (this info is taken from the README):
 
