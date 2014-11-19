@@ -8,6 +8,15 @@ navigation:
 skip-chapter-toc: true
 ---
 
+First, download ADAM's artifacts from [this link](http://goo.gl/JADQjN) to your `usb` directory and
+unzip it. To run ADAM, you'll need to set the path to your Spark installation:
+
+<div class="codetabs">
+<pre class="prettyprint lang-bsh">
+export SPARK_HOME=usb/spark
+</pre>
+</div>
+
 [ADAM](https://www.github.com/bigdatagenomics/adam) is an open-source library and command line
 toolkit for exploring genomic data. In this chapter, we will use ADAM to explore a short portion
 of a human genome. ADAM is built on Spark and also provides an interactive shell. Our first two
@@ -15,11 +24,12 @@ exercises will use the ADAM command line tools, and we'll use the ADAM shell for
 exercises.
 
 In this exercise, we'll use a several hundred base pair long fragment of a human genome.
-Conceptually, the human genome is divided up into 23 different chromosomes (22 "autosomal"
-chromosomes, and the X/Y sex chromosomes). Each person has two copies of each chromosome; one
-inherited from your mother, and one from your father. Each chromosome is a long string made out
-of the letters A, C, G, and T. The chromosomes vary in length from 250 million bases on chromosome 1
-down to 50 million bases on the Y chromosome.
+Conceptually, the human genome contains 25 different chromosomes (22 "autosomal" chromosomes,
+the X/Y sex chromosomes, and a mitochondrial chromosome). Each person inherits two copies of each
+chromosome _except_ for the mitochondrial chromosome; one is inherited from your mother, and one is
+from your father. The mitochondrial chromosome is always inherited from your mother. Each chromosome
+is a long string made out of the letters A, C, G, and T. The chromosomes vary in length from 250
+million bases on chromosome 1 down to 50 million bases on the Y chromosome.
 
 When we sequence a genome, we get the data back as _short reads_. These short reads are 100-250
 letter long _samples_ of your genome. No sequencer yet can read a whole chromosome at once. Instead,
@@ -50,7 +60,7 @@ data into the ADAM format by running the following command:
 
 <div class="codetabs">
 <pre class="prettyprint lang-bsh">
-adam/bin/adam-submit transform NA12878.sam NA12878.adam
+usb/$ adam/bin/adam-submit transform adam/NA12878.sam adam/NA12878.adam
 </pre>
 </div>
 
@@ -58,22 +68,22 @@ Once this command finishes, let's compare the size of the two files.
 
 <div class="codetabs">
 <pre class="prettyprint lang-bsh">
-ls -alh NA12878.sam
-du -h NA12878.adam
+usb/$ ls -alh NA12878.sam
+usb/$ du -h NA12878.adam
 </pre>
 </div>
 
 Here, ADAM is about 50% smaller! While this is a toy example, SAM has a binary, compressed companion
 called BAM. In practice, ADAM is approximately 20% smaller than compressed BAM files. This is due to
-Parquet. Since Parquet stores each column individually, it can apply column specific compression
-techniques like dictionary encoding for columns with low cardinality, or run length encoding for
-highly repetitive columns. Parquet allows us to check the size of each column; we can do this by
-running:
+[Parquet](http://parquet.incubator.apache.org). Since Parquet stores each column individually,
+it can apply column specific compression techniques like dictionary encoding for columns with low
+cardinality, or run length encoding for highly repetitive columns. Parquet allows us to check the
+size of each column; we can do this by running:
 
 <div class="codetabs">
 <pre class="prettyprint lang-bsh">
-export CLASSPATH=$(./adam/bin/compute-adam-classpath.sh)
-java parquet.hadoop.PrintFooter NA12878.adam
+usb/$ export CLASSPATH=$(./adam/bin/compute-adam-classpath.sh)
+usb/$ java parquet.hadoop.PrintFooter adam/NA12878.adam
 </pre>
 </div>
 
@@ -89,7 +99,7 @@ run the following command:
 
 <div class="codetabs">
 <pre class="prettyprint lang-bsh">
-adam/bin/adam-submit viz NA12878.adam 20
+usb/$ adam/bin/adam-submit viz adam/NA12878.adam 20
 </pre>
 </div>
 
@@ -108,7 +118,7 @@ use ADAM by running:
 
 <div class="codetabs">
 <pre class="prettyprint lang-bsh">
-adam/bin/adam-shell
+usb/$ adam/bin/adam-shell
 </pre>
 </div>
 
@@ -122,7 +132,7 @@ the log output.
 scala> import org.bdgenomics.adam.rdd.ADAMContext._
 import org.bdgenomics.adam.rdd.ADAMContext._
 
-scala> val reads = sc.loadAlignments("NA12878.adam").cache()
+scala> val reads = sc.loadAlignments("adam/NA12878.adam").cache()
 reads: org.apache.spark.rdd.RDD[org.bdgenomics.formats.avro.AlignmentRecord] = MappedRDD[1] at map at ADAMContext.scala:132
 
 scala> reads.count()
@@ -139,6 +149,8 @@ scala> println(reads.first)
 </pre>
 </div>
 
+[Avro](http://avro.apache.org) is a binary serialization format
+
 2. *_k_-mer Analysis:* When analyzing reads, we frequently look at the substrings that make up the
 reads. We refer to these substrings as _k_-mers, where _k_ is the length of the substring. These
 substrings are interesting because they allow us to look at the sequence content of a genome. With
@@ -149,6 +161,9 @@ To get started, let's count _k_-mers in ADAM using _k_ = 20. We should wind up w
 
 <div class="codetabs">
 <pre class="prettyprint lang-bsh">
+scala> import org.bdgenomics.adam.rdd.read.AlignmentRecordContext._
+import org.bdgenomics.adam.rdd.read.AlignmentRecordContext._
+
 scala> val kmers = reads.adamCountKmers(20).cache()
 kmers: org.apache.spark.rdd.RDD[(String, Long)] = ShuffledRDD[19] at reduceByKey at AlignmentRecordRDDFunctions.scala:225
 
@@ -200,24 +215,6 @@ the whole genome, these peaks very closely approximate Poisson distributions.
 we have bases that don't match the average human genome. We can do this by counting the number
 of bases at each site in the genome. If most of the bases match the reference, then we probably
 don't have a variant at that position.
-
-<!---
-When we collect DNA for sequencing, we don't have enough material
-to sequence directly. Instead, we use a chemical reaction (polymerase chain reaction, PCR) to amplify
-the DNA before sequencing. However, sometimes errors happen during the PCR process that lead to
-individual reads being duplicated. In ADAM, we can identify duplicated
-
-<div class="codetabs">
-<pre class="prettyprint lang-bsh">
-scala> import org.bdgenomics.adam.rdd.read.AlignmentRecordContext._
-import org.bdgenomics.adam.rdd.read.AlignmentRecordContext._
-
-scala> val markedReads = reads.adamMarkDuplicates().cache()
-markedReads: org.apache.spark.rdd.RDD[org.bdgenomics.formats.avro.AlignmentRecord] = FlatMappedRDD[15] at flatMap at MarkDuplicates.scala:75
-
-</pre>
-</div>
--->
 
 To start this process, let's convert our reads to _pileups_. Pileups provide a coordinate-space
 view of the data; e.g., they aggregate all of the bases at position _x_ from all of the reads that
@@ -291,13 +288,6 @@ res11: Long = 3
 </pre>
 </div>
 
-This is approximately what we expect.
-
-<!-- We can dive in deeper to the few sites that have an different
-allele from the average human genome. Let's first figure out what those sites are:
-
-scala> referencePctByPosition.filter(kv => kv._2 > 0.33 && kv._2 < 0.66).foreach(println)
-(224940,0.43243243243243246)
-(224970,0.4666666666666667)
-(225057,0.5444444444444444)
--->
+This is close to what we'd expect to see. In a real pipeline, we would use a probabilistic model
+that would account for the probability that each base was sequenced correctly. If we apply a
+more rigorous model, we are able to reduce this down to a single base.

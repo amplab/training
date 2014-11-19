@@ -6,6 +6,8 @@ navigation:
   show: true
 ---
 
+[SparkR](sparkr.html)
+
 # Welcome
 Welcome to the AMP Camp 5 hands-on exercises! These exercises are extended and enhanced from those
 given at previous <a href="http://ampcamp.berkeley.edu">AMP Camp Big Data Bootcamps</a>. They were
@@ -96,8 +98,8 @@ If you would like a quick primer on Scala, check out the following doc in the ap
   <td class="yes">R only</td>
 </tr><tr>
   <td>ADAM</td>
-  <td class="no">no</td>
   <td class="yes">yes</td>
+  <td class="no">no</td>
   <td class="no">no</td>
 </tr>
 </tbody>
