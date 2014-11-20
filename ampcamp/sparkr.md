@@ -32,14 +32,13 @@ configure Java with R. Exit R, run the following command in a shell and relaunch
 `rJava`.
 
 <pre class="prettyprint lang-bsh">
-R CMD javareconf -e
+usb/$ R CMD javareconf -e
 </pre>
 
 ### Getting the dataset
 <pre class="prettyprint lang-bsh">
-# first, cd into the base directory for the tutorial 
-$ mkdir data
-$ cd data
+# first, cd into the [usb root directory], then:
+usb/$ cd data
 # download the data (49MB compressed; 140MB uncompressed) from the following URL
 $ wget -c http://cs.berkeley.edu/~shivaram/ampcamp-data/tsv_wiki.zip
 # unzip the archive
@@ -53,8 +52,9 @@ Now you're good to go!
 The code below assumes Mac OS X, but Linux and Windows should be supported as well.
 
 <pre class="prettyprint lang-bsh">
-# first, cd into the base directory for the tutorial and launch R.
-$ R
+# the above steps should take you back to the [usb root directory]
+# now we can launch an R shell normally:
+usb/$ R
 > pkgPath <- "SparkR/mac/SparkR_0.1.tgz" # accordingly use {windows, linux} folders
 > install.packages(pkgPath)
 </pre>
@@ -195,13 +195,12 @@ nonEmptyUsernames <- Filter(function(x) { !is.na(x) }, usernames)
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-r">
-     calArticles <- Filter(function(item) {
+> calArticles <- Filter(function(item) {
        Sys.setlocale("LC_ALL", "C")
        grepl("California", item$text)
      }, parsedRDD)
-     count(calArticles)
-       [1] 5795
-   </pre>
+> count(calArticles)
+[1] 5795</pre>
    </div>
 
 8. You can explore the full RDD API by using the command `help(package=SparkR)`.
