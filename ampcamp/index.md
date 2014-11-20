@@ -86,8 +86,8 @@ If you would like a quick primer on Scala, check out the following doc in the ap
   <td class="no">no</td>
 </tr><tr>
   <td>Pipelines</td>
-  <td class="no">no</td>
   <td class="yes">yes</td>
+  <td class="no">no</td>
   <td class="no">no</td>
 </tr><tr>
   <td>SparkR</td>
