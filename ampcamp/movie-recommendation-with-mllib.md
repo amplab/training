@@ -15,6 +15,12 @@ quick testing of your code, you may want to use a smaller dataset under
 `data/movielens/medium`, which contains 1 million ratings from 6000 users on 4000
 movies.
 
+## Prerequisite
+Please follow the instructions on the <a href="getting-started.html">Getting Started</a>
+page to download and unpack the `training-downloads.zip` file.
+
+Now you're good to go!
+
 ##Data set
 
 We will use two files from this MovieLens dataset: "`ratings.dat`" and
@@ -603,10 +609,10 @@ selected and its RMSE on the test set is used as the final metric.
 </div>
 
 Spark might take a minute or two to train the models. You should see the
-following on the screen:
+following on the screen. Note that you might get slightly different answers in your run.
 
 ~~~
-The best model was trained using rank 8 and lambda 10.0, and its RMSE on test is 0.8808492431998702.
+The best model was trained with rank 8 and lambda 10.0, and numIter = 10, and its RMSE on test is 0.8808492431998702.
 ~~~
 
 ##Recommending movies for you

@@ -3,7 +3,7 @@ layout: global
 title: Explore In-Memory Data Store Tachyon
 categories: [module]
 navigation:
-  weight: 90
+  weight: 50
   show: true
 ---
 
@@ -66,7 +66,7 @@ it. For more information, please visit Tachyon's [website](http://tachyon-projec
 
  * You have a laptop
  * Your laptop has Java 6 or 7 installed
- * Mac OS or Linux
+ * Mac OS or Linux (Windows is not supported)
 
 ## Launch Tachyon
 

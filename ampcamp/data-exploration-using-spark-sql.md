@@ -31,16 +31,19 @@ Once you have launched the Spark shell, the next step is to create a SQLContext.
 <pre class="prettyprint lang-bsh">
 scala> val sqlContext = new org.apache.spark.sql.SQLContext(sc)
 sqlContext: org.apache.spark.sql.SQLContext = org.apache.spark.sql.SQLContext@52955821
+scala> sqlContext.setConf("spark.sql.parquet.binaryAsString", "true")
 </pre>
 </div>
 <div data-lang="python" markdown="1">
 <pre class="prettyprint lang-bsh">
 from pyspark.sql import SQLContext
-sqlCtx = SQLContext(sc)</pre>
+sqlCtx = SQLContext(sc)
+sqlCtx.sql("SET spark.sql.parquet.binaryAsString=true")
+</pre>
 </div>
 </div>
 
-Now we can load a set of data in that is stored in the Parquet format.  Parquet is a self-describing columnar format.  Since it is self-describing, Spark SQL will automatically be able to infer all of the column names and their datatypes.  For this exercise we have provided a set of data that contains all of the pages on wikipedia that contain the word "berkeley".  You can load this data using the parquetFile method provided by the SQLContext.
+Now we can load a set of data in that is stored in the Parquet format.  Parquet is a self-describing columnar format.  Since it is self-describing, Spark SQL will automatically be able to infer all of the column names and their datatypes. The `spark.sql.parquet.binaryAsString` flag tells Spark SQL to treat binary-encoded data as strings ([more doc](http://spark.apache.org/docs/1.1.0/sql-programming-guide.html#configuration)). For this exercise we have provided a set of data that contains all of the pages on wikipedia that contain the word "berkeley".  You can load this data using the parquetFile method provided by the SQLContext.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
