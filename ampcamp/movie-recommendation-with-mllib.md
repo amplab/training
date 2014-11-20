@@ -15,6 +15,12 @@ quick testing of your code, you may want to use a smaller dataset under
 `data/movielens/medium`, which contains 1 million ratings from 6000 users on 4000
 movies.
 
+## Prerequisite
+Please follow the instructions on the <a href="getting-started.html">Getting Started</a>
+page to download and unpack the `training-downloads.zip` file.
+
+Now you're good to go!
+
 ##Data set
 
 We will use two files from this MovieLens dataset: "`ratings.dat`" and

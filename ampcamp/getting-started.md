@@ -9,7 +9,12 @@ skip-chapter-toc: true
 
 # Getting Started With Your USB Stick
 
-You should have received a USB stick containing training material.  If you do not have one, please ask a TA.
+#### On-site Participants
+You should have received a USB stick containing the training materials.  If you do not have one, please ask a TA.
+
+#### Remote Participants
+Please download the training materials from
+<a href="http://d12yw77jruda6f.cloudfront.net/ampcamp5-usb.zip">here</a>.
 
 ## Quick Start
 
@@ -61,8 +66,9 @@ Please ask a TA if you are having trouble getting the simple application to buil
 Some of the exercises require you to download addtional project templates and/or data. The
 following instructions explain how to incorporate this material with the content of the USB drive.
 
-1. Download the following zip file: <a
-   href="http://www.cs.berkeley.edu/~jey/ampcamp5/training-downloads.zip">training-downloads.zip</a>.
+1. Download the following zip file:
+    - Link for on-site participants: <a href="http://d12yw77jruda6f.cloudfront.net/training-downloads.zip">training-downloads.zip</a>
+    - Link for remote participants: <a href="http://d12yw77jruda6f.cloudfront.net/training-downloads.zip">training-downloads.zip</a>
 
 2. Unzip the `training-downloads.zip` file to your [usb root directory].
 

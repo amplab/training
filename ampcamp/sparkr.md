@@ -36,16 +36,8 @@ R CMD javareconf -e
 </pre>
 
 ### Getting the dataset
-<pre class="prettyprint lang-bsh">
-# first, cd into the base directory for the tutorial 
-$ mkdir data
-$ cd data
-# download the data (49MB compressed; 140MB uncompressed) from the following URL
-$ wget -c http://cs.berkeley.edu/~shivaram/ampcamp-data/tsv_wiki.zip
-# unzip the archive
-$ unzip tsv_wiki.zip
-$ cd -
-</pre>
+Please follow the instructions on the <a href="getting-started.html">Getting Started</a>
+page to download and unpack the `training-downloads.zip` file.
 
 Now you're good to go!
 

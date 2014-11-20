@@ -12,14 +12,8 @@ In this chapter, we will first use the Spark shell to interactively explore the 
 Then, we will give a brief introduction to writing standalone Spark programs. 
 
 ## Prerequisite: getting the dataset
-<pre class="prettyprint lang-bsh">
-# first, cd into the root directory of the USB drive
-$ mkdir data/pagecounts && cd data/pagecounts
-# download two text files from S3
-$ wget -c http://s3.amazonaws.com/ampcamp-data/wikistats_20090505_restricted-01/part-00001
-$ wget -c http://s3.amazonaws.com/ampcamp-data/wikistats_20090505_restricted-07/part-00053
-# you're good to go!
-</pre>
+Please follow the instructions on the <a href="getting-started.html">Getting Started</a>
+page to download and unpack the `training-downloads.zip` file.
 
 ## Interactive Analysis
 
