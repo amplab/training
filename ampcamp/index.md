@@ -138,3 +138,9 @@ Note: Please follow the setup instructions at the [Getting Started](getting-star
 | [SparkR](sparkr.html)                                            | Interactive Data Analytics using Spark in R             | Short    | [Project Page](http://amplab-extras.github.io/SparkR-pkg/); [Github](https://github.com/amplab-extras/SparkR-pkg) |
 | [ADAM](genome-analysis-with-adam.html)                           | Genome analysis with ADAM                               | Medium   | |
 -->
+
+## IRC Chat Room
+A chat room is available for participants to connect with each other and get realtime help with exercises.
+The room can be joined <a href="http://webchat.freenode.net/?randomnick=1&channels=%23ampcamp&prompt=1">here</a>
+or by using an IRC client to connect to the #ampcamp channel on the FreeNode
+(irc.freenode.net) network.

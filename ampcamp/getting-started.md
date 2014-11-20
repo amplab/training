@@ -12,6 +12,9 @@ skip-chapter-toc: true
 #### On-site Participants
 You should have received a USB stick containing the training materials.  If you do not have one, please ask a TA.
 
+If you cannot use the USB stick or would prefer to download a zip file with the USB stick's contents,
+please click <a href="http://10.225.217.159/ampcamp5-usb.zip">here</a>.
+
 #### Remote Participants
 Please download the USB stick's contents from
 <a href="http://d12yw77jruda6f.cloudfront.net/ampcamp5-usb.zip">here</a>.
@@ -67,7 +70,7 @@ Some of the exercises require you to download addtional project templates and/or
 following instructions explain how to incorporate this material with the content of the USB drive.
 
 1. Download the following zip file:
-    - Link for on-site participants: <a href="http://d12yw77jruda6f.cloudfront.net/training-downloads.zip">training-downloads.zip</a>
+    - Link for on-site participants: <a href="http://10.225.217.159/training-downloads.zip">training-downloads.zip</a>
     - Link for remote participants: <a href="http://d12yw77jruda6f.cloudfront.net/training-downloads.zip">training-downloads.zip</a>
 
 2. Unzip the `training-downloads.zip` file to your [usb root directory].
@@ -93,6 +96,3 @@ You'll find the following contents in the USB drive (this info is taken from the
      * ivy/cache - a pre-populated cache, pointed to via conf/sbtopts
      * bin - removed and all files moved into sbt's home directory so users can run sbt/sbt similair to working with spark's source code
  * **simple-app** - a simple example app to build (based on the Spark quick start docs)
- * **streaming** - project template for Spark Streaming examples
- * **machine-learning** - project template for Machine Learning examples
- * **website** - documentation for the examples
