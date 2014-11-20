@@ -13,7 +13,7 @@ skip-chapter-toc: true
 You should have received a USB stick containing the training materials.  If you do not have one, please ask a TA.
 
 #### Remote Participants
-Please download the training materials from
+Please download the USB stick's contents from
 <a href="http://d12yw77jruda6f.cloudfront.net/ampcamp5-usb.zip">here</a>.
 
 ## Quick Start
