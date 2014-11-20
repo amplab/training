@@ -17,7 +17,7 @@ leave this exercise convinced that it will be useful for other tasks.
 Before getting to the details of the classification task, let's quickly review
 the goals of the project and the underlying principles of the framework.
 
-##Getting Comfortable with the Pipelines Framework
+##The Pipelines Framework
 
 The goal of the pipelines project is to provide a framework for feature
 extraction and machine learning that encourages modular design and the
@@ -60,6 +60,88 @@ repository is still a work-in-progress, but we're looking forward to sharing
 it with the world when it's ready.
 
 
+##Pipelines API
+
+*Note this API can and will change before its public release - this is just a preview of the ideas behind it.*
+
+The core of the pipelines API is very simple, and is inspired heavily by
+type-safe functional programming. Here's the definition of a PipelineNode
+and a Pipeline:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+object Pipelines {
+  type PipelineNode[Input, Output] = (Input => Output)
+
+  type Pipeline[Input, Output] = ((Input) => Output)
+}
+~~~
+</div>
+</div>
+
+This might not make sense if you're new to Scala - but what this is saying is
+that a "PipelineNode" has the same interface as a function from an input of
+type "Input" to output of type "Output". That is - a pipeline node is *just* a
+function.
+
+To define a new *node*, you simply have to write a class that implements this
+interface. Namely it has to have a method called `apply(x: Input): Output`. In
+Scala, these "Input" and "Output" types are abstract.
+
+Let's take a look at an example node:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+case object Vectorizer 
+  extends PipelineNode[RDD[Image], RDD[Vector]]] 
+  with Serializable {
+  override def apply(in: RDD[Image]): RDD[Vector] = {
+    in.map(_.toVector)
+  }
+}
+~~~
+</div>
+</div>
+
+This node simply takes an `RDD[Image]` as input, and produces an
+`RDD[Vector]` as output. It does so by calling "_.toVector"
+on each element of its input. This is obviously a very simple example.
+
+What doing things this way buys us is the ability to use some features of the
+Scala language to do things like compose pipelines using built in syntax.
+
+For example - if I want to create a pipeline that consists of two nodes,
+a vectorizer and a node that adds a "1" to the beginning of each vector,
+I could just write:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val pipeline = Vectorizer andThen InterceptAdder //pipeline takes an RDD[Image] and returns an RDD[Vector] with 1 added to the front.
+
+//To apply it to a dataset, I could just write:
+val x: RDD[Image] = sc.objectFile(someFileName)
+val result = pipeline.apply(x) //Result is an RDD[Vector]
+//or equivalently
+val result = pipeline(x) 
+~~~
+</div>
+</div>
+
+Note that this only works because the `InterceptAdder` node expects Vectors as
+input.
+
+Since the pipeline operations are really just transformations on RDD's, they
+automatically get scheduled and executed efficiently by Spark. In the example
+above, for instance, the pipeline won't even execute until an action is
+performed on the result. Additionally, the map tasks between the two nodes will
+automatically be pushed into a single task and executed together. 
+
+In a moment, we'll see how these simple ideas let us perform complicated
+machine learning tasks on distributed datasets.
+
 ##Data set
 
 We'll be using a dataset of 60,000 images in 10 classes called
@@ -83,13 +165,32 @@ processing nodes in our pipelines will expect.
 
 ##Linear Classification
 
+There are lots of different classification models out there - SVMs, Naive
+Bayes, Decision Trees, Logistic Regression.
+[MLlib](http://spark.apache.org/mllib) supports many of them. But today, we're
+going to focus on *one* model family - specifically Linear Classification, and
+instead see how proper *featurization* affects this choice of model.
+
 Linear classifiers are the bread-and-butter of machine learning models. If
 you've heard of linear regression - the concept of linear classification should
-be pretty easy to understand.
+be pretty easy to understand. 
 
-*TODO* - Put in an explanation of Ax = b and say that we want to solve for x.
-Explain what's in the matrix. Picture of line fitting, and maybe show how it's
-not that different from an SVM.
+<p style="text-align: center;">
+  <img src="img/linear-model.png"
+       title="Linear Classification"
+       alt="Linear Classification"
+       width="75%" />
+  <!-- Images are downsized intentionally to improve quality on retina displays -->
+</p>
+
+Mathematically, we set up our "features" as a data matrix, `A`, of size (n x d)
+where n is the number of training examples and d, the number of features from
+some featurizer. The training labels, `b` are then a data matrix of size (n x
+k) where each element is either `-1.0` if the training example belongs to a
+particular class, or `+1.0` otherwise. Linear classifier learns a model, `x`,
+which minimizes the squared loss `|(Ax - b)^2|`. To control overfitting we'll
+use a technique called regularization which adds a penalty for models that
+aren't sparse.
 
 There are several ways to solve linear models - including approximate methods
 (e.g. gradient descent, coordinate descent) and exact methods (e.g. the normal
@@ -97,19 +198,20 @@ equations or QR decomposition).
 
 As part of the pipelines project, we've developed several distributed solvers
 for linear systems like this. For you - this means that you don't have to worry
-about the details of how each of these work, and you can just call one to solve
-for your model. We'll see how this works in a little bit.
+about the details of how each of these work, and you can just call one to estimate
+your model. We'll see how this works in a little bit.
 
 ##Setup
 
-We will be using a standalone scala project as a template for these exercises.
+We will be using a standalone Scala project as a template for these exercises.
 
 <div class="codetabs">
 
 <div data-lang="scala">
 <div class="prettyprint" style="margin-bottom:10px">
 <ul style="margin-bottom:0px">
-In the training USB drive, this has been setup in <code>pipelines/scala/</code>.<br>
+Unzip the file you downloaded for the pipelines project and navigate to the directory "ampcamp-pipelines"
+
 You should find the following items in the directory:
 <li><code>build.sbt</code>: SBT project file</li>
 <li><code>LinearPixels.scala</code>: The simplest pipeline you're going to train and run.</li>
@@ -117,6 +219,8 @@ You should find the following items in the directory:
 <li><code>RandomPatchCifar.scala</code>: A reference for the better pipeline you're going to run.</li>
 <li><code>data</code>: Directory containing "cifar_train.bin" and "cifar_test.bin"</li>
 <li><code>src</code>: Directory containing the rest of the library.</li>
+<li><code>saved_pipelines</code>: Directory containing some pre-built pipelines.</li>
+<li><code>target</code>: Directory containing the packaged jar of this repository.</li>
 </ul>
 </div>
 </div>
@@ -128,9 +232,8 @@ As we've mentioned, we've provided data loaders for the CIFAR dataset.
 The first, simplest pipeline we'll create attempts to use the pixel values
 of the images to train an SVM model.
 
-Let's take a look at the code for this pipeline: Let's first take a closer look
-at our template code in a text editor, then we'll start adding code to the
-template. Locate the `LinearPixels` class and open it with a text editor.
+Let's take a look at the code for this pipeline: Locate the `LinearPixels`
+class and open it with a text editor.
 
 <div class="codetabs">
 
@@ -198,19 +301,24 @@ object LinearPixels {
 </div>
 </div>
 
-This pipeline uses five nodes - a data loader, a label extractor,
-an image extractor, a node to take the image pixels and flatten them out into
-a vector for input to our linear solver, and a linear solver to train a model
-on these pixels.
+This pipeline uses six nodes - a data loader, a label extractor, an image
+extractor, a grayscale converter, a node to take the image pixels and flatten
+them out into a vector for input to our linear solver, and a linear solver to
+train a model on these pixels.
 
-We've already built the pipeline for you, so try running it on the input data like so:
+We call the collection of `ImageExtractor andThen GrayScaler andThen
+Vectorizer` the featurizer - because it is what takes us from raw pixels to
+input suitable for our linear classifier.
+
+We've already built the code for you, so you can call this pipeline like so.
+like so:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-usb/$ cd pipelines/scala
+usb/$ cd ampcamp-pipelines
 
-scala/$ SPARK_MEM=8g bash run-main.sh pipelines.LinearPixels local[2] data/cifar_train.bin data/cifar_test.bin
+ampcamp-pipelines/$ SPARK_MEM=4g bash run-main.sh pipelines.LinearPixels local[2] data/cifar_train.bin data/cifar_test.bin
 </pre>
 </div>
 </div>
@@ -224,6 +332,21 @@ What does this mean? It means that on the test set, our simple pipeline
 predicts the correct class ~25% of the time. Remember, there are 10 classes in
 our dataset, and these classes are pretty evenly balanced, so while this model
 is doing better than picking a class at random, it's still not great.
+
+Let's visually verify that this isn't so great. The program has generated a
+page of example classifications from the test set for you in the directory
+`linear_pixels`. From the `ampcamp-pipelines` directory, open
+`linear_pixels/index.html` in your web browser.
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<pre class="prettyprint lang-bsh">
+#On Windows - change the following command to open in your browser of choice.
+ampcamp-pipelines/$ open linear_pixels/index.html
+</pre>
+</div>
+</div>
+
 
 ##A Better Pipeline
 
@@ -254,9 +377,7 @@ Let's try running this code and seeing what it gives us. At the console
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-~~~
-    scala/$ SPARK_MEM=8g bash run-main.sh pipelines.RandomCifar local[2] data/cifar_train.bin data/cifar_test.bin 200 10 0.2
-~~~
+    ampcamp-pipelines/$ SPARK_MEM=8g bash run-main.sh pipelines.RandomCifar local[2] data/cifar_train.bin data/cifar_test.bin 200 10 0.2
 </pre>
 </div>
 </div>
@@ -266,17 +387,36 @@ visual vocabulary to use (200), the regularization parameter (10), and the
 fraction of the input data to train with. This last number is set to 20% here
 in the interest of time.
 
-While that's running - let's explain what's going on. In this example, we're
-using exactly the same kind of model for our image classifier - a linear model.
-Instead, all the hard work goes into "featurizing" our data.
+You can see our featurizer has gotten a bit more complicated. In particular,
+we've created a "filterArray" which is a bank of filters to be applied to the
+input images. These filters have been generated *randomly* from a Gaussian
+distribution. The filters represent our "visual vocabulary."
 
-The main featurization steps - convolution, rectification, pooling, and
-normalization - can all be explained visually. ...
+We then apply each of these 200 filters to the input image, and *pool* the
+results into image quadrants. Different filters will react differently to each
+filter in our "visual vocabulary." We then add a bias term, and use this term
+as well as the pooled results as arguments to our linear classifier.
 
-After a few minutes, your code will run and give you an answer.
+After a few minutes, your code will run and give you an answer similar to this:
 
     Training error is: 36.235596, Test error is: 42.88
     
+Again, now let's look at the result visually, this time, the files are in the
+`random_cifar` directory.
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<pre class="prettyprint lang-bsh">
+#On Windows - change the following command to open in your browser of choice.
+ampcamp-pipelines/$ open random_cifar/index.html
+</pre>
+</div>
+</div>
+
+###Advanced Exercise
+
+If you have time, try changing around of of the parameters to the pipeline.
+For example, try a different regularization value or number of filters (try 100 or 300).
 
 
 ##An Advanced Pipeline
@@ -287,8 +427,6 @@ the category right leaves something to be desired.
 
 The last key to this puzzle is using better "words" in our visual vocabulary.
 For that, we'll use patch extraction and whitening. 
-
-*TODO* - Train a big one.
 
 
 ##Loading a pre-trained pipeline from disk.
@@ -334,18 +472,18 @@ miss important messages. In this case, you're more sensitive to false negatives
 e-mails showing up in your inbox).
 
 So, to diagnose whether a spam prediction model is any good, we might look at
-its precision/recall table.
+its contingency table.
 
-*TODO* put down a sample P/R table here.
+<p style="text-align: center;">
+  <img src="img/spam-ham.png"
+       title="Contingency Table"
+       alt="Contingency Table"
+       width="50%" />
+  <!-- Images are downsized intentionally to improve quality on retina displays -->
+</p>
 
-##Confusion Matrix
-
-A confusion matrix is the multiclass analog of a simple precision/recall table.
-It tells us, when we misclassify things, where do they go?
-
-*TODO* code to generate confusion matrix.
-Generate a confusion matrix here.
-
+We can generalize this contingency table to the multiclass setting, and we'll
+see an example of that in a moment.
 
 ##Evaluate a Pipeline
 
@@ -355,19 +493,59 @@ the following:
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-scala/$ SPARK_MEM=8g bash run-main.sh pipelines.EvaluateCifarPipeline local[2] saved_pipelines/randomPatchCifar.pipe data/cifar_test.bin
+ampcamp-pipelines/$ SPARK_MEM=4g bash run-main.sh pipelines.EvaluateCifarPipeline local[2] saved_pipelines/randomPatchCifar.pipe data/cifar_test.bin
+
+<div class="solution">
+	plane	car	bird	cat	deer	dog	frog	horse	ship	truck
+plane	    741	     26	     79	     24	     29	     18	      3	     22	     73	     33
+car	     26	    791	     20	     16	      8	     13	      6	     10	     44	     64
+bird	     37	     12	    511	     62	     56	     64	     50	     42	     13	     10
+cat	     12	     16	     66	    456	     50	    143	     42	     29	     12	      7
+deer	     19	      8	     81	     45	    582	     42	     47	     43	      8	      5
+dog	      5	      5	     71	    187	     29	    608	     19	     59	      5	     10
+frog	     18	     17	     94	    103	     99	     39	    807	     17	      6	     15
+horse	     22	      8	     46	     47	     97	     42	     11	    749	      4	     11
+ship	     80	     38	     17	     26	     20	     14	     10	      7	    801	     22
+truck	     40	     79	     15	     34	     30	     17	      5	     22	     34	    823
+
+Classification error on data/cifar_test.bin is: 31.31
+</div>
 </pre>
 </div>
 </div>
 
-You'll see some output that includes accuracy numbers along with a confusion matrix.
+Part of your output should look like the "solution" above? The rows of this
+table represent predictions of the model, while the columns are the true
+classes. An entry (r,c) represents the number of times row r was predicted in
+the test set and its actual class is c. Entries on the diagonal are good, and
+large entries off the diagonal are points where the model got confused.
 
-Here, we can see that the model most frequently confuses birds with airplanes. Are you surprised?
+What's the highest non-diagonal entry? Does it make sense to you?
+
+Finally, take a look at the `patch_cifar` visual output. Do you think the model
+has gotten better?
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<pre class="prettyprint lang-bsh">
+#On Windows - change the following command to open in your browser of choice.
+ampcamp-pipelines/$ open patch_cifar/index.html
+</pre>
+</div>
+</div>
+
+###Advanced Exercise 2 
+
+Try actually changing a pipeline and recompiling it. You
+can modify the pipelines in any text editor or IDE that supports scala, and
+recompile with "sbt/sbt assembly." Try training a pipeline without adding an
+intercept or normalizing and see how that affects statistical performance.
+
 
 ##Concluding Remarks
 
 You've now built and evaluated three sample pipelines for image classification
-on spark. We hope we've convinced you that this is a framework that's easy to
+on Spark. We hope we've convinced you that this is a framework that's easy to
 use and general purpose enough to capture your machine learning workflow. The
 pipelines project is still in its infancy, so we're happy to receive feedback
 now that you've used it.
