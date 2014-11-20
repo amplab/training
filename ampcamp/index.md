@@ -114,7 +114,7 @@ You are welcome to mix and match languages depending on your preferences and int
 The modules we will cover at the AMPCamp training are listed below.
 These can be done _**in any order**_ according to your interests, though we recommend that new users start with Spark.
 
-Note: Please follow the setup instructions at the [Getting Started](getting-started.html) before any of the exercises.
+Note: Please follow the setup instructions at the [Getting Started](getting-started.html) page before any of the exercises.
 
 ### Day 1
 
