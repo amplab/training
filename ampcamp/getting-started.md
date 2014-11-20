@@ -94,5 +94,5 @@ You'll find the following contents in the USB drive (this info is taken from the
      * conf/sbtopts - modified to point to embeded ivy cache
      * conf/sbtconfig.txt - modified to point to embeded ivy cache for [Windows]
      * ivy/cache - a pre-populated cache, pointed to via conf/sbtopts
-     * bin - removed and all files moved into sbt's home directory so users can run sbt/sbt similair to working with spark's source code
+     * bin - removed and all files moved into sbt's home directory so users can run sbt/sbt similar to working with spark's source code
  * **simple-app** - a simple example app to build (based on the Spark quick start docs)

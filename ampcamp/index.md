@@ -91,9 +91,9 @@ If you would like a quick primer on Scala, check out the following doc in the ap
   <td class="no">no</td>
 </tr><tr>
   <td>SparkR</td>
-  <td class="yes">R only</td>
-  <td class="yes">R only</td>
-  <td class="yes">R only</td>
+  <td class="no">R only</td>
+  <td class="no">R only</td>
+  <td class="no">R only</td>
 </tr><tr>
   <td>ADAM</td>
   <td class="no">no</td>
