@@ -8,8 +8,10 @@ navigation:
 skip-chapter-toc: true
 ---
 
-First, download ADAM's artifacts from [this link](http://goo.gl/JADQjN) to your `usb` directory and
-unzip it. To run ADAM, you'll need to set the path to your Spark installation:
+First, download ADAM's artifacts from [this link](https://s3.amazonaws.com/bdgenomics-test/adam.zip)
+to your `usb` directory and unzip it. *NOTE:* ADAM is not designed for Windows and requires the `bash`
+shell to be installed. We don't recommend trying ADAM on Windows unless you're feeling very adventurous.
+To run ADAM, you'll need to set the path to your Spark installation:
 
 <div class="codetabs">
 <pre class="prettyprint lang-bsh">
