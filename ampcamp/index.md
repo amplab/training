@@ -130,7 +130,6 @@ Note: Please follow the setup instructions at the [Getting Started](getting-star
 | [GraphX](graph-analytics-with-graphx.html)                       | Explore graph-structured data and graph algorithms      | Long     | [Programming Guide](http://spark.apache.org/docs/latest/sql-programming-guide.html)                               |
 
 
-<!--
 ### Day 2
 
 {:.bordered}
@@ -139,7 +138,6 @@ Note: Please follow the setup instructions at the [Getting Started](getting-star
 | [Pipelines](image-classification-with-pipelines.html)            | Image classification with pipelines                     | Medium   | |
 | [SparkR](sparkr.html)                                            | Interactive Data Analytics using Spark in R             | Short    | [Project Page](http://amplab-extras.github.io/SparkR-pkg/); [Github](https://github.com/amplab-extras/SparkR-pkg) |
 | [ADAM](genome-analysis-with-adam.html)                           | Genome analysis with ADAM                               | Medium   | |
--->
 
 ## IRC Chat Room
 A chat room is available for participants to connect with each other and get realtime help with exercises.
