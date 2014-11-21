@@ -39,7 +39,7 @@ The pipelines framework you'll be using is based on a few pretty simple principl
 1. A *pipeline* is made of *nodes* which have an expected input and output type. 
 2. You can only fit together nodes if the output type of the first node matches the input type of the second node.
 3. Pipelines themselves can be thought of as "nodes" and can thus be composed to form new pipelines.
-4. Wherever possible, nodes should take RDDs as input and output. This encourages node developers to think in data parallel terms.
+4. Wherever possible, nodes should take RDDs as input and produce them as output. This encourages node developers to think in data parallel terms.
 
 This type-safe approach allows us to check that a pipeline will have a
 reasonable chance of working at compile-time, leading to fewer issues when you
@@ -187,10 +187,10 @@ Mathematically, we set up our "features" as a data matrix, `A`, of size (n x d)
 where n is the number of training examples and d, the number of features from
 some featurizer. The training labels, `b` are then a data matrix of size (n x
 k) where each element is either `-1.0` if the training example belongs to a
-particular class, or `+1.0` otherwise. Linear classifier learns a model, `x`,
-which minimizes the squared loss `|(Ax - b)^2|`. To control overfitting we'll
-use a technique called regularization which adds a penalty for models that
-aren't sparse.
+particular class, or `+1.0` otherwise. A linear classifier learns a model, `x`,
+of size (d x k) which minimizes the squared loss `|(Ax - b)^2|`. To control
+overfitting we'll use a technique called regularization which adds a penalty
+for models that aren't sparse.
 
 There are several ways to solve linear models - including approximate methods
 (e.g. gradient descent, coordinate descent) and exact methods (e.g. the normal
@@ -215,8 +215,8 @@ Unzip the file you downloaded for the pipelines project and navigate to the dire
 You should find the following items in the directory:
 <li><code>build.sbt</code>: SBT project file</li>
 <li><code>LinearPixels.scala</code>: The simplest pipeline you're going to train and run.</li>
-<li><code>RandomCifar.scala</code>: A better pipeline you're going to train and run.</li>
-<li><code>RandomPatchCifar.scala</code>: A reference for the better pipeline you're going to run.</li>
+<li><code>RandomVocab.scala</code>: A better pipeline you're going to train and run.</li>
+<li><code>PatchVocab.scala</code>: A reference for the better pipeline you're going to run.</li>
 <li><code>data</code>: Directory containing "cifar_train.bin" and "cifar_test.bin"</li>
 <li><code>src</code>: Directory containing the rest of the library.</li>
 <li><code>saved_pipelines</code>: Directory containing some pre-built pipelines.</li>
@@ -225,6 +225,20 @@ You should find the following items in the directory:
 </div>
 </div>
 </div>
+
+**IMPORTANT** Before going any further, make sure you have the `SPARK_HOME`
+environment variable set in the terminal you're using to run the pipelines code.
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<pre class="prettyprint lang-bsh">
+#Make sure you do this in the root of the USB directory.
+usb/$ export SPARK_HOME=[usb root directory]/spark
+#On windows, use "set SPARK_HOME=[usb root directory]\spark"
+</pre>
+</div>
+</div>
+
 
 ##A Simple Pipeline
 
@@ -258,9 +272,10 @@ import utils.Stats
 
 object LinearPixels {
   def main(args: Array[String]) = {
-    val trainFile = args(1)
-    val testFile = args(2)
-    val sc = new SparkContext(args(0), "LinearPixels")
+    val trainFile = args(0)
+    val testFile = args(1)
+    val conf = new SparkConf().setAppName("LinearPixels")
+    val sc = new SparkContext(conf)
     val numClasses = 10
 
     //Define a node to load up our data.
@@ -293,7 +308,9 @@ object LinearPixels {
 
     val testError = Stats.classificationError(predictionPipeline(testData), testLabels)
 
+    EvaluateCifarPipeline.evaluatePipeline(testData, predictionPipeline, "linear_pixels")
     println(s"Training error is: $trainError, Test error is: $testError")
+
   }
 
 }
@@ -318,7 +335,8 @@ like so:
 <pre class="prettyprint lang-bsh">
 usb/$ cd ampcamp-pipelines
 
-ampcamp-pipelines/$ SPARK_MEM=4g bash run-main.sh pipelines.LinearPixels local[2] data/cifar_train.bin data/cifar_test.bin
+#If you use windows, change the forward slashes (/) below to backslash (\).
+ampcamp-pipelines/$ bin/run-pipeline.sh pipelines.LinearPixels data/cifar_train.bin data/cifar_test.bin
 </pre>
 </div>
 </div>
@@ -351,9 +369,9 @@ ampcamp-pipelines/$ open linear_pixels/index.html
 ##A Better Pipeline
 
 So how do we do better than 75% error? The secret is in applying the concept of
-a visual vocabulary which you heard about earlier. Switch your editor to the file
-`RandomCifar.scala`. The main differences you'll see is in how the featurizer is
-defined:
+a visual vocabulary which you heard about in the pipelines talk earlier. Switch
+your editor to the file `RandomVocab.scala`. The main differences you'll see is
+in how the featurizer is defined:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -377,7 +395,8 @@ Let's try running this code and seeing what it gives us. At the console
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-    ampcamp-pipelines/$ SPARK_MEM=8g bash run-main.sh pipelines.RandomCifar local[2] data/cifar_train.bin data/cifar_test.bin 200 10 0.2
+    #If you use windows, change the forward slashes (/) below to backslash (\).
+    ampcamp-pipelines/$ bin/run-pipeline.sh pipelines.RandomVocab data/cifar_train.bin data/cifar_test.bin 200 10 0.2
 </pre>
 </div>
 </div>
@@ -408,15 +427,16 @@ Again, now let's look at the result visually, this time, the files are in the
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
 #On Windows - change the following command to open in your browser of choice.
-ampcamp-pipelines/$ open random_cifar/index.html
+ampcamp-pipelines/$ open random_vocab/index.html
 </pre>
 </div>
 </div>
 
 ###Advanced Exercise
 
-If you have time, try changing around of of the parameters to the pipeline.
-For example, try a different regularization value or number of filters (try 100 or 300).
+If you have time, try changing around of of the parameters to the pipeline. For
+example, try a different regularization value or number of filters (try 100 or
+300). How does the accuracy change?
 
 
 ##An Advanced Pipeline
@@ -426,10 +446,47 @@ pipeline did work better than the simple pipeline on our data sample, getting
 the category right leaves something to be desired.
 
 The last key to this puzzle is using better "words" in our visual vocabulary.
-For that, we'll use patch extraction and whitening. 
+For that, we'll use patch extraction and whitening.
+
+Load up `PatchVocab.scala` to see what we mean.
+
+Notice that the only real difference between this pipeline and the last one is
+the following section has been added. 
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+    val patchExtractor = ImageExtractor
+      .andThen(new Windower(patchSteps,patchSize))
+      .andThen(new ImageVectorizer)
+      .andThen(new Sampler(whitenerSize))
+
+    val (filters, whitener) = {
+        val baseFilters = patchExtractor(trainData)
+        val baseFilterMat = Stats.normalizeRows(new MatrixType(baseFilters), 10.0)
+        val whitener = new ZCAWhitener(baseFilterMat)
+
+        //Normalize them.
+        val sampleFilters = new MatrixType(Random.shuffle(baseFilterMat.toArray2.toList).toArray.slice(0, numFilters))
+        val unnormFilters = whitener(sampleFilters)
+        val twoNorms = MatrixFunctions.pow(MatrixFunctions.pow(unnormFilters, 2.0).rowSums, 0.5)
+
+        (((unnormFilters divColumnVector (twoNorms.addi(1e-10))) mmul (whitener.whitener.transpose)).toArray2, whitener)
+    }
+~~~
+</div>
+</div>
+
+Instead of being filters generated by the function `FloatMatrix.randn()`, our
+filters are *sampled from the data.*
+
+This is a powerful idea, because it means that instead of matching our images
+to random noise (think static on a TV screen), we're matching images to how
+much they look like things we recognize (like Mickey Mouse's ear or the logo of
+the tenacious Philadelphia Eagles.)
 
 
-##Loading a pre-trained pipeline from disk.
+##Loading A Pre-Trained Pipeline
 
 Due to the computational requirements required to featurize the training data
 and train the model on your machine in the time allotted, we've instead
@@ -460,6 +517,10 @@ val predictions = predictionPipeline(data)
 
 As you'll see in a minute, we've also written a simple script to load up a
 trained pipeline, evaluate it on a test dataset, and print out accuracy.
+
+You'll notice that this makes the deployment strategy for pipelines very simple.
+Once you're satisfied with the trained objects - ship them to a model serving
+service like Velox, and you're good to go. This is by design.
 
 ##Pipeline Evaluation
 
@@ -493,9 +554,11 @@ the following:
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-ampcamp-pipelines/$ SPARK_MEM=4g bash run-main.sh pipelines.EvaluateCifarPipeline local[2] saved_pipelines/randomPatchCifar.pipe data/cifar_test.bin
-
+#If you use windows, change the forward slashes (/) below to backslash (\).
+ampcamp-pipelines/$ bin/run-pipeline.sh pipelines.EvaluateCifarPipeline saved_pipelines/patchvocab.pipe data/cifar_test.bin 0.2
 <div class="solution">
+#This is the full contingency table for this model - you will have fewer observation in your dataset.  
+  
 	plane	car	bird	cat	deer	dog	frog	horse	ship	truck
 plane	    741	     26	     79	     24	     29	     18	      3	     22	     73	     33
 car	     26	    791	     20	     16	      8	     13	      6	     10	     44	     64
@@ -514,7 +577,7 @@ Classification error on data/cifar_test.bin is: 31.31
 </div>
 </div>
 
-Part of your output should look like the "solution" above? The rows of this
+Part of your output should look like the "solution" above. The rows of this
 table represent predictions of the model, while the columns are the true
 classes. An entry (r,c) represents the number of times row r was predicted in
 the test set and its actual class is c. Entries on the diagonal are good, and
@@ -529,17 +592,42 @@ has gotten better?
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
 #On Windows - change the following command to open in your browser of choice.
-ampcamp-pipelines/$ open patch_cifar/index.html
+ampcamp-pipelines/$ open patch_vocab/index.html
 </pre>
 </div>
 </div>
 
-###Advanced Exercise 2 
+
+#Advanced Exercise 2
+There's another saved pipeline in your "saved_pipelines" folder. This one 
+will take longer to evaluate, but gets even better error. The code that 
+generated this pipeline is in `PatchVocab2.scala`
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<pre class="prettyprint lang-bsh">
+#If you use windows, change the forward slashes (/) below to backslash (\).
+ampcamp-pipelines/$ bin/run-pipeline.sh pipelines.EvaluateCifarPipeline saved_pipelines/patchvocab2.pipe data/cifar_test.bin 0.2
+</pre>
+</div>
+</div>
+
+This pipeline was trained using a relatively large number of sample patches
+(2000) and gives us about 24% test error. In order to train it, we had to make
+a slightly more complicated pipeline that uses a boosting technique called 
+block coordinate descent.
+
+We know that if we scale up to 10,000
+or so patches and pick the right regularization value, we can get to about 15%
+error. This is horizontally scalable and competitive with recent
+state-of-the-art academic results on this dataset.
+
+###Advanced Exercise 3
 
 Try actually changing a pipeline and recompiling it. You
 can modify the pipelines in any text editor or IDE that supports scala, and
 recompile with "sbt/sbt assembly." Try training a pipeline without adding an
-intercept or normalizing and see how that affects statistical performance.
+intercept or whitening and see how that affects statistical performance.
 
 
 ##Concluding Remarks
