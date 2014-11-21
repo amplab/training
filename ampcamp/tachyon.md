@@ -276,7 +276,7 @@ counts.saveAsTextFile("tachyon://localhost:19998/result");
 </div>
 <div data-lang="python" markdown="1">
 ~~~
-file = spark.textFile("tachyon://localhost:19998/LICENSE")
+file = sc.textFile("tachyon://localhost:19998/LICENSE")
 counts = file.flatMap(lambda line: line.split(" ")) \
              .map(lambda word: (word, 1)) \
              .reduceByKey(lambda a, b: a + b)
