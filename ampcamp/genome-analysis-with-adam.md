@@ -8,7 +8,7 @@ navigation:
 skip-chapter-toc: true
 ---
 
-First, download ADAM's artifacts from [this link](http://goo.gl/JADQjN) to your `usb` directory and
+First, download ADAM's artifacts from [this link](http://d12yw77jruda6f.cloudfront.net/adam.zip) to your `usb` directory and
 unzip it. To run ADAM, you'll need to set the path to your Spark installation:
 
 <div class="codetabs">
