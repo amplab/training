@@ -204,6 +204,8 @@ your model. We'll see how this works in a little bit.
 ##Setup
 
 We will be using a standalone Scala project as a template for these exercises.
+You will need to make sure you have the following file downloaded and unpacked 
+on your drive somewhere: [http://goo.gl/qAhM2W](http://goo.gl/qAhM2W)
 
 <div class="codetabs">
 
