@@ -8,8 +8,10 @@ navigation:
 ---
 
 **IMPORTANT** Before you begin reading, you should begin downloading
-[this file](http://d12yw77jruda6f.cloudfront.net/ampcamp-pipelines.zip)
-it will be necessary to complete the exercises.
+the ML Pipelines exercise materials:
+
+  * On-site participants: [ampcamp-pipelines.zip](http://10.225.217.159/ampcamp-pipelines.zip)
+  * Remote participants: [ampcamp-pipelines.zip](http://d12yw77jruda6f.cloudfront.net/ampcamp-pipelines.zip)
 
 In this chapter, we'll use a preview of the ML pipelines framework to build an
 image classifier. The goal of the application we're building is to take an
@@ -210,7 +212,9 @@ your model. We'll see how this works in a little bit.
 We will be using a standalone Scala project as a template for these exercises.
 You will need to make sure you have the following file downloaded and unpacked 
 on your drive somewhere:
-[http://d12yw77jruda6f.cloudfront.net/ampcamp-pipelines.zip](http://d12yw77jruda6f.cloudfront.net/ampcamp-pipelines.zip)
+
+  * On-site participants: [ampcamp-pipelines.zip](http://10.225.217.159/ampcamp-pipelines.zip)
+  * Remote participants: [ampcamp-pipelines.zip](http://d12yw77jruda6f.cloudfront.net/ampcamp-pipelines.zip)
 
 <div class="codetabs">
 
