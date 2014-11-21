@@ -7,6 +7,9 @@ navigation:
   show: true
 ---
 
+**IMPORTANT** Before you begin reading, you should begin downloading [this file](http://files.sparks.public.s3.amazonaws.com/ampcamp-pipelines.zip)
+it will be necessary to complete the exercises.
+
 In this chapter, we'll use a preview of the ML pipelines framework to build an
 image classifier. The goal of the application we're building is to take an
 input image and automatically determine what is in it - e.g. a picture of a
