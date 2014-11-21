@@ -35,6 +35,8 @@ configure Java with R. Exit R, run the following command in a shell and relaunch
 usb/$ R CMD javareconf -e
 </pre>
 
+__NOTE__ (Mac OS Yosemite users): if you encounter issues similar to [this one](http://stackoverflow.com/questions/26489928/cant-load-x11-in-r-after-os-x-yosemite-upgrade), try re-installing XQuartz as one of the answers suggests.
+
 ### Getting the dataset
 Please follow the instructions on the <a href="getting-started.html">Getting Started</a>
 page to download and unpack the `training-downloads.zip` file.
