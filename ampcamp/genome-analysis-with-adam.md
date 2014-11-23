@@ -8,11 +8,9 @@ navigation:
 skip-chapter-toc: true
 ---
 
-First, download ADAM's artifacts  to your `usb` directory and unzip it.
-
-  * On-site participants: [adam.zip](http://10.225.217.159/adam.zip)
-  * Remote participants: [adam.zip](http://d12yw77jruda6f.cloudfront.net/adam.zip)
-
+First, download ADAM's artifacts from [this link](http://d12yw77jruda6f.cloudfront.net/adam.zip)
+to your `usb` directory and unzip it. *NOTE:* ADAM is not designed for Windows and requires the `bash`
+shell to be installed. We don't recommend trying ADAM on Windows unless you're feeling very adventurous.
 To run ADAM, you'll need to set the path to your Spark installation:
 
 <div class="codetabs">
