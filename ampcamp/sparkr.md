@@ -201,5 +201,3 @@ nonEmptyUsernames <- Filter(function(x) { !is.na(x) }, usernames)
 8. You can explore the full RDD API by using the command `help(package=SparkR)`.
 
 This brings us to the end of the SparkR chapter of the tutorial. We encourage you to continue playing with the code and to check out the subscribe to the [SparkR Developers mailing list](https://groups.google.com/forum/#!forum/sparkr-dev) for project updates. Bug reports and feature requests are also welcomed through [JIRA](https://sparkr.atlassian.net/issues/). Finally, you can submit pull requests through [Github](https://github.com/amplab-extras/SparkR-pkg), which contains further documentation and demo programs.
-
-To build high level functions for R uses to call directly instead of low level RDD APIs, SparkR RDD API will be kept private, while DataFrames API will be public for Spark release 1.4 (coming soon). Therefore, operations on RDD in this exercise will been invalid then, while similar operations on DataFrames can be used. At present, you can explore the DataFrames API by downloading the upstream repository of Spark in Github, where SparkR has been integrated into.
