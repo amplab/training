@@ -70,12 +70,12 @@ Once this command finishes, let's compare the size of the two files.
 
 <div class="codetabs">
 <pre class="prettyprint lang-bsh">
-usb/$ ls -alh NA12878.sam
-usb/$ du -h NA12878.adam
+usb/$ ls -alh adam/NA12878.sam
+usb/$ du -h adam/NA12878.adam
 </pre>
 </div>
 
-Here, ADAM is about 50% smaller! While this is a toy example, SAM has a binary, compressed companion
+Here, ADAM is about 25% smaller! While this is a toy example, SAM has a binary, compressed companion
 called BAM. In practice, ADAM is approximately 20% smaller than compressed BAM files. This is due to
 [Parquet](http://parquet.incubator.apache.org). Since Parquet stores each column individually,
 it can apply column specific compression techniques like dictionary encoding for columns with low
@@ -89,6 +89,33 @@ usb/$ java parquet.hadoop.PrintFooter adam/NA12878.adam
 </pre>
 </div>
 
+If this command fails due to classpath errors, you may need to add Hadoop to your classpath.
+
+You should set the `HADOOP_HOME` environment variable to where your Hadoop
+distribution is installed. (Don''t have Hadoop installed? See <a
+href="http://www.cloudera.com/content/cloudera/en/documentation/cdh5/v5-0-0/CDH5-Installation-Guide/CDH5-Installation-Guide.html">the
+CDH 5 installation guide</a>.)
+
+<div class="codetabs">
+<pre class="prettyprint lang-bsh">
+usb/$ export HADOOP_HOME=/usr/lib/hadoop # or your own install path as appropriate.
+usb/$ for j in `ls "$HADOOP_HOME"/*.jar`; do export CLASSPATH="$CLASSPATH:$j"; done
+usb/$ for j in `ls "$HADOOP_HOME"/lib/*.jar`; do export CLASSPATH="$CLASSPATH:$j"; done
+</pre>
+</div>
+
+The output of `PrintFooter` is pretty noisy. Let''s sift through this with some
+shell tools:
+
+<div class="codetabs">
+<pre class="prettyprint lang-bsh">
+usb/$ java parquet.hadoop.PrintFooter adam/NA12878.adam | grep 'of all space' | awk '{ print $3 " "
+$1 }' | sort -n | tac | head -10
+</pre>
+</div>
+
+This prints a list of the top 10 columns sorted by size.
+
 Three columns make up about 75% of the size of the file on disk. These columns store information
 about the _quality_ of each base in the read. While Parquet is able to compress most fields well,
 the quality scores are noisy and compress poorly without using lossy compression.
@@ -101,7 +128,8 @@ run the following command:
 
 <div class="codetabs">
 <pre class="prettyprint lang-bsh">
-usb/$ adam/bin/adam-submit viz adam/NA12878.adam 20
+usb/$ cd adam/ # Launch the web app from the ADAM home dir.
+usb/adam/$ bin/adam-submit viz NA12878.adam 20
 </pre>
 </div>
 
@@ -112,6 +140,15 @@ start of the chromosome, but rather are from the middle. Enter the coordinates `
 into the browser.
 
 We can also visualize the exact reads by navigating to `localhost:8080/reads`.
+
+Don''t forget to return to the demo root directory after finishing this step:
+
+<div class="codetabs">
+<pre class="prettyprint lang-bsh">
+usb/adam/$ cd ..
+usb/$ 
+</pre>
+</div>
 
 ## Interactive Analysis
 
@@ -243,7 +280,8 @@ we've done these two steps correctly, the two coverage measurements will match:
 <div class="codetabs">
 <pre class="prettyprint lang-bsh">
 scala> val pileupsByPosition = pileups.filter(_.getReferenceBase != null).groupBy(_.getPosition).cache()
-pileupsByPosition: org.apache.spark.rdd.RDD[(Long, Iterable[org.bdgenomics.formats.avro.Pileup])] = ShuffledRDD[41] at groupBy at <console>:25
+pileupsByPosition: org.apache.spark.rdd.RDD[(Long, Iterable[org.bdgenomics.formats.avro.Pileup])] =
+ShuffledRDD[41] at groupBy at &lt;console&gt;:25
 
 scala> pileups.count().toDouble / pileupsByPosition.count().toDouble
 res7: Double = 95.58793969849246
@@ -270,7 +308,7 @@ scala> val referencePctByPosition = pileupsByPosition.map(kv => {
      | val (pos, piles) = kv
      | (pos, piles.filter(p => p.getReferenceBase == p.getReadBase).size.toDouble / piles.size.toDouble)
      | })
-referencePctByPosition: org.apache.spark.rdd.RDD[(Long, Double)] = MappedRDD[42] at map at <console>:27
+referencePctByPosition: org.apache.spark.rdd.RDD[(Long, Double)] = MappedRDD[42] at map at &lt;console&gt;:27
 </pre>
 </div>
 
