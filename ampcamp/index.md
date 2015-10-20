@@ -9,7 +9,7 @@ navigation:
 [SparkR](sparkr.html)
 
 # Welcome
-Welcome to the AMP Camp 5 hands-on exercises! These exercises are extended and enhanced from those
+Welcome to the AMP Camp 6 hands-on exercises! These exercises are extended and enhanced from those
 given at previous <a href="http://ampcamp.berkeley.edu">AMP Camp Big Data Bootcamps</a>. They were
 written by volunteer graduate students and postdocs in the
 <a href="https://amplab.cs.berkeley.edu/">UC Berkeley AMPLab</a>. Many of those same graduate

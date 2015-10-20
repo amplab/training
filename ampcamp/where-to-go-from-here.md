@@ -31,9 +31,11 @@ Find examples, documentation, downloads, research papers, news, and more using t
 - [Spark on github](http://github.com/apache/incubator-spark) - The official repository.
 - [Spark user Survey](https://docs.google.com/forms/d/1eMXp4GjcIXglxJe5vYYBzXKVm-6AiYt1KThJwhCjJiY/viewform) - If you use Spark and want to share your feedback with the community leaders.
 - AMP Camp talks (videos and slides) and exercises
-    - [AMP Camp 1](http://ampcamp.berkeley.edu/1)
-    - [AMP Camp 2](http://ampcamp.berkeley.edu/2)
+    - [AMP Camp 5](http://ampcamp.berkeley.edu/5)
+    - [AMP Camp 4](http://ampcamp.berkeley.edu/4)
     - [AMP Camp 3](http://ampcamp.berkeley.edu/3)
+    - [AMP Camp 2](http://ampcamp.berkeley.edu/2)
+    - [AMP Camp 1](http://ampcamp.berkeley.edu/1)
 - Subscribe to the [Spark mailing lists](http://spark.incubator.apache.org/mailing-lists.html)
 - The [Spark issue tracker](https://issues.apache.org/jira/browse/SPARK)
 - Various [Spark related articles on Quora](http://www.quora.com/Spark-Cluster-Computing)
