@@ -1,6 +1,6 @@
 ---
 layout: global
-title: Image Classification with Pipelines
+title: Classification with KeystoneML
 categories: [module]
 navigation:
   weight: 80
@@ -8,13 +8,12 @@ navigation:
 ---
 
 **IMPORTANT** Before you begin reading, you should begin downloading
-the ML Pipelines exercise materials:
+the KeystoneML exercise materials:
 
-  * On-site participants: [ampcamp-pipelines.zip](http://10.225.217.159/ampcamp-pipelines.zip)
-  * Remote participants: [ampcamp-pipelines.zip](http://d12yw77jruda6f.cloudfront.net/ampcamp-pipelines.zip)
+** todo: Insert here
 
-In this chapter, we'll use a preview of the ML pipelines framework to build an
-image classifier. The goal of the application we're building is to take an
+In this chapter, we'll use the KeystoneML framework to build an image classifier and a text classifier.
+The goal of the application we're building is to take an
 input image and automatically determine what is in it - e.g. a picture of a
 bird should return the class "bird." While image classification is one
 application that can be supported with the pipelines framework, we hope you'll
@@ -23,127 +22,226 @@ leave this exercise convinced that it will be useful for other tasks.
 Before getting to the details of the classification task, let's quickly review
 the goals of the project and the underlying principles of the framework.
 
-##The Pipelines Framework
+##The KeystoneML Framework
 
-The goal of the pipelines project is to provide a framework for feature
-extraction and machine learning that encourages modular design and the
-composition of complex learning systems based on simple, reusable, and
-understandable components.
+KeystoneML is a software framework designed to make building and deploying large scale machine learning pipelines easier.
+To assist developers in this task we have created an API that simplifies common tasks and presents a unified interface
+for all stages of the pipeline.
 
-Once built - a pipeline should offer a way of taking input data through a
-potentially complicated pre-processing and prediction process in a way that is
-transparent to end-users. That is, a complete pipeline becomes a black box
-that I can throw data in the form of images, speech, text, click logs, etc.
-into and get out predictions.
+Additionally we've included a rich library of example pipelines and the operators (or *nodes*) that support them. We've also provided a number of utilities that are useful for things like loading training data and computing the classification error of a trained pipeline. The "complete" KeystoneML documentation and codebase can be found at [keystone-ml.org](http://keystone-ml.org/index.html).
 
-While the inner workings of a pipeline should be transparent to end-users -
-they should be highly understandable to the people responsible for producing
-them. Today you'll play the role of a pipeline builder.
+### Design Principles
+KeystoneML is built on several design principles: supporting end-to-end workflows, type safety, horizontal scalability, and composibility.
 
-The pipelines framework you'll be using is based on a few pretty simple principles:
+By focusing on these principles, KeystoneML allows for the construction of complete, robust, large scale pipelines that are constructed from *reusable, understandable parts*.
 
-1. A *pipeline* is made of *nodes* which have an expected input and output type. 
-2. You can only fit together nodes if the output type of the first node matches the input type of the second node.
-3. Pipelines themselves can be thought of as "nodes" and can thus be composed to form new pipelines.
-4. Wherever possible, nodes should take RDDs as input and produce them as output. This encourages node developers to think in data parallel terms.
+We've done our best to adhere to these principles throughout the development of KeystoneML, and we hope that this translates to better applications that use it!
 
-This type-safe approach allows us to check that a pipeline will have a
-reasonable chance of working at compile-time, leading to fewer issues when you
-go to deploy your pipeline on hundreds of nodes.
+### Key API Concepts
+At the center of KeystoneML are a handful of core API concepts that allow us to build complex machine learning pipelines out of simple parts: `pipelines`, `nodes`, `transformers`, and `estimators`.
 
-The codebase you're working with today is a stripped-down preview of the larger
-system we've built in the AMPLab. It provides a handful of nodes that fall into
-the following categories:
+#### Pipelines
+A `Pipeline` is a dataflow that takes some input data and maps it to some output data through a series of `nodes`. 
+By design, these nodes can operate on one data item (for point lookup) or many data items: for batch model evaluation.
 
-1. Image Processing for data preprocessing and feature extraction.
-2. General purpose statistical transformations for things like data normalization and scaling.
-3. Linear solvers for training models.
-
-Additionally, we've provided a number of utilities that are useful for things
-like saving and loading pipelines once they've been trained, computing the
-classification error of a trained pipeline, etc. The "complete" pipelines
-repository is still a work-in-progress, but we're looking forward to sharing
-it with the world when it's ready.
-
-
-##Pipelines API
-
-*Note this API can and will change before its public release - this is just a preview of the ideas behind it.*
-
-The core of the pipelines API is very simple, and is inspired heavily by
-type-safe functional programming. Here's the definition of a PipelineNode
-and a Pipeline:
+In a sense, a pipeline is just a function that is composed of simpler functions. Here's part of the `Pipeline` definition:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-object Pipelines {
-  type PipelineNode[Input, Output] = (Input => Output)
+package workflow
 
-  type Pipeline[Input, Output] = ((Input) => Output)
+trait Pipeline[A, B] {
+  // ...
+  def apply(in: A): B
+  def apply(in: RDD[A]): RDD[B]
+  // ...
 }
 ~~~
 </div>
 </div>
 
-This might not make sense if you're new to Scala - but what this is saying is
-that a "PipelineNode" has the same interface as a function from an input of
-type "Input" to output of type "Output". That is - a pipeline node is *just* a
-function.
+From this we can see that a Pipeline has two type parameters: its input and output types.
+We can also see that it has methods to operate on just a single input data item, or on a batch RDD of data items.
 
-To define a new *node*, you simply have to write a class that implements this
-interface. Namely it has to have a method called `apply(x: Input): Output`. In
-Scala, these "Input" and "Output" types are abstract.
+#### Nodes
+Nodes come in two flavors: `Transformers` and `Estimators`. 
+`Transformers` are nodes which provide a unary function interface for both single items and `RDD` of the same type of item, while an `Estimator` produces a `Transformer` based on some training data.
 
-Let's take a look at an example node:
+##### Transformers
+As already mentioned, a `Transformer` is the simplest type of node, and takes an input, and deterministically *transforms* it into an output. 
+Here's an abridged definition of the `Transformer` class.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-case object Vectorizer 
-  extends PipelineNode[RDD[Image], RDD[Vector]]] 
-  with Serializable {
-  override def apply(in: RDD[Image]): RDD[Vector] = {
-    in.map(_.toVector)
+package workflow
+
+abstract class Transformer[A, B : ClassTag] extends TransformerNode[B] with Pipeline[A, B] {
+  def apply(in: A): B
+  def apply(in: RDD[A]): RDD[B] = in.map(apply)
+  //...
+}
+~~~
+</div>
+</div>
+
+There are a few things going on in this class definition.
+First: A Transformer has two type parameters: its input and output types.
+Second, *every* Transformer extends TransformerNode, which is used internally by Keystone for Pipeline construction and execution. 
+In turn TransformerNode extends Serializable, which means it can be written out and shipped over the network to run on any machine in a Spark cluster.
+Third, it extends Pipeline because every Transformer can be treated as a full pipeline in it's own right.
+Fourth, it is `abstract` because it has an `apply` method which needs to be filled out by the implementor.
+Fifth, it provides a default implementation of `apply(in: RDD[A]): RDD[B]` which simply runs the single-item version on each item in an RDD.
+Developers worried about performance of their transformers on bulk datasets are welcome to override this method, and we do so in KeystoneML with some frequency.
+
+While transformers are unary functions, they themselves may be parameterized by more than just their input. 
+To handle this case, transformers can take additional state as constructor parameters. Here's a simple transformer which will add a fixed vector from any vector it is fed as input. *(Note: we make use of [breeze](https://github.com/scalanlp/breeze) library for all local linear algebra operations.)*
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+import pipelines.Transformer
+import breeze.linalg._
+
+class Adder(vec: Vector[Double]) extends Transformer[Vector[Double], Vector[Double]] {
+  def apply(in: Vector[Double]): Vector[Double] = in + vec
+}
+~~~
+</div>
+</div>
+
+We can then create a new `Adder` and `apply` it to a `Vector` or `RDD[Vector]` just as you'd expect:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val vec = Vector(1.0,2.0,3.0)
+
+val subber = new Adder(vec)
+
+val res = subber(Vector(2.0,3.0,6.0)) //Returns Vector(3.0,5.0,9.0)
+~~~
+</div>
+</div>
+
+If you want to play around with defining new Transformers, you can do so at the scala console by typing `sbt/sbt console` in the KeystoneML project directory.
+
+##### Estimators
+
+`Estimators` are what puts the **ML** in KeystoneML.
+An abridged `Estimator` interface looks like this:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+package workflow
+
+abstract class Estimator[A, B] extends EstimatorNode {
+  protected def fit(data: RDD[A]): Transformer[A, B]
+  // ...
+}
+~~~
+</div>
+</div>
+
+That is `Estimator` takes in training data as an `RDD` to its `fit()` method, and outputs a Transformer. 
+This may sound like abstract functional programming nonsense, but as we'll see this idea is pretty powerful. 
+
+Let's consider a concrete example.
+Suppose you have a big list of vectors and you want to subtract off the mean of each coordinate across all the vectors (and new ones that come from the same distribution).
+You could create an `Estimator` to do this like so:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+import pipelines.Estimator
+
+object ScalerEstimator extends Estimator[Vector[Double], Vector[Double]] {
+  def fit(data: RDD[Vector[Double]]): Adder = {
+    val mean = data.reduce(_ + _)/data.count.toDouble    
+    new Adder(-1.0 * mean)
   }
 }
 ~~~
 </div>
 </div>
 
-This node simply takes an `RDD[Image]` as input, and produces an
-`RDD[Vector]` as output. It does so by calling "_.toVector"
-on each element of its input. This is obviously a very simple example.
+A couple things to notice about this example:
 
-What doing things this way buys us is the ability to use some features of the
-Scala language to do things like compose pipelines using built in syntax.
+1. `fit` takes an RDD, and computes the mean of each coordinate using familiar Spark and breeze operations.
+2. Adder satisfies the `Transformer[Vector[Double],Vector[Double]]` interface so we can return an adder from our `ScalerEstimator` estimator.
+3. By multiplying the mean by `-1.0` we can reuse the `Adder` code we already wrote and it will work as expected.
 
-For example - if I want to create a pipeline that consists of two nodes,
-a vectorizer and a node that adds a "1" to the beginning of each vector,
-I could just write:
+Of course, KeystoneML already includes this functionality out of the box via the `StandardScaler` class, so you don't have to write it yourself!
+
+In most cases, `Estimators` are things that estimate machine learning models - like a `LinearMapEstimator` which learns a standard linear model on training data.
+
+#### Chaining Nodes and Building Pipelines
+
+Pipelines are created by chaining transformers and estimators with the `andThen` methods. Going back to a different part of the `Pipeline` interface: 
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val pipeline = Vectorizer andThen InterceptAdder //pipeline takes an RDD[Image] and returns an RDD[Vector] with 1 added to the front.
+package workflow
 
-//To apply it to a dataset, I could just write:
-val x: RDD[Image] = sc.objectFile(someFileName)
-val result = pipeline.apply(x) //Result is an RDD[Vector]
-//or equivalently
-val result = pipeline(x) 
+trait Pipeline[A, B] {
+  //...
+  final def andThen[C](next: Pipeline[B, C]): Pipeline[A, C] = //...
+  final def andThen[C](est: Estimator[B, C], data: RDD[A]): Pipeline[A, C] = //...
+  final def andThen[C, L](est: LabelEstimator[B, C, L], data: RDD[A], labels: RDD[L]): Pipeline[A, C] = //...
+}
 ~~~
 </div>
 </div>
 
-Note that this only works because the `InterceptAdder` node expects Vectors as
-input.
+Ignoring the implementation, `andThen` allows you to take a pipeline and add another onto it, yielding a new `Pipeline[A,C]` which works by first applying the first pipeline (`A` => `B`) and then applying the `next` pipeline (`B` => `C`). 
 
-Since the pipeline operations are really just transformations on RDD's, they
-automatically get scheduled and executed efficiently by Spark. In the example
-above, for instance, the pipeline won't even execute until an action is
-performed on the result. Additionally, the map tasks between the two nodes will
-automatically be pushed into a single task and executed together. 
+This is where **type safety** comes in to ensure robustness. As your pipelines get more complicated, you may end up trying to chain together nodes that are incompatible, but the compiler won't let you. This is powerful, because it means that if your pipeline compiles, it is more likely to work when you go to run it at scale. Here's an example of a simple two stage pipeline that adds 4.0 to every coordinate of a 3-dimensional vector:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val pipeline = new Adder(Vector(1.0,2.0,3.0)) andThen new Adder(Vector(3.0,2.0,1.0))
+~~~
+</div>
+</div>
+
+Since sometimes transformers are just simple unary functions, you can also inline a Transformer definition. Here's a three-stage pipeline that adds 2.0 to each element of a vector, computes its sum, and then translates that to a string:
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+import breeze.linalg._
+
+val pipeline = new Adder(Vector(2.0, 2.0, 2.0)) andThen Transformer(sum) andThen Transformer(_.toString)
+~~~
+</div>
+</div>
+
+You can *also* chain `Estimators` onto transformers via the `andThen (estimator, data)` or `andThen (labelEstimator, data, labels)` methods. The latter makes sense if you're training a supervised learning model which needs ground truth training labels.
+Suppose you want to chain together a pipeline which takes a raw image, converts it to grayscale, and then fits a linear model on the pixel space, and returns the most likely class according to the linear model.
+
+You can do this with some code that looks like the following:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val labels: RDD[Vector[Double]] = //...
+val trainImages: RDD[Image] = //...
+
+val pipe = GrayScaler andThen 
+  ImageVectorizer andThen 
+  (LinearMapEstimator(), trainImages, trainLabels) andThen 
+  MaxClassifier
+~~~
+</div>
+</div>
+
+In this example `pipe` has a type Pipeline[Image, Int] and predicts the most likely class of an input image according to the model fit on the training data
+While this pipeline won't give you a very high quality model (because pixels are bad predictors of an image class), it demonstrates the APIs.
+
+##KeystoneML API
 
 In a moment, we'll see how these simple ideas let us perform complicated
 machine learning tasks on distributed datasets.
