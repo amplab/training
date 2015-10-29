@@ -101,6 +101,11 @@ If you would like a quick primer on Scala, check out the following doc in the ap
   <td class="yes">yes</td>
   <td class="no">no</td>
   <td class="no">no</td>
+</tr><tr>
+  <td>Splash</td>
+  <td class="yes">yes</td>
+  <td class="no">no</td>
+  <td class="no">no</td>
 </tr>
 </tbody>
 </table>
@@ -138,6 +143,7 @@ Note: Please follow the setup instructions at the [Getting Started](getting-star
 | [Pipelines](image-classification-with-pipelines.html)            | Image classification with pipelines                     | Medium   | |
 | [SparkR](sparkr.html)                                            | Interactive Data Analytics using Spark in R             | Short    | [Project Page](http://amplab-extras.github.io/SparkR-pkg/); [Github](https://github.com/amplab-extras/SparkR-pkg) |
 | [ADAM](genome-analysis-with-adam.html)                           | Genome analysis with ADAM                               | Medium   | |
+| [Splash](splash.html)                           | Use Splash to run stochastic learning algorithms                              | Short   |[Project Page](http://zhangyuc.github.io/splash/) | 
 
 ## IRC Chat Room
 A chat room is available for participants to connect with each other and get realtime help with exercises.
