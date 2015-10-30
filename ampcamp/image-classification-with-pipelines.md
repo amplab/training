@@ -35,12 +35,9 @@ KeystoneML is built on several design principles: supporting end-to-end workflow
 
 By focusing on these principles, KeystoneML allows for the construction of complete, robust, large scale pipelines that are constructed from *reusable, understandable parts*.
 
-We've done our best to adhere to these principles throughout the development of KeystoneML, and we hope that this translates to better applications that use it!
-
-### Key API Concepts
 At the center of KeystoneML are a handful of core API concepts that allow us to build complex machine learning pipelines out of simple parts: `pipelines`, `nodes`, `transformers`, and `estimators`.
 
-#### Pipelines
+### Pipelines
 A `Pipeline` is a dataflow that takes some input data and maps it to some output data through a series of `nodes`. 
 By design, these nodes can operate on one data item (for point lookup) or many data items: for batch model evaluation.
 
@@ -64,11 +61,11 @@ trait Pipeline[A, B] {
 From this we can see that a Pipeline has two type parameters: its input and output types.
 We can also see that it has methods to operate on just a single input data item, or on a batch RDD of data items.
 
-#### Nodes
+### Nodes
 Nodes come in two flavors: `Transformers` and `Estimators`. 
 `Transformers` are nodes which provide a unary function interface for both single items and `RDD` of the same type of item, while an `Estimator` produces a `Transformer` based on some training data.
 
-##### Transformers
+#### Transformers
 As already mentioned, a `Transformer` is the simplest type of node, and takes an input, and deterministically *transforms* it into an output. 
 Here's an abridged definition of the `Transformer` class.
 
@@ -89,7 +86,6 @@ abstract class Transformer[A, B : ClassTag] extends TransformerNode[B] with Pipe
 There are a few things going on in this class definition.
 First: A Transformer has two type parameters: its input and output types.
 Second, *every* Transformer extends TransformerNode, which is used internally by Keystone for Pipeline construction and execution. 
-In turn TransformerNode extends Serializable, which means it can be written out and shipped over the network to run on any machine in a Spark cluster.
 Third, it extends Pipeline because every Transformer can be treated as a full pipeline in it's own right.
 Fourth, it is `abstract` because it has an `apply` method which needs to be filled out by the implementor.
 Fifth, it provides a default implementation of `apply(in: RDD[A]): RDD[B]` which simply runs the single-item version on each item in an RDD.
@@ -101,7 +97,7 @@ To handle this case, transformers can take additional state as constructor param
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-import pipelines.Transformer
+import workflow.Transformer
 import breeze.linalg._
 
 class Adder(vec: Vector[Double]) extends Transformer[Vector[Double], Vector[Double]] {
@@ -125,9 +121,7 @@ val res = subber(Vector(2.0,3.0,6.0)) //Returns Vector(3.0,5.0,9.0)
 </div>
 </div>
 
-If you want to play around with defining new Transformers, you can do so at the scala console by typing `sbt/sbt console` in the KeystoneML project directory.
-
-##### Estimators
+#### Estimators
 
 `Estimators` are what puts the **ML** in KeystoneML.
 An abridged `Estimator` interface looks like this:
@@ -155,7 +149,7 @@ You could create an `Estimator` to do this like so:
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-import pipelines.Estimator
+import workflow.Estimator
 
 object ScalerEstimator extends Estimator[Vector[Double], Vector[Double]] {
   def fit(data: RDD[Vector[Double]]): Adder = {
@@ -177,7 +171,7 @@ Of course, KeystoneML already includes this functionality out of the box via the
 
 In most cases, `Estimators` are things that estimate machine learning models - like a `LinearMapEstimator` which learns a standard linear model on training data.
 
-#### Chaining Nodes and Building Pipelines
+### Chaining Nodes and Building Pipelines
 
 Pipelines are created by chaining transformers and estimators with the `andThen` methods. Going back to a different part of the `Pipeline` interface: 
 
@@ -208,50 +202,55 @@ val pipeline = new Adder(Vector(1.0,2.0,3.0)) andThen new Adder(Vector(3.0,2.0,1
 </div>
 </div>
 
-Since sometimes transformers are just simple unary functions, you can also inline a Transformer definition. Here's a three-stage pipeline that adds 2.0 to each element of a vector, computes its sum, and then translates that to a string:
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-~~~
-import breeze.linalg._
-
-val pipeline = new Adder(Vector(2.0, 2.0, 2.0)) andThen Transformer(sum) andThen Transformer(_.toString)
-~~~
-</div>
-</div>
-
 You can *also* chain `Estimators` onto transformers via the `andThen (estimator, data)` or `andThen (labelEstimator, data, labels)` methods. The latter makes sense if you're training a supervised learning model which needs ground truth training labels.
-Suppose you want to chain together a pipeline which takes a raw image, converts it to grayscale, and then fits a linear model on the pixel space, and returns the most likely class according to the linear model.
-
-You can do this with some code that looks like the following:
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-~~~
-val labels: RDD[Vector[Double]] = //...
-val trainImages: RDD[Image] = //...
-
-val pipe = GrayScaler andThen 
-  ImageVectorizer andThen 
-  (LinearMapEstimator(), trainImages, trainLabels) andThen 
-  MaxClassifier
-~~~
-</div>
-</div>
-
-In this example `pipe` has a type Pipeline[Image, Int] and predicts the most likely class of an input image according to the model fit on the training data
-While this pipeline won't give you a very high quality model (because pixels are bad predictors of an image class), it demonstrates the APIs.
-
-##KeystoneML API
 
 In a moment, we'll see how these simple ideas let us perform complicated
 machine learning tasks on distributed datasets.
 
-##Data set
+##Data Sets
 
-We'll be using a dataset of 60,000 images in 10 classes called
-[CIFAR-10](http://www.cs.toronto.edu/~kriz/cifar.html). The techniques we'll
-work with are designed to scale well to millions of images in thousands of
-classes.
+First, we'll be classifying text from the [20 Newsgroups](http://qwone.com/~jason/20Newsgroups/) dataset. The "bydate" version of the 20 Newsgroups dataset that we'll be using contains 18846 documents in 20 classes, split into 60% training data and 40% test data.
+
+An example document from the `misc.forsale` class looks as follows:
+
+~~~
+From: thouchin@cs.umr.edu (T. J. Houchin)
+Subject: FOR SALE: FARENHEIT 1280 24bit
+Article-I.D.: umr.1993Apr5.231308.3558
+Distribution: usa
+Organization: University of Missouri - Rolla
+Lines: 12
+Nntp-Posting-Host: mcs213c.cs.umr.edu
+Originator: thouchin@mcs213c.cs.umr.edu
+
+FOR SALE:
+  Orchid Fareheit 1280 24bit color card
+  -1 meg 
+  -almost new
+  
+$200 or best offer
+
+This is a post for a friend
+
+Call him (Thuan Pho) at 314-368-3624
+
+T.J. Houchin
+~~~
+
+After that, we'll be classifying images from the [MNIST](http://yann.lecun.com/exdb/mnist/) digit database.
+
+The MNIST database is a dataset of 60,000 handwritten digits in 10 classes, one for each digit. The MNIST images are 28 by 28 grayscale pixels each, and look as follows:
+
+<p style="text-align: center;">
+  <img src="img/spam-ham.png"
+       title="Contingency Table"
+       alt="Contingency Table"
+       width="50%" />
+  <!-- Images are downsized intentionally to improve quality on retina displays -->
+</p>
+
+
+[CIFAR-10](http://www.cs.toronto.edu/~kriz/cifar.html). 
 
 We'll be using the "binary" dataset from the CIFAR webpage, which is formatted
 as follows:
@@ -262,18 +261,14 @@ as follows:
 <1 x label><3072 x pixel>
 ~~~
 
-But don't worry about matching pixel values to input data structures. We've
-provided a standard data loader for data in this format that will take data and
-represent it as an `Image`, which is the object type that all of the image
-processing nodes in our pipelines will expect.
+We've provided utilities to load these datasets into a form usable by KeystoneML. The techniques we'll work use to classify them are designed to scale well to millions of training examples.
 
 ##Linear Classification
 
 There are lots of different classification models out there - SVMs, Naive
-Bayes, Decision Trees, Logistic Regression.
+Bayes, Decision Trees, Neural Networks.
 [MLlib](http://spark.apache.org/mllib) supports many of them. But today, we're
-going to focus on *one* model family - specifically Linear Classification, and
-instead see how proper *featurization* affects this choice of model.
+going to focus on *one* model family - specifically Linear Classification, and instead see how proper *featurization* affects this choice of model.
 
 Linear classifiers are the bread-and-butter of machine learning models. If
 you've heard of linear regression - the concept of linear classification should
@@ -319,7 +314,7 @@ on your drive somewhere:
 <div data-lang="scala">
 <div class="prettyprint" style="margin-bottom:10px">
 <ul style="margin-bottom:0px">
-Unzip the file you downloaded for the pipelines project and navigate to the directory "ampcamp-pipelines"
+Unzip the file you downloaded for the pipelines project and navigate to the directory "keystoneml"
 
 You should find the following items in the directory:
 <li><code>build.sbt</code>: SBT project file</li>
@@ -335,8 +330,6 @@ You should find the following items in the directory:
 </div>
 </div>
 
-**IMPORTANT** Before going any further, make sure you have the `SPARK_HOME`
-environment variable set in the terminal you're using to run the pipelines code.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -348,8 +341,154 @@ usb/$ export SPARK_HOME=[usb root directory]/spark
 </div>
 </div>
 
+##Newsgroups Text Classification
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<pre class="prettyprint lang-bsh">
+./bin/spark-shell --master local[2] --jars /Users/tomerk11/Development/keystone/target/scala-2.10/keystoneml-assembly-0.3.0-SNAPSHOT.jar --driver-memory 2G --driver-class-path /Users/tomerk11/Development/keystone/target/scala-2.10/keystoneml-assembly-0.3.0-SNAPSHOT.jar
+</pre>
+</div>
+</div>
 
-##A Simple Pipeline
+###A Simple Pipeline
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+import ampcamp._
+import nodes.learning._
+import nodes.nlp._
+import nodes.stats._
+import nodes.util._
+
+val (trainData, trainLabels) = loadNewsgroupsData(sc, "/Users/tomerk11/Downloads/20news-bydate/20news-bydate-train")
+
+val pipeline = {
+  Tokenizer("[\\s]+") andThen
+  TermFrequency(x => 1) andThen
+  (CommonSparseFeatures(100000), trainData) andThen
+  (LogisticRegressionEstimator(newsgroupsClasses.length, regParam = 0, numIters = 10), trainData, trainLabels)
+}
+
+evalNewsgroupsPipeline(pipeline, sc, "/Users/tomerk11/Downloads/20news-bydate/20news-bydate-test")
+
+~~~
+</div>
+</div>
+
+###A Better Pipeline
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val pipeline = {
+  LowerCase() andThen
+  Tokenizer("[\\s]+") andThen
+  TermFrequency(x => 1) andThen
+  (CommonSparseFeatures(100000), trainData) andThen
+  (LogisticRegressionEstimator(newsgroupsClasses.length, regParam = 0, numIters = 10), trainData, trainLabels)
+}
+
+evalNewsgroupsPipeline(pipeline, sc, "/Users/tomerk11/Downloads/20news-bydate/20news-bydate-test")
+
+~~~
+</div>
+</div>
+
+
+###An Even Better Pipeline
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val numExamples = trainData.count
+
+val pipeline = {
+  LowerCase() andThen
+  Tokenizer("[\\s]+") andThen
+  TermFrequency(x => x) andThen
+  (IDFCommonSparseFeatures(x => math.log(numExamples/x), 100000), trainData) andThen
+  (LogisticRegressionEstimator(newsgroupsClasses.length, regParam = 0, numIters = 10), trainData, trainLabels)
+}
+
+evalNewsgroupsPipeline(pipeline, sc, "/Users/tomerk11/Downloads/20news-bydate/20news-bydate-test")
+
+~~~
+</div>
+</div>
+
+##MNIST Image Classification
+
+Mnist dataset
+
+
+###A Simple Pipeline
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+import ampcamp._
+import nodes.learning._
+import nodes.stats._
+import nodes.util._
+import breeze.linalg.DenseVector
+import workflow._
+
+val (trainData, trainLabels) = loadMnistData(sc, "/Users/tomerk11/Desktop/mnist/train-mnist-dense-with-labels.data")
+
+val pipeline = {
+  Identity() andThen
+  (LinearMapEstimator(lambda = Some(1.0)), trainData, trainLabels) andThen
+  MaxClassifier
+}
+
+evalMnistPipeline(pipeline, sc, "/Users/tomerk11/Desktop/mnist/test-mnist-dense-with-labels.data")
+
+~~~
+</div>
+</div>
+
+###A Better Pipeline
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val mnistImageSize = 784
+
+val pipeline = {
+  RandomSignNode(mnistImageSize) andThen
+  PaddedFFT() andThen
+  LinearRectifier(0.0) andThen
+  (LinearMapEstimator(lambda = Some(1.0)), trainData, trainLabels) andThen
+  MaxClassifier
+}
+
+evalMnistPipeline(pipeline, sc, "/Users/tomerk11/Desktop/mnist/test-mnist-dense-with-labels.data")
+
+~~~
+</div>
+</div>
+
+###An Even Better Pipeline
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val pipeline = {
+  Pipeline.gather {
+    Seq.fill(8) {
+      RandomSignNode(mnistImageSize) andThen
+      PaddedFFT() andThen
+      LinearRectifier(0.0)
+    }
+  } andThen
+  VectorCombiner() andThen
+  (LinearMapEstimator(lambda = Some(1.0)), trainData, trainLabels) andThen
+  MaxClassifier
+}
+
+evalMnistPipeline(pipeline, sc, "/Users/tomerk11/Desktop/mnist/test-mnist-dense-with-labels.data")
+
+~~~
+</div>
+</div>
+
+
+##Old ampcamp 5
 
 As we've mentioned, we've provided data loaders for the CIFAR dataset.
 The first, simplest pipeline we'll create attempts to use the pixel values
@@ -373,56 +512,6 @@ The pipeline is defined fully here:
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-package pipelines
-
-import nodes._
-import org.apache.spark.{SparkContext, SparkConf}
-import utils.Stats
-
-object LinearPixels {
-  def main(args: Array[String]) = {
-    val trainFile = args(0)
-    val testFile = args(1)
-    val conf = new SparkConf().setAppName("LinearPixels")
-    val sc = new SparkContext(conf)
-    val numClasses = 10
-
-    //Define a node to load up our data.
-    val dataLoader = new CifarParser() andThen new CachingNode()
-
-    //Our training data is the result of applying this node to our input filename.
-    val trainData = dataLoader(sc, trainFile)
-
-    //A featurizer maps input images into vectors. For this pipeline, we'll also convert the image to grayscale.
-    val featurizer = ImageExtractor andThen GrayScaler andThen Vectorizer
-    val labelExtractor = LabelExtractor andThen ClassLabelIndicatorsFromIntLabels(numClasses) andThen new CachingNode
-
-    //Our training features are the featurizer applied to our training data.
-    val trainFeatures = featurizer(trainData)
-    val trainLabels = labelExtractor(trainData)
-
-    //We estimate our model as by calling a linear solver on our
-    val model = LinearMapper.train(trainFeatures, trainLabels)
-
-    //The final prediction pipeline is the composition of our featurizer and our model.
-    //Since we end up using the results of the prediction twice, we'll add a caching node.
-    val predictionPipeline = featurizer andThen model andThen new CachingNode
-
-    //Calculate training error.
-    val trainError = Stats.classificationError(predictionPipeline(trainData), trainLabels)
-
-    //Do testing.
-    val testData = dataLoader(sc, testFile)
-    val testLabels = labelExtractor(testData)
-
-    val testError = Stats.classificationError(predictionPipeline(testData), testLabels)
-
-    EvaluateCifarPipeline.evaluatePipeline(testData, predictionPipeline, "linear_pixels")
-    println(s"Training error is: $trainError, Test error is: $testError")
-
-  }
-
-}
 ~~~
 </div>
 </div>
@@ -473,9 +562,6 @@ ampcamp-pipelines/$ open linear_pixels/index.html
 </pre>
 </div>
 </div>
-
-
-##A Better Pipeline
 
 So how do we do better than 75% error? The secret is in applying the concept of
 a visual vocabulary which you heard about in the pipelines talk earlier. Switch
@@ -541,98 +627,6 @@ ampcamp-pipelines/$ open random_vocab/index.html
 </div>
 </div>
 
-###Advanced Exercise
-
-If you have time, try changing around of of the parameters to the pipeline. For
-example, try a different regularization value or number of filters (try 100 or
-300). How does the accuracy change?
-
-
-##An Advanced Pipeline
-
-In the last pipeline, we used a "random" visual vocabulary, and while our
-pipeline did work better than the simple pipeline on our data sample, getting
-the category right leaves something to be desired.
-
-The last key to this puzzle is using better "words" in our visual vocabulary.
-For that, we'll use patch extraction and whitening.
-
-Load up `PatchVocab.scala` to see what we mean.
-
-Notice that the only real difference between this pipeline and the last one is
-the following section has been added. 
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-~~~
-    val patchExtractor = ImageExtractor
-      .andThen(new Windower(patchSteps,patchSize))
-      .andThen(new ImageVectorizer)
-      .andThen(new Sampler(whitenerSize))
-
-    val (filters, whitener) = {
-        val baseFilters = patchExtractor(trainData)
-        val baseFilterMat = Stats.normalizeRows(new MatrixType(baseFilters), 10.0)
-        val whitener = new ZCAWhitener(baseFilterMat)
-
-        //Normalize them.
-        val sampleFilters = new MatrixType(Random.shuffle(baseFilterMat.toArray2.toList).toArray.slice(0, numFilters))
-        val unnormFilters = whitener(sampleFilters)
-        val twoNorms = MatrixFunctions.pow(MatrixFunctions.pow(unnormFilters, 2.0).rowSums, 0.5)
-
-        (((unnormFilters divColumnVector (twoNorms.addi(1e-10))) mmul (whitener.whitener.transpose)).toArray2, whitener)
-    }
-~~~
-</div>
-</div>
-
-Instead of being filters generated by the function `FloatMatrix.randn()`, our
-filters are *sampled from the data.*
-
-This is a powerful idea, because it means that instead of matching our images
-to random noise (think static on a TV screen), we're matching images to how
-much they look like things we recognize (like Mickey Mouse's ear or the logo of
-the tenacious Philadelphia Eagles.)
-
-
-##Loading A Pre-Trained Pipeline
-
-Due to the computational requirements required to featurize the training data
-and train the model on your machine in the time allotted, we've instead
-provided a pre-trained pipeline with some extra bells and whistles.
-
-We've shipped this pipeline to you as a "*.pipe" file, which is just a
-serialized version of the same java object you've seen in the code.
-
-The code to save, load, and apply a trained pipeline is very simple:
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-~~~
-import utils.PipelinePersistence._
-
-//Save the pipeline.
-savePipeline(predictionPipeline, "saved_pipelines/your_pipeline.pipe")
-    
-//Load the pipeline from disk.
-val predictionPipeline = loadPipeline[RDD[Image],RDD[Array[DataType]]]("saved_pipelines/your_pipeline.pipe")
-    
-//Apply the prediction pipeline to new data.
-val data: RDD[Image]
-val predictions = predictionPipeline(data)    
-~~~
-</div>
-</div>
-
-As you'll see in a minute, we've also written a simple script to load up a
-trained pipeline, evaluate it on a test dataset, and print out accuracy.
-
-You'll notice that this makes the deployment strategy for pipelines very simple.
-Once you're satisfied with the trained objects - ship them to a model serving
-service like Velox, and you're good to go. This is by design.
-
-##Pipeline Evaluation
-
 So far, we've been focused on one number when evaluating our pipelines -
 classification error. But, evaluating whether a classifier is good is more
 nuanced than this. Consider the case of spam detection. As a user, you want
@@ -654,8 +648,6 @@ its contingency table.
 
 We can generalize this contingency table to the multiclass setting, and we'll
 see an example of that in a moment.
-
-##Evaluate a Pipeline
 
 To evaluate a previously constructed pipeline on test data, you'll need to do
 the following:
@@ -694,55 +686,7 @@ large entries off the diagonal are points where the model got confused.
 
 What's the highest non-diagonal entry? Does it make sense to you?
 
-Finally, take a look at the `patch_cifar` visual output. Do you think the model
-has gotten better?
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-<pre class="prettyprint lang-bsh">
-#On Windows - change the following command to open in your browser of choice.
-ampcamp-pipelines/$ open patch_vocab/index.html
-</pre>
-</div>
-</div>
-
-
-#Advanced Exercise 2
-There's another saved pipeline in your "saved_pipelines" folder. This one 
-will take longer to evaluate, but gets even better error. The code that 
-generated this pipeline is in `PatchVocab2.scala`
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-<pre class="prettyprint lang-bsh">
-#If you use windows, change the forward slashes (/) below to backslash (\).
-ampcamp-pipelines/$ bin/run-pipeline.sh pipelines.EvaluateCifarPipeline saved_pipelines/patchvocab2.pipe data/cifar_test.bin 0.2
-</pre>
-</div>
-</div>
-
-This pipeline was trained using a relatively large number of sample patches
-(2000) and gives us about 24% test error. In order to train it, we had to make
-a slightly more complicated pipeline that uses a boosting technique called 
-block coordinate descent.
-
-We know that if we scale up to 10,000
-or so patches and pick the right regularization value, we can get to about 15%
-error. This is horizontally scalable and competitive with recent
-state-of-the-art academic results on this dataset.
-
-###Advanced Exercise 3
-
-Try actually changing a pipeline and recompiling it. You
-can modify the pipelines in any text editor or IDE that supports scala, and
-recompile with "sbt/sbt assembly." Try training a pipeline without adding an
-intercept or whitening and see how that affects statistical performance.
-
 
 ##Concluding Remarks
 
-You've now built and evaluated three sample pipelines for image classification
-on Spark. We hope we've convinced you that this is a framework that's easy to
-use and general purpose enough to capture your machine learning workflow. The
-pipelines project is still in its infancy, so we're happy to receive feedback
-now that you've used it.
+You've now built and evaluated several pipelines for text and image classification on Spark. We hope we've convinced you that this is a framework that's easy to use and general purpose enough to capture your machine learning workflow. The KeystoneML project is still a work in progress, so we're happy to receive feedback now that you've used it.
