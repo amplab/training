@@ -269,7 +269,7 @@ These documents are stored in a separate plain-text file each, with each documen
 
 After that, we'll be classifying images from the [MNIST](http://yann.lecun.com/exdb/mnist/) digit database.
 
-The MNIST database is a dataset of 60,000 handwritten digits in 10 classes, one for each digit. The MNIST images are 28 by 28 grayscale pixels each, and look as follows:
+The MNIST database is a dataset of 60,000 handwritten digits in 10 classes, one for each digit. Roughly 50,000 of them are in the training set, and 10,000 in the test set. The MNIST images are 28 by 28 grayscale pixels each, and look as follows:
 
 <p style="text-align: center;">
   <img src="img/mnist-example-ipy.png"
@@ -358,12 +358,12 @@ evalNewsgroupsPipeline(pipeline, sc, "../ampcamp-keystoneml/20news-bydate/20news
 </div>
 </div>
 
-After all the imports, the first thing this code does is load the Newsgroups training data using a utility ampcamp methods we have provided. Next, a very simple pipeline for text classification is built using KeystoneML. This pipeline consists of: 
+After all the imports, the first thing this code does is use an ampcamp utility method we have provided to load the Newsgroups training data into an `RDD[String]` for the training documents and an `RDD[Int]` for the class labels. Next, a very simple pipeline for text classification is built using KeystoneML. This pipeline consists of: 
 
-1. Simple tokenization (splitting text on whitespace)
-2. Attaching the value '1' to tokens that occur in the document
-3. Converting the tokens to a a sparse feature vector, with the attached values becoming the feature values for the tokens (Keeping only the 100000 tokens that appear in the most training documents)
-4. Classification using a Logistic Regression Model, a [generalization](https://en.wikipedia.org/wiki/Generalized_linear_model) of the linear classifier we described above. 
+1. `Tokenizer("[\\s]+")`: Simple tokenization (splitting text on whitespace)
+2. `TermFrequency(x => 1)`: Attaches the value '1' to tokens that occur in the document
+3. `CommonSparseFeatures(100000)`: Converting the tokens to a a sparse feature vector, with the attached values becoming the feature values for the tokens (Keeping only the 100000 tokens that appear in the most training documents)
+4. `LogisticRegressionEstimator(newsgroupsClasses.length, regParam = 0, numIters = 10)`: Classification using a Logistic Regression Model, a [generalization](https://en.wikipedia.org/wiki/Generalized_linear_model) of the linear classifier we described above. 
 
 Once the pipeline is built, the final line both trains the pipeline, and evaluates it on the test data.
 
@@ -457,10 +457,12 @@ newsgroupsClasses(pipeline("Will humans ever colonize Mars?"))
 
 ##MNIST Image Classification
 
-Mnist dataset
-
+We'll now build a simple KeystoneML pipeline to classify handwritten digits from the MNIST dataset, and then gradually improve it.
 
 ###A Simple Pipeline
+
+The following is an absolute baseline MNIST classification pipeline that feeds the raw pixel values into a Linear Classifier:
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
@@ -471,7 +473,7 @@ import nodes.util._
 import breeze.linalg.DenseVector
 import workflow._
 
-val (trainData, trainLabels) = loadMnistData(sc, "/Users/tomerk11/Desktop/mnist/train-mnist-dense-with-labels.data")
+val (trainData, trainLabels) = loadMnistData(sc, "../ampcamp-keystoneml/mnist/train-mnist-dense-with-labels.data")
 
 val pipeline = {
   Identity() andThen
@@ -479,14 +481,23 @@ val pipeline = {
   MaxClassifier
 }
 
-evalMnistPipeline(pipeline, sc, "/Users/tomerk11/Desktop/mnist/test-mnist-dense-with-labels.data")
+evalMnistPipeline(pipeline, sc, "../ampcamp-keystoneml/mnist/test-mnist-dense-with-labels.data")
 
 ~~~
 </div>
 </div>
 
+This code uses an ampcamp utility method to load the MNIST training data as flattened 784-dimensional (28 x 28) feature vectors into an `RDD[DenseVector[Double]]`, and the class labels are loaded into an `RDD[Int]`. Next, a very simple pipeline is built using KeystoneML that feeds these `DenseVectors` into a Linear Classifier directly, with no feature transformation.
+
+<div class="solution">
+Total Accuracy: 0.860
+</div>
+
+As you can see, the MNIST digit data set is simple enough that even feeding raw pixel values directly into a simple Linear Classifier is enough to be an effective classifier. We will next show that we can make this classifier even better. 
 
 ###A Better Pipeline
+Next we will try some techniques known as Scalable Kernel Machines. These are methods for learning classification boundaries that aren't just planes through the data. These often do a better job than linear models, but conventional methods for fitting them don't scale well. More recent methods do scale better, and we can actually implement these methods as pipelines in KeystoneML, as shown below:
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
@@ -500,13 +511,23 @@ val pipeline = {
   MaxClassifier
 }
 
-evalMnistPipeline(pipeline, sc, "/Users/tomerk11/Desktop/mnist/test-mnist-dense-with-labels.data")
+evalMnistPipeline(pipeline, sc, "../ampcamp-keystoneml/mnist/test-mnist-dense-with-labels.data")
 
 ~~~
 </div>
 </div>
 
+What this pipeline does is take the raw pixel values, flip the signs of pixels randomly selected at the start, pass the whole thing through an FFT filter, set all values less than 0 to 0, and then send this into a Linear Classifier.
+
+
+<div class="solution">
+Total Accuracy: 0.919
+</div>
+
+As we can see, this technique has improved our classification accuracy noticeably.
+
 ###An Even Better Pipeline
+It just so happens that we can keep adding more of the random features shown above using the following Pipeline:
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
@@ -523,13 +544,20 @@ val pipeline = {
   MaxClassifier
 }
 
-evalMnistPipeline(pipeline, sc, "/Users/tomerk11/Desktop/mnist/test-mnist-dense-with-labels.data")
+evalMnistPipeline(pipeline, sc, "../ampcamp-keystoneml/mnist/test-mnist-dense-with-labels.data")
 
 ~~~
 </div>
 </div>
 
+`Pipeline.gather { ... } andThen VectorCombiner()` is syntax we haven't shown before to build a pipeline which applies the sequence of nested pipelines found in the inner braces in parallel, and then join the outputs into a single vector.
+
+<div class="solution">
+Total Accuracy: 0.970
+</div>
+
+As you can see, we have significantly improved the classification accuracy by adding more random features. While this is the limit of how many features the `LinearMapEstimator` solver can handle without running out of memory, we have provided other solvers with KeystoneML that can scale to higher feature counts, and get even better classification accuracy than this on MNIST. 
 
 ##Concluding Remarks
 
-You've now built and evaluated several pipelines for text and image classification on Spark. We hope we've convinced you that this is a framework that's easy to use and general purpose enough to capture your machine learning workflow. The KeystoneML project is still a work in progress, so we're happy to receive feedback now that you've used it.
+You've now built and evaluated several pipelines for text and image classification using KeystoneML. We hope we've convinced you that this is a framework that's easy to use and general purpose enough to capture your machine learning workflow. The KeystoneML project is still a work in progress, so we're happy to receive feedback now that you've used it.
