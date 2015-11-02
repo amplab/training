@@ -33,7 +33,7 @@ Tachyon is Hadoop compatible. Existing Spark and MapReduce programs can run on t
 code changes. Tachyon is the default off-heap option in Spark, which means that RDDs can
 automatically be stored inside Tachyon to make Spark more resilient and avoid GC overheads. The
 project is open source and is already deployed at multiple companies. In addition, Tachyon has more
-than [50 contributors](https://github.com/amplab/tachyon/graphs/contributors) from over 20
+than [130 contributors](https://github.com/amplab/tachyon/graphs/contributors) from over 50
 institutions, including Yahoo, Intel, Redhat, and Pivotal. The project is the storage layer of the
 [Berkeley Data Analytics Stack (BDAS)](https://amplab.cs.berkeley.edu/software/) and also part of
 the [Fedora distribution](http://timothysc.github.io/blog/2014/02/17/bdas-tachyon/).
@@ -72,19 +72,18 @@ it. For more information, please visit Tachyon's [website](http://tachyon-projec
 
 ### Configurations
 
-All system's configuration is under `tachyon/conf` folder. Please find them, and
-see how much memory is configured on each worker node.
+All system's configuration is under `tachyon/conf` folder. You configure the system by specifying
+your own environment variables in `tachyon/conf/tachyon-env.sh`. Copy the template and then modify
+`TACHYON_WORKER_MEMORY_SIZE` to 1GB.
 
 <div class="solution" markdown="1">
 ~~~
-$ grep "TACHYON_WORKER_MEMORY_SIZE=" conf/tachyon-env.sh
-export TACHYON_WORKER_MEMORY_SIZE=1GB
+$ cp conf/tachyon-env.sh.template conf/tachyon-env.sh
 ~~~
 </div>
 
-You can also read the through the file and try to understand those parameters. For more information
-on configuration, you can visit Tachyon
-[Configuration Settings webpage](http://tachyon-project.org/Configuration-Settings.html).
+For more information on configuration values, you can visit the Tachyon
+[Configuration Settings Docs](http://tachyon-project.org/documentation/Configuration-Settings.html).
 
 ### Format the storage
 
@@ -192,13 +191,12 @@ $ ./bin/tachyon tfs cat /LICENSE
 ### Application Programming Interface
 
 After using command line to interact with Tachyon, you can also use its API. We have several sample
-[applications](https://github.com/amplab/tachyon/tree/master/core/src/main/java/tachyon/examples).
-For example, [BasicOperations.java](https://github.com/amplab/tachyon/blob/master/core/src/main/java/tachyon/examples/BasicOperations.java)
+[applications](https://github.com/amplab/tachyon/tree/master/examples/src/main/java/tachyon/examples).
+For example, [BasicOperations.java](https://github.com/amplab/tachyon/blob/master/examples/src/main/java/tachyon/examples/BasicOperations.java)
 shows how to user file create, write, and read operations.
 
-You have put these into our script, you can simply use the following command to run this sample
-program. The following command runs [BasicOperations.java], and also verifies Tachyon's
-installation.
+Using the Tachyon script, you can simply use the following command to run this sample program. The
+following command runs [BasicOperations.java], and also verifies Tachyon's installation.
 
 ~~~
 $ ./bin/tachyon runTests
