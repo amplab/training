@@ -4,7 +4,7 @@ title: Data Exploration Using BlinkDB
 categories: [module]
 navigation:
   weight: 100
-  show: true
+  show: false
 skip-chapter-toc: true
 ---
 

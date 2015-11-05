@@ -4,7 +4,7 @@ title: Genome Analysis with ADAM
 categories: [module]
 navigation:
   weight: 150
-  show: true
+  show: false
 skip-chapter-toc: true
 ---
 

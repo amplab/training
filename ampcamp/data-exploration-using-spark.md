@@ -11,10 +11,6 @@ skip-chapter-toc: true
 In this chapter, we will first use the Spark shell to interactively explore the Wikipedia data.
 Then, we will give a brief introduction to writing standalone Spark programs. 
 
-## Prerequisite: getting the dataset
-Please follow the instructions on the <a href="getting-started.html">Getting Started</a>
-page to download and unpack the `training-downloads.zip` file.
-
 ## Interactive Analysis
 
 Let's now use Spark to do some order statistics on the data set.

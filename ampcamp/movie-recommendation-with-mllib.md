@@ -4,7 +4,7 @@ title: Movie Recommendation with MLlib
 categories: [module]
 navigation:
   weight: 70
-  show: true
+  show: false
 ---
 
 In this chapter, we will use MLlib to make personalized movie recommendations

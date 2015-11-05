@@ -3,7 +3,7 @@ layout: global
 title: Updating RDDs with IndexedRDD
 categories: [module]
 navigation:
-  weight: 60
+  weight: 65
   show: true
 ---
 

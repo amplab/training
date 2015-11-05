@@ -3,7 +3,7 @@ layout: global
 title: Querying compressed RDDs with Succinct Spark 
 categories: [module]
 navigation:
-  weight: 60
+  weight: 75
   show: true
 ---
 

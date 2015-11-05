@@ -4,7 +4,7 @@ title: Graph Analytics With GraphX
 categories: [module]
 navigation:
   weight: 60
-  show: true
+  show: false
 ---
 
 {:toc}

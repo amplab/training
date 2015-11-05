@@ -3,7 +3,7 @@ layout: global
 title: Explore In-Memory Data Store Tachyon
 categories: [module]
 navigation:
-  weight: 50
+  weight: 70
   show: true
 ---
 
