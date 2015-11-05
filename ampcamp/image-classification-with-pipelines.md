@@ -7,11 +7,6 @@ navigation:
   show: true
 ---
 
-**IMPORTANT** Before you begin reading, you should begin downloading
-the KeystoneML exercise materials:
-
-** todo: Insert here
-
 In this chapter, we'll use the KeystoneML framework to build an image classifier and a text classifier.
 
 Before getting to the details of the classification tasks, let's quickly review
@@ -45,7 +40,7 @@ You should find the following items in the directory:
 </div>
 </div>
 
-Now, you can launch your Spark Shell using KeystoneML as follows from the root of the USB directory:
+Now, you can launch your Spark Shell using KeystoneML as follows from the spark subdirectory of the USB directory:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -134,18 +129,24 @@ class Adder(vec: Vector[Double]) extends Transformer[Vector[Double], Vector[Doub
 </div>
 </div>
 
-We can then create a new `Adder` and `apply` it to a `Vector` or `RDD[Vector]` just as you'd expect:
+We can then create a new `Adder` and `apply` it to a `Vector` or `RDD[Vector]` as shown below:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val vec = Vector(1.0,2.0,3.0)
+val vec = Vector(1.0, 2.0, 3.0)
 
-val subber = new Adder(vec)
+val adder = new Adder(vec)
 
-val res = subber(Vector(2.0,3.0,6.0)) //Returns Vector(3.0,5.0,9.0)
+val res = adder(Vector(2.0, 3.0, 6.0)) 
 ~~~
 </div>
+</div>
+
+What do you expect the value of `res` to be?
+
+<div class="solution">
+Vector(3.0, 5.0, 9.0)
 </div>
 
 #### Estimators
@@ -171,15 +172,15 @@ This may sound like abstract functional programming nonsense, but as we'll see t
 
 Let's consider a concrete example.
 Suppose you have a big list of vectors and you want to subtract off the mean of each coordinate across all the vectors (and new ones that come from the same distribution).
-You could create an `Estimator` in your Spark Shell to do this like so:
+You could define an `Estimator` subclass in your Spark Shell to do this like so:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
 import workflow.Estimator
-import org.apache.spark.rdd._
+import org.apache.spark.rdd.RDD
 
-object ScalerEstimator extends Estimator[Vector[Double], Vector[Double]] {
+class ScalingEstimator extends Estimator[Vector[Double], Vector[Double]] {
   def fit(data: RDD[Vector[Double]]): Adder = {
     val mean = data.reduce(_ + _)/data.count.toDouble    
     new Adder(-1.0 * mean)
@@ -194,6 +195,28 @@ A couple things to notice about this example:
 1. `fit` takes an RDD, and computes the mean of each coordinate using familiar Spark and breeze operations.
 2. Adder satisfies the `Transformer[Vector[Double],Vector[Double]]` interface so we can return an adder from our `ScalerEstimator` estimator.
 3. By multiplying the mean by `-1.0` we can reuse the `Adder` code we already wrote and it will work as expected.
+
+We can apply this estimator as shown below:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val rdd = sc.parallelize(Seq(
+  Vector(1.0, 0.0), 
+  Vector(0.0, 1.0), 
+  Vector(2.0, -4.0)
+))
+
+val scalingEstimator = new ScalingEstimator
+val meanSubtractor = scalingEstimator.fit(rdd)
+val res = meanSubtractor(Vector(2.0, -4.0))
+~~~
+
+What do you expect the value of `res` to be?
+
+<div class="solution">
+Vector(1.0, -3.0)
+</div>
 
 Of course, KeystoneML already includes this functionality out of the box via the `StandardScaler` class, so you don't have to write it yourself!
 
@@ -220,14 +243,22 @@ trait Pipeline[A, B] {
 
 Ignoring the implementation, `andThen` allows you to take a pipeline and add another onto it, yielding a new `Pipeline[A,C]` which works by first applying the first pipeline (`A` => `B`) and then applying the `next` pipeline (`B` => `C`). 
 
-This is where **type safety** comes in to ensure robustness. As your pipelines get more complicated, you may end up trying to chain together nodes that are incompatible, but the compiler won't let you. This is powerful, because it means that if your pipeline compiles, it is more likely to work when you go to run it at scale. Here's an example of a simple two stage pipeline that adds 4.0 to every coordinate of a 3-dimensional vector:
+This is where **type safety** comes in to ensure robustness. As your pipelines get more complicated, you may end up trying to chain together nodes that are incompatible, but the compiler won't let you. This is powerful, because it means that if your pipeline compiles, it is more likely to work when you go to run it at scale. Here's an example of building a simple two stage pipeline and applying it to a vector:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val pipeline = new Adder(Vector(1.0,2.0,3.0)) andThen new Adder(Vector(3.0,2.0,1.0))
+val pipeline = new Adder(Vector(1.0, 2.0, 3.0)) andThen new Adder(Vector(3.0, 2.0, 1.0))
+
+val res = pipeline(Vector(2.1, -0.3, 7.8))
 ~~~
 </div>
+</div>
+
+What do you think this pipeline does?
+
+<div class="solution">
+This pipeline adds 4.0 to every coordinate of a 3-dimensional vector.
 </div>
 
 You can *also* chain `Estimators` onto transformers via the `andThen (estimator, data)` or `andThen (labelEstimator, data, labels)` methods. The latter makes sense if you're training a supervised learning model which needs ground truth training labels.
@@ -376,7 +407,7 @@ Total Accuracy: 0.640
 Take a look at the largest non-diagonal values in the contingency table. Do these misclassifications make sense to you?
 
 ###A Better Pipeline
-Let's take the above pipeline and make a very simple change to lower-case the documents before we tokenize them. This may improve classification by grouping together tokens that have the same meaning while lowering the total feature noise the classifier has to deal with.
+Let's take the above pipeline and make a very simple change to lower-case the documents before we tokenize them. This may improve classification by grouping together tokens that have the same meaning while lowering the total feature noise the classifier has to deal with. We can do this by adding a `LowerCase` node to the start of the previous pipeline:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -395,6 +426,8 @@ evalNewsgroupsPipeline(pipeline, sc, "../ampcamp-keystoneml/20news-bydate/20news
 </div>
 </div>
 
+How big of a difference do you expect this to make?
+
 <div class="solution">
 Total Accuracy: 0.644
 </div>
@@ -411,7 +444,8 @@ One such change is using a better term weighting scheme than just 1 if a term oc
        alt="tf-idf" />
   <!-- Images are downsized intentionally to improve quality on retina displays -->
 </p>
-`f_(t,d)` is the number of times term `t` appears in document `d`, `N` is the number of documents in the training corpus, and `n_t` is the number of documents in the training corpus that contain term `t`.
+
+<i>f<sub>t,d</sub></i> is the number of times term *t* appears in document *d*, *N* is the number of documents in the training corpus, and <i>n<sub>t</sub></i> is the number of documents in the training corpus that contain term *t*.
 
 Introducing tf-idf term weighting to the earlier pipeline can be done with the following code:
 
@@ -433,6 +467,8 @@ evalNewsgroupsPipeline(pipeline, sc, "../ampcamp-keystoneml/20news-bydate/20news
 ~~~
 </div>
 </div>
+
+How big of an impact do you think this term reweighting will have?
 
 <div class="solution">
 Total Accuracy: 0.807
@@ -487,7 +523,7 @@ evalMnistPipeline(pipeline, sc, "../ampcamp-keystoneml/mnist/test-mnist-dense-wi
 </div>
 </div>
 
-This code uses an ampcamp utility method to load the MNIST training data as flattened 784-dimensional (28 x 28) feature vectors into an `RDD[DenseVector[Double]]`, and the class labels are loaded into an `RDD[Int]`. Next, a very simple pipeline is built using KeystoneML that feeds these `DenseVectors` into a Linear Classifier directly, with no feature transformation.
+This code uses an ampcamp utility method to load the MNIST training data as flattened 784-dimensional (28 x 28) feature vectors into an `RDD[DenseVector[Double]]`, and the class labels are loaded into an `RDD[Int]`. Next, a very simple pipeline is built using KeystoneML that feeds these `DenseVectors` into a Linear Classifier directly, with no feature transformation. Finally, an ampcamp utility method is used to evaluate the MNIST pipeline on test data.
 
 <div class="solution">
 Total Accuracy: 0.860
@@ -496,7 +532,17 @@ Total Accuracy: 0.860
 As you can see, the MNIST digit data set is simple enough that even feeding raw pixel values directly into a simple Linear Classifier is enough to be an effective classifier. We will next show that we can make this classifier even better. 
 
 ###A Better Pipeline
-Next we will try some techniques known as Scalable Kernel Machines. These are methods for learning classification boundaries that aren't just planes through the data. These often do a better job than linear models, but conventional methods for fitting them don't scale well. More recent methods do scale better, and we can actually implement these methods as pipelines in KeystoneML, as shown below:
+Next we will try some techniques known as [Kernel Methods](https://en.wikipedia.org/wiki/Kernel_method). Kernel Methods allow learning classification boundaries that aren't just planes through the data by transforming the feature space into one where the classes are linearly separable, as shown below:
+
+<p style="text-align: center;">
+  <img src="img/Kernel_Machine.png"
+       title="Kernel Method"
+       alt="Kernel Method"
+       width="75%" />
+  <!-- Images are downsized intentionally to improve quality on retina displays -->
+</p>
+
+Kernel Methods often do a better job than linear models in practice, but conventional techniques for fitting them don't scale well. More recent techniques known as Scalable Kernel Machines scale much better, and we can actually implement these methods as pipelines in KeystoneML, as shown below:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -518,7 +564,6 @@ evalMnistPipeline(pipeline, sc, "../ampcamp-keystoneml/mnist/test-mnist-dense-wi
 </div>
 
 What this pipeline does is take the raw pixel values, flip the signs of pixels randomly selected at the start, pass the whole thing through an FFT filter, set all values less than 0 to 0, and then send this into a Linear Classifier.
-
 
 <div class="solution">
 Total Accuracy: 0.919
@@ -550,13 +595,13 @@ evalMnistPipeline(pipeline, sc, "../ampcamp-keystoneml/mnist/test-mnist-dense-wi
 </div>
 </div>
 
-`Pipeline.gather { ... } andThen VectorCombiner()` is syntax we haven't shown before to build a pipeline which applies the sequence of nested pipelines found in the inner braces in parallel, and then join the outputs into a single vector.
+`Pipeline.gather { ... } andThen VectorCombiner()` is syntax we haven't shown before to build a pipeline which applies the sequence of nested pipelines found in the inner braces in parallel, and then join the outputs into a single vector. Let's run this pipeline in the Spark Shell to see how much impact adding extra features to our classifier can have:
 
 <div class="solution">
 Total Accuracy: 0.970
 </div>
 
-As you can see, we have significantly improved the classification accuracy by adding more random features. While this is the limit of how many features the `LinearMapEstimator` solver can handle without running out of memory, we have provided other solvers with KeystoneML that can scale to higher feature counts, and get even better classification accuracy than this on MNIST. 
+As you can see, we have significantly improved the classification accuracy by adding more random features. While this is the limit of how many features the `LinearMapEstimator` solver can handle without running out of memory, we have provided other solvers with KeystoneML that can scale to larger feature spaces, and get even better classification accuracy than this on MNIST. 
 
 ##Concluding Remarks
 
