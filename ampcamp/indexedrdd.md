@@ -49,6 +49,7 @@ import edu.berkeley.cs.amplab.spark.indexedrdd.IndexedRDD
 import edu.berkeley.cs.amplab.spark.indexedrdd.IndexedRDD._
 ~~~
 </div>
+</div>
 
 ### Load the Wikipedia Articles
 
@@ -69,6 +70,7 @@ val articlesRDD = sc.textFile("data/indexedrdd/wiki-article-titles.txt").map {
 // the entries by article ID.
 val articles = IndexedRDD(articlesRDD).cache()
 ~~~
+</div>
 </div>
 
 ### Look at the Article Titles
@@ -92,6 +94,7 @@ articles2.get(1642702735464155009L) // => Some(Stanford University)
 articles3.get(1642702735464155009L) // => None
 ~~~
 </div>
+</div>
 
 ### Track Views by Article
 
@@ -102,6 +105,7 @@ Let's create another IndexedRDD to track how many times someone views each artic
 ~~~
 var views = articles.mapValues(title => 0)
 ~~~
+</div>
 </div>
 
 In a real application, the view data might come from web server logs, but here we have it in a series of files. Let's load each file, then update the view counts using a join:
@@ -120,6 +124,7 @@ updateViews("data/indexedrdd/wiki-views-2.txt")
 updateViews("data/indexedrdd/wiki-views-3.txt")
 ~~~
 </div>
+</div>
 
 ### Analyze the Results
 
@@ -136,6 +141,7 @@ val titlesAndViews = articles.innerJoin(views) {
 titlesAndViews.get(8395060451189818649L) // => Some((Saul Perlmutter,1))
 ~~~
 </div>
+</div>
 
 Finally, we can use standard RDD operations on IndexedRDDs as well. Let's aggregate the view counts by keyword to find what keywords got the most views:
 
@@ -148,6 +154,7 @@ val viewsByKeyword = titlesAndViews.flatMap {
 viewsByKeyword.top(10)(Ordering.by(_._2))
 // => Array((of,34), (List,16), (in,11), (and,10), (the,8), (Berkeley,8), (California,6), (University,6), (The,5), (United,5))
 ~~~
+</div>
 </div>
 
 And that's it! This brings us to the end of this IndexedRDD chapter of the
