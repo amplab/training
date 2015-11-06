@@ -22,10 +22,11 @@ a table).
 
 To start using Succinct's API, we need to start up the Spark Shell with the 
 Succinct Spark package available to it. The following command directs the Spark
-Shell to pull the package from the Spark Packages repository:
+Shell to load the jar for the Succinct Spark package, and increase the executor
+memory to 2GB (since we'll be working with large datasets later in the exercise):
 
 <pre class="prettyprint lang-bsh">
-usb/$ bin/spark-shell --packages amplab:succinct:0.1.3
+usb/$ bin/spark-shell --jars ~/Work/AMPCamp2015/succinct/jars/succinct-0.1.4.jar --executor-memory 2G --conf "spark.driver.extraJavaOptions=-XX:MaxPermSize=256m"
 </pre>
 
 Now that we have the Spark shell loaded with the Succinct Spark package, we'll
@@ -46,29 +47,47 @@ work with an RDD of `(articleID, article)` pairs, where each entry corresponds
 to a single Wikipedia article.
 
 Let's start with loading the Wikipedia articles into a regular RDD. The dataset
-provided is stored as a CSV containing `(articleID,article)` pairs. The following
-snipped loads the dataset into an RDD:
+provided is stored as a CSV containing `(articleID, article)` pairs. The following
+snippet loads the dataset and creates an RDD of key value pairs pairs:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val wikiData = sc.textFile("data/succinct/wiki-articles.txt").map(_.split("|"))
+val wikiData = sc.textFile("data/succinct/wiki-small.txt").map(_.split('|'))
+val wikiKV = wikiData.map(entry => (entry(0).toLong, entry(1)))
 ~~~
 </div>
 </div>
 
-While `SuccinctKVRDD`'s key class can be any _ordered_ type, the value is an
-array of bytes. We will use `Long` keys:
+Lets take a look at how many documents we have in the RDD:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val wikiKV = wikiData.map(entry => (entry(0).toLong, entry(1).getBytes)
+wikiKV.count
 ~~~
 </div>
 </div>
 
-Finally, we can now convert this RDD into a `SuccinctKVRDD`:
+Not too many. 
+
+If we wanted to find all `articleId`s corresponding to `article`s containing the term
+"Berkeley", we can use the filter operation as follows:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val articleIdsRDD = wikiKV.filter(kvPair => kvPair._2.contains("Berkeley")).map(_._1)
+articleIds.count
+~~~
+</div>
+</div>
+
+We've found only 3 artciles, but had to scan through all 250 to find them.
+
+Lets take a look at how we can now convert this RDD into a `SuccinctKVRDD`. 
+While the keys can be of arbitrary type (`Long` in this example), each array is
+an array of bytes. We can transform the RDD we created before as follows:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -78,86 +97,195 @@ val succinctWikiKV = wikiKV.succinctKV
 </div>
 </div>
 
-That's it! We now have a _compressed version of the RDD_ that supports
-several interesting queries directly on the compressed RDD.
+Lets make sure we still have all the documents:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+succinctWikiKV.count
+~~~
+</div>
+</div>
+
+That's it! We now have a _compressed version of the RDD_ that supports a number
+of interesting queries directly on the compressed RDD.
 
 ## Querying Succinct RDDs
 
-Lets jump into querying our new compressed RDD. One of the key operations
-on compressed RDDs in Succinct is `search(query)`. For instance, the following 
-query obtains `articleID`s corresponding to all articles containing "Berkeley":
+Lets start querying our new compressed RDD. One of the key operations
+on compressed RDDs in Succinct is `search(query)` -- similar to the filter 
+operation on the uncompressed RDD before, the following query obtains an RDD 
+of `articleID`s corresponding to all `article`s containing "Berkeley":
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val articleIdsRDD = succinctWikiKV.search("Berkeley")
+val articleIdsRDD2 = succinctWikiKV.search("Berkeley")
+articleIdsRDD2.count
 ~~~
 </div>
 </div>
 
-Lets fetch the first 10 articleIDs:
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-~~~
-val articleIds = articleIdsRDD.take(10)
-~~~
-</div>
-</div>
+As before, we've obtained the 3 articles containing "Berkeley", but 
+_without having to scan all 250 articles_. We don't use indexes either,
+all the information required to search for any arbitrary term is 
+_embedded within the compressed representation_.
 
 The `articleIds` themselves don't reveal much; we need to look at the
 article text for them...
 
 SuccinctKVRDD allows you to fetch the value corresponding to any key
 through the familiar `get(key)` API. We'll use this API to fetch the
-article contents corresponding to each of these `articleIds`:
+article contents corresponding to each of these `articleIds`: 
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
+val articleIds = articleIdsRDD2.take(3)
 articleIds.foreach(key => {
 	val valueBuf = succinctWikiKV.get(key)
 	println("articleID = " + key + " article = " + new String(valueBuf))
-}
+})
 ~~~
 </div>
 </div>
 
-This was a short overview of `SuccinctKVRDD`'s functionality using a small
-Wikipedia dataset.
+We've taken a look at how we can compress data on Spark into a SuccinctKVRDD,
+and seen how we can execute queries directly on these compressed RDDs. However,
+we've only worked with a small dataset size of 250 Wikipedia articles.
 
-## Working with Larger Succinct RDDs 
+## Working with Larger RDDs
 
-In order to demonstrate the power of Succinct, we've
-preprocessed a larger Wikipedia dataset into Succinct data structures 
-and stored it on your USB drive. Lets try loading the preprocessed data
+In practice, we would want to work with much larger datasets. In order to 
+analyze relatively larger datasets, we've pre-processed ~600MB of Wikipedia
+articles on your USB drive.
+
+Lets first analyze the dataset using Spark's native RDDs as before; we'll start
+by loading the dataset and caching it in memory:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val wikiKV2 = sc.textFile("data/succinct/wiki-large.txt")
+	.map(_.split('|'))
+  	.map(t => (t(0).toLong, t(1)))
+wikiKV2.count
+~~~
+</div>
+</div>
+
+The dataset contains 300000 articles -- much more than before. We can take a look at the
+storage footprint of the RDD at http://localhost:4040. This is what it should look like:
+
+<img src="img/spark-storage.png" 
+title="Spark RDD Storage" 
+alt=""Spark RDD Storage"
+id="spark-storage"
+/>
+
+Depending on the configuration of the machine you're running on, the number of 
+partitions cached may vary.
+
+Lets try executing the same search query as before on this dataset, using the 
+filter operation:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val articleIdsRDD3 = wikiKV2.filter(kvPair => kvPair._2.contains("Berkeley")).map(_._1)
+articleIdsRDD3.count
+~~~
+</div>
+</div>
+
+Take a note of how long the query took to execute.
+
+Another important query for document and key-value stores is `get(key)`. We can
+emulate this on a Spark RDD using the following snippet:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val article = wikiKV2.filter(kvPair => kvPair._1 == 0).map(_._2).collect()(0)
+~~~
+</div>
+</div>
+
+Again, note the time taken to execute this query.
+
+Now lets see how we can perform the same operations on a SuccinctKVRDD. In
+the interest of time, we also preprocessed the larger Wikipedia dataset into Succinct 
+data structures and stored it on your USB drive. Lets try loading the preprocessed data
 and running queries on it:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-import edu.berkeley.cs.succinct.kv._
-val wikiSuccinctKV2 = sc.succinctKV[Long]("data/succinct/succinct-wiki-artices") 
+val wikiSuccinctKV2 = sc.succinctKV[Long]("data/succinct/succinct-wiki-large")
+wikiSuccinctKV2.count 
 ~~~
 </div>
 </div>
 
-The command above directs Spark to load the `SuccinctKVRDD` with `Long` keys from the 
-specified location on disk.
+The command above directs Spark to load the `SuccinctKVRDD` with `Long` keys 
+from the specified location on disk. We have the same number of articles as 
+the uncompressed RDD, but _with a much lower storage footprint_. To see how much
+smaller, go back to http://localhost:8080/; it might look something like this:
 
-Our goal with the Succinct project is to push the boundaries of queries that can be executed
-directly on compressed data. To this end, we've added support for _regular expression queries_ 
-directly on compressed RDDs! The API is quite similar to the `search(query)` before:
+<img src="img/succinct-storage.png" 
+title="Spark RDD Storage" 
+alt=""Spark RDD Storage"
+id="spark-storage"
+/>
+
+Now we'll try running the same set of queries as before on the SuccinctKVRDD.
+Let's start with search:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val articleIdsRDD2 = succinctWikiKV2.regexSearch("(stanford|berkeley)\\.edu")
+val articleIdsRDD4 = succinctWikiKV2.search("Berkeley")
+articleIdsRDD4.count
+~~~
+</div>
+</div>
+
+Note the time taken to execute the query; as we described earlier, Succinct avoids having to _scan_
+all 300000 articles to obtain the ones that contain "Bekeley" -- it embeds all necessary information to obtain
+the query results directly from the compressed representation. This leads to both _reduced storage overheads_
+as well as _low latency_ for search queries.
+
+Let's take a look at few of the matching articles using the `get(key)` operation:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
 val articleIds2 = articleIdsRDD2.take(10)
 articleIds2.foreach(key => {
 	val valueBuf = succinctWikiKV2.get(key)
 	println("articleID = " + key + " article = " + new String(valueBuf))
-}
+})
+~~~
+</div>
+</div>
+
+Again, contrast the performance of `get(key)` for SuccinctKVRDD and Spark's native RDD -- the benefits arise
+due to Succinct's native support for _random access_ as opposed to performing data scans.
+
+Our goal with the Succinct project is to push the boundaries of queries that can be executed
+directly on compressed data. To this end, we've added support for _regular expression queries_ 
+directly on compressed RDDs! The supported operators include union (`R1|R2`), repeat (`R1+`, `R1*`), 
+concat (`(R1)(R2)`) and wildcard (`R1.*R2`). The API is quite similar to the `search(query)` before:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val articleIdsRDD3= succinctWikiKV3.regexSearch("(stanford|berkeley)\\.edu")
+val articleIds3 = articleIdsRDD3.take(10)
+articleIds2.foreach(key => {
+	val valueBuf = succinctWikiKV2.get(key)
+	println("articleID = " + key + " article = " + new String(valueBuf))
+})
 ~~~
 </div>
 </div>
