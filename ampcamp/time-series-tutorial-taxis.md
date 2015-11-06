@@ -141,7 +141,7 @@ val vectorsAR = ARModel(timeSeriesRDD, chosenP, Some(mean)).map(_.covariation)
 </div>
 </div>
 
-2. Let's compute the residuals
+2. Let's compute the residuals...
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
@@ -150,7 +150,7 @@ val residualsAR = ARPredictor(timeSeriesRDD, vectorsAR, Some(mean))
 </div>
 </div>
 
-3. And their covariance matrix. As usual we want it to be a diagonal.
+3. and their covariance matrix. As usual we want it to be a diagonal.
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
@@ -186,7 +186,7 @@ PlotTS.showModel(estVARMatrices, Some("Multivariate parameter estimates"), Some(
 </div>
 </div>
 
-7. Let's compute the residuals.
+7. Let's compute the residuals...
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
@@ -195,7 +195,7 @@ val residualVAR = VARPredictor(timeSeriesRDD, estVARMatrices, Some(mean))
 </div>
 </div>
 
-8. and their variance-covariance matrix. Again we want to avoid extra-diagonal terms.
+8. and their variance-covariance matrix. Once again we want to avoid extra-diagonal terms.
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
