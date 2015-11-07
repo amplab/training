@@ -1,3 +1,13 @@
+---
+layout: global
+title: Time series analysis on taxi data in New York
+categories: [module]
+navigation:
+  weight: 100
+  show: true
+skip-chapter-toc: true
+---
+
 # Time series analysis on taxi data in New York.
 
 ## Compilation notes:

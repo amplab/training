@@ -1,3 +1,12 @@
+---
+layout: global
+title: Time series analysis on surrogate data
+categories: [module]
+navigation:
+  weight: 100
+  show: true
+skip-chapter-toc: true
+---
 # Time series analysis on surrogate data.
 
 ## Compilation notes:
