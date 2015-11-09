@@ -11,22 +11,22 @@ navigation:
 
 Succinct is a distributed data store that supports a wide range of point 
 queries directly on a compressed representation of the input data. We are very
-excited to release Succinct Spark, as a Spark package, that enables search, 
-range and random access queries on compressed RDDs. This release allows users 
-to use Apache Spark as a document store (with search on documents) similar to 
-ElasticSearch, a key-value interface (with search on values) similar to 
+excited to announce the release Succinct Spark, as a Spark package, that enables
+search, range and random access queries on compressed RDDs. This release allows 
+users to use Apache Spark as a document store (with search on documents) similar 
+to ElasticSearch, a key-value interface (with search on values) similar to 
 HyperDex, and an experimental DataFrame interface (with search along columns in
 a table).
 
 ## Creating a Succinct RDD
 
 To start using Succinct's API, we need to start up the Spark Shell with the 
-Succinct Spark package available to it. The following command directs the Spark
-Shell to load the jar for the Succinct Spark package, and increase the executor
+Succinct Spark package jars available to it. The following command directs the Spark
+Shell to load the jar for the Succinct Spark package, and increases the executor
 memory to 2GB (since we'll be working with large datasets later in the exercise):
 
 <pre class="prettyprint lang-bsh">
-usb/$ bin/spark-shell --jars ~/Work/AMPCamp2015/succinct/jars/succinct-0.1.4.jar --executor-memory 2G --conf "spark.driver.extraJavaOptions=-XX:MaxPermSize=256m"
+usb/$ bin/spark-shell --jars jars/succinct/succinct-0.1.4.jar --executor-memory 2G --conf "spark.driver.extraJavaOptions=-XX:MaxPermSize=256m"
 </pre>
 
 Now that we have the Spark shell loaded with the Succinct Spark package, we'll
@@ -47,7 +47,7 @@ work with an RDD of `(articleID, article)` pairs, where each entry corresponds
 to a single Wikipedia article.
 
 Let's start with loading the Wikipedia articles into a regular RDD. The dataset
-provided is stored as a CSV containing `(articleID, article)` pairs. The following
+provided is stored as a CSV file of `(articleID, article)` pairs. The following
 snippet loads the dataset and creates an RDD of key value pairs pairs:
 
 <div class="codetabs">
@@ -59,7 +59,7 @@ val wikiKV = wikiData.map(entry => (entry(0).toLong, entry(1)))
 </div>
 </div>
 
-Lets take a look at how many documents we have in the RDD:
+Lets take a look at the number of documents we have in the RDD:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -83,7 +83,8 @@ articleIds.count
 </div>
 </div>
 
-We've found only 3 artciles, but had to scan through all 250 to find them.
+We've found only 3 artciles, but note that Spark had to scan through all 250 to 
+find them.
 
 Lets take a look at how we can now convert this RDD into a `SuccinctKVRDD`. 
 While the keys can be of arbitrary type (`Long` in this example), each array is
@@ -92,7 +93,7 @@ an array of bytes. We can transform the RDD we created before as follows:
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val succinctWikiKV = wikiKV.succinctKV
+val succinctWikiKV = wikiKV.map(t => (t._1, t._2.getBytes).succinctKV
 ~~~
 </div>
 </div>
@@ -179,12 +180,12 @@ storage footprint of the RDD at http://localhost:4040. This is what it should lo
 
 <img src="img/spark-storage.png" 
 title="Spark RDD Storage" 
-alt=""Spark RDD Storage"
+alt="Spark RDD Storage"
 id="spark-storage"
 />
 
 Depending on the configuration of the machine you're running on, the number of 
-partitions cached may vary.
+partitions or the amount of data cached may vary.
 
 Lets try executing the same search query as before on this dataset, using the 
 filter operation:
@@ -234,7 +235,7 @@ smaller, go back to http://localhost:8080/; it might look something like this:
 
 <img src="img/succinct-storage.png" 
 title="Spark RDD Storage" 
-alt=""Spark RDD Storage"
+alt="Spark RDD Storage"
 id="spark-storage"
 />
 
@@ -269,8 +270,20 @@ articleIds2.foreach(key => {
 </div>
 </div>
 
-Again, contrast the performance of `get(key)` for SuccinctKVRDD and Spark's native RDD -- the benefits arise
-due to Succinct's native support for _random access_ as opposed to performing data scans.
+Again, contrast the performance of `get(key)` for SuccinctKVRDD and Spark's 
+native RDD -- the benefits arise due to Succinct's native support for 
+_random access_ as opposed to performing data scans in regular RDDs.
+
+In addition, SuccinctKVRDD also supports random access _within values_. For instance,
+we can extract the first 100 bytes for the `article` with `articleId` 42 as follows:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val extractedData = new String(succinctWikiKV2.extract(42, 0, 100))
+~~~
+</div>
+</div>
 
 Our goal with the Succinct project is to push the boundaries of queries that can be executed
 directly on compressed data. To this end, we've added support for _regular expression queries_ 
