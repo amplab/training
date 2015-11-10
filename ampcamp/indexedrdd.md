@@ -34,7 +34,7 @@ First, we need to launch the Spark Shell with the IndexedRDD package its
 dependencies:
 
 <pre class="prettyprint lang-bsh">
-usb/$ bin/spark-shell --packages amplab:spark-indexedrdd:0.3 \
+usb/$ spark/bin/spark-shell --packages amplab:spark-indexedrdd:0.3 \
         --repositories https://raw.githubusercontent.com/ankurdave/maven-repo/master
 </pre>
 
