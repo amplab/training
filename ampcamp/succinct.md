@@ -78,7 +78,7 @@ If we wanted to find all `articleId`s corresponding to `article`s containing the
 <div data-lang="scala" markdown="1">
 ~~~
 val articleIdsRDD = wikiKV.filter(kvPair => kvPair._2.contains("Berkeley")).map(_._1)
-articleIds.count
+articleIdsRDD.count
 ~~~
 </div>
 </div>
@@ -93,7 +93,7 @@ an array of bytes. We can transform the RDD we created before as follows:
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val succinctWikiKV = wikiKV.map(t => (t._1, t._2.getBytes).succinctKV
+val succinctWikiKV = wikiKV.map(t => (t._1, t._2.getBytes)).succinctKV
 ~~~
 </div>
 </div>
@@ -222,8 +222,8 @@ and running queries on it:
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val wikiSuccinctKV2 = sc.succinctKV[Long]("data/succinct/succinct-wiki-large")
-wikiSuccinctKV2.count 
+val succinctWikiKV2 = sc.succinctKV[Long]("data/succinct/succinct-wiki-large")
+succinctWikiKV2.count 
 ~~~
 </div>
 </div>
