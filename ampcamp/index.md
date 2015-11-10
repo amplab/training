@@ -140,7 +140,7 @@ Note: Please follow the setup instructions at the [Getting Started](getting-star
 {:.bordered}
 | Exercise                                                         | Description                                             | Length   | More Documentation                                                                                                |
 | ---------------------------------------------------              | ------------------------------------------------------- | :------: | :------------------------------------------------------------------------------:                                  |
-| [Pipelines](image-classification-with-pipelines.html)            | Image classification with pipelines                     | Medium   | |
+| [KeystoneML](image-classification-with-pipelines.html)            | Text and Image classification with KeystoneML                     | Medium   | |
 | [SparkR](sparkr.html)                                            | Interactive Data Analytics using Spark in R             | Short    | [Project Page](http://amplab-extras.github.io/SparkR-pkg/); [Github](https://github.com/amplab-extras/SparkR-pkg) |
 | [ADAM](genome-analysis-with-adam.html)                           | Genome analysis with ADAM                               | Medium   | |
 | [Splash](splash.html)                           | Use Splash to run stochastic learning algorithms                              | Short   |[Project Page](http://zhangyuc.github.io/splash/) | 
