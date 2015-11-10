@@ -10,9 +10,36 @@ skip-chapter-toc: true
 
 # Time series analysis on surrogate data.
 
-## Compilation notes:
-Compile by typing in time series folder: sbt assembly .
-Run by typing in time series folder: sbt console .
+## Getting started:
+In the shell, from the usb/spark/, please enter
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<pre class="prettyprint lang-bsh">
+    usb/$ ./bin/spark-shell --master local[4] --jars ../timeseries/sparkgeots.jar --driver-memory 2G
+</pre>
+</div>
+</div>
+
+and then please copy and paste the following in the Spark shell:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<pre class="prettyprint lang-bsh">
+    import breeze.linalg._
+    import breeze.stats.distributions.Gaussian
+    import breeze.numerics.sqrt
+    import org.apache.spark.rdd.RDD
+    import org.apache.spark.{SparkConf, SparkContext}
+    import main.scala.overlapping._
+    import containers._
+    import timeSeries._
+
+    implicit def signedDistMillis = (t1: TSInstant, t2: TSInstant) => (t2.timestamp.getMillis - t1.timestamp.getMillis).toDouble
+</pre>
+</div>
+</div>
+
 
 In this tutorial we are going to practice on artificially generated data
 and show that we are able to successfully identify autoregressive models.
@@ -21,102 +48,119 @@ and show that we are able to successfully identify autoregressive models.
 
 Let's generate some data with an order 3 Autoregressive Model.
 
+In such a model X_t = A_1 * X_{t-1} + A_2 * X_{t-2} + A_3 * X_{t-3} + iid noise.
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-val actualP = 3
+    val actualP = 3
 </div>
 </div>
 
 We have 3 spatial dimensions (3 sensors or data feeds).
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-val d = 3
+    val d = 3
 </div>
 </div>
 
 Let's generate 10000 samples (you can also try a million for instance).
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-val N = 10000L
+    val N = 10000L
 </div>
 </div>
 
 ## Time series configuration
 
 Let's specify that there is one millisecond between each sample.
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-val deltaTMillis = 1L
+    val deltaTMillis = 1L
 </div>
 </div>
 
-Let's have an overlap between partitions of 100 ms
+Let's have an overlap between partitions of 100 ms.
+The data in our partitions will overlap as follows:
+------------------------------------
+                                -----------------------------------
+                                                                ---------------------------------
+This is necessary to estimate our models without shuffling data between nodes.
+With this setup, we will be able to calibrate models of any order lower that 100 ms / 1 ms = 100.
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-val paddingMillis = 100L
+    val paddingMillis = 100L
 </div>
 </div>
 
-We choose to have 8 partitions
+We choose to have 8 partitions.
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-val nPartitions = 8
+    val nPartitions = 8
 </div>
 </div>
 
 We gather all that information into the implicit val config which will be
 used later on in all the calls we make.
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-implicit val config = TSConfig(deltaTMillis, d, N, paddingMillis.toDouble)
+    implicit val config = TSConfig(deltaTMillis, d, N, paddingMillis.toDouble)
 </div>
 </div>
 
 ## Data generation
 (1) We generate the coefficients of the model randomly and try to enforce causality.
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-val ARCoeffs: Array[DenseMatrix[Double]] = Array.fill(actualP){DenseMatrix.rand[Double](d, d) - (DenseMatrix.ones[Double](d, d) * 0.5)}
-Stability.makeStable(ARCoeffs)
+    val ARCoeffs: Array[DenseMatrix[Double]] = Array.fill(actualP){DenseMatrix.rand[Double](d, d) - (DenseMatrix.ones[Double](d, d) * 0.5)}
+    Stability.makeStable(ARCoeffs)
 </div>
 </div>
 
 We have the same amount of noise everywhere.
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-<pre class="prettyprint lang-bsh">
-val noiseMagnitudes = DenseVector.ones[Double](d)
-</pre>
+    val noiseMagnitudes = DenseVector.ones[Double](d)
 </div>
 </div>
 
 Let's generate the surrogate data.
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-val rawTS = Surrogate.generateVAR(
-  ARCoeffs,
-  d,
-  N.toInt,
-  deltaTMillis,
-  Gaussian(0.0, 1.0),
-  noiseMagnitudes,
-  sc)
+    val rawTS = Surrogate.generateVAR(
+        ARCoeffs,
+        d,
+        N.toInt,
+        deltaTMillis,
+        Gaussian(0.0, 1.0),
+        noiseMagnitudes,
+        sc)
 </div>
 </div>
 
 And put it in the overlapping data structure
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-val (timeSeriesRDD: RDD[(Int, SingleAxisBlock[TSInstant, DenseVector[Double]])], _) =
-  SingleAxisBlockRDD((paddingMillis, paddingMillis), nPartitions, rawTS)
+    val (timeSeriesRDD: RDD[(Int, SingleAxisBlock[TSInstant, DenseVector[Double]])], _) =
+        SingleAxisBlockRDD((paddingMillis, paddingMillis), nPartitions, rawTS)
 </div>
 </div>
 
 We can inspect the parameters and plot some data
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-PlotTS.showModel(ARCoeffs, Some("Actual parameters"))
-PlotTS(timeSeriesRDD, Some("In Sample Data"))
+    PlotTS.showModel(ARCoeffs, Some("Actual parameters"))
+    PlotTS(timeSeriesRDD, Some("In Sample Data"))
 </div>
 </div>
 
@@ -128,53 +172,59 @@ Go back to (1) if unfortunately this has happened.
 Let's take a look at the auto-correlation structure of the data we have
 generated. If that correlation vanishes to 0 after lag q, the data we
 see is most likely generated by an MA(q) model.
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-val (correlations, _) = CrossCorrelation(timeSeriesRDD, 4)
-PlotTS.showModel(correlations, Some("Cross correlation"))
+    val (correlations, _) = CrossCorrelation(timeSeriesRDD, 4)
+    PlotTS.showModel(correlations, Some("Cross correlation"))
 </div>
 </div>
 
 Let's take a look at the partial auto-correlation structure of the data we have
 generated. If that correlation vanishes to 0 after lag p, the data we
 see is most likely generated by an AR(p) model.
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-val (partialCorrelations, _) = PartialCrossCorrelation(timeSeriesRDD,4)
-PlotTS.showModel(partialCorrelations, Some("Partial cross correlation"))
+    val (partialCorrelations, _) = PartialCrossCorrelation(timeSeriesRDD,4)
+    PlotTS.showModel(partialCorrelations, Some("Partial cross correlation"))
 </div>
 </div>
 
 ## Monovariate analysis
 
 1. Let's fit a univariate AR model on each spatial dimension of the data
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-val p = actualP
-val mean = MeanEstimator(timeSeriesRDD)
-val vectorsAR = ARModel(timeSeriesRDD, p, Some(mean)).map(_.covariation)
+    val p = actualP
+    val mean = MeanEstimator(timeSeriesRDD)
+    val vectorsAR = ARModel(timeSeriesRDD, p, Some(mean)).map(_.covariation)
 </div>
 </div>
 
 2. Now we compute the prediction residuals (in sample).
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-val residualsAR = ARPredictor(timeSeriesRDD, vectorsAR, Some(mean))
+    val residualsAR = ARPredictor(timeSeriesRDD, vectorsAR, Some(mean))
 </div>
 </div>
 
 3. We also compute the variance - covariance matrix of the residuals.
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-val residualSecondMomentAR = SecondMomentEstimator(residualsAR)
+    val residualSecondMomentAR = SecondMomentEstimator(residualsAR)
 </div>
 </div>
 
 4. Let's inspect the result:
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-PlotTS.showUnivModel(vectorsAR, Some("Monovariate parameter estimates"))
-PlotTS(residualsAR, Some("Monovariate AR residual error"))
+    PlotTS.showUnivModel(vectorsAR, Some("Monovariate parameter estimates"))
+    PlotTS(residualsAR, Some("Monovariate AR residual error"))
 </div>
 </div>
 
@@ -182,34 +232,40 @@ PlotTS(residualsAR, Some("Monovariate AR residual error"))
 
 1. Let's fit a multivariate AR model taking the information of all sensors
 jointly into account.
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-val (estVARMatrices, _) = VARModel(timeSeriesRDD, p)
+    val (estVARMatrices, _) = VARModel(timeSeriesRDD, p)
 </div>
 </div>
 
 2. We compute the predition residuals.
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-val residualVAR = VARPredictor(timeSeriesRDD, estVARMatrices, Some(mean))
+    val residualVAR = VARPredictor(timeSeriesRDD, estVARMatrices, Some(mean))
 </div>
 </div>
 
 3. Let's take a look at the variance - covariance matrix of the residuals. It should be closer to a diagonal matrix than in the univariate analysis.
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-val residualSecondMomentVAR = SecondMomentEstimator(residualVAR)
-PlotTS.showModel(estVARMatrices, Some("Multivariate parameter estimates"))
-PlotTS.showCovariance(residualSecondMomentAR, Some("Monovariate residual covariance"))
-PlotTS.showCovariance(residualSecondMomentVAR, Some("Multivariate residual covariance"))
+    val residualSecondMomentVAR = SecondMomentEstimator(residualVAR)
+    PlotTS.showModel(estVARMatrices, Some("Multivariate parameter estimates"))
+    PlotTS.showCovariance(residualSecondMomentAR, Some("Monovariate residual covariance"))
+    PlotTS.showCovariance(residualSecondMomentVAR, Some("Multivariate residual covariance"))
 </div>
 </div>
 
-4. Let's compare the errors between univariate and multivariate models.
+4. Let's compare the errors between univariate and multivariate models. We compute the mean squared errors which sum all squared errors along the sensing dimensions. The averate error we make when predicting is therefore obtained by dividing by the number of sensors and taking the square root of the result.
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-println("AR in sample error = " + trace(residualSecondMomentAR))
-println("VAR in sample error = " + trace(residualSecondMomentVAR))
-println()
+    println("AR in sample error = " + trace(residualSecondMomentAR))
+    println("Monovariate average error magnitude = " + sqrt(trace(residualSecondMomentAR) / d))
+    println("VAR in sample error = " + trace(residualSecondMomentVAR))
+    println("Multivariate average error magnitude = " + sqrt(trace(residualSecondMomentVAR) / d))
+    println()
 </div>
 </div>
