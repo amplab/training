@@ -13,11 +13,11 @@ skip-chapter-toc: true
 You should have received a USB stick containing the training materials.  If you do not have one, please ask a TA.
 
 If you cannot use the USB stick or would prefer to download a zip file with the USB stick's contents,
-please click <a href="http://10.225.217.159/ampcamp5-usb.zip">here</a>.
+please click <a href="http://www.cs.berkeley.edu/~jey/ampcamp6/ampcamp6-rc1.zip">here</a>.
 
 #### Remote Participants
 Please download the USB stick's contents from
-<a href="http://d12yw77jruda6f.cloudfront.net/ampcamp5-usb.zip">here</a>.
+<a href="http://www.cs.berkeley.edu/~jey/ampcamp6/ampcamp6-rc1.zip">here</a>.
 
 ## Quick Start
 
