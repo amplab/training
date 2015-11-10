@@ -174,7 +174,7 @@ wikiKV2.count
 </div>
 
 The dataset contains 300000 articles -- much more than before. We can take a look at the
-storage footprint of the RDD at http://localhost:4040. This is what it should look like:
+storage footprint of the RDD at http://localhost:4040/storage/. This is what it should look like:
 
 <img src="img/spark-storage.png" 
 title="Spark RDD Storage" 
@@ -212,10 +212,10 @@ val article = wikiKV2.filter(kvPair => kvPair._1 == 0).map(_._2).collect()(0)
 
 Again, note the time taken to execute this query.
 
-Now lets see how we can perform the same operations on a SuccinctKVRDD. In
-the interest of time, we also preprocessed the larger Wikipedia dataset into Succinct 
-data structures and stored it on your USB drive. Before we load the Succinct data structures,
-lets uncache the previous RDD:
+Now lets see how we can perform the same operations on a SuccinctKVRDD. In the 
+interest of time, we also preprocessed the larger Wikipedia dataset into 
+Succinct data structures and stored it on your USB drive. Before we load the 
+Succinct data structures, lets uncache the previous RDD:
  
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -239,7 +239,8 @@ succinctWikiKV2.count
 The command above directs Spark to load the `SuccinctKVRDD` with `Long` keys 
 from the specified location on disk. We have the same number of articles as 
 the uncompressed RDD, but _with a much lower storage footprint_. To see how much
-smaller, go back to http://localhost:4040/; it might look something like this:
+smaller, go back to http://localhost:4040/storage/; it might look something like 
+this:
 
 <img src="img/succinct-storage.png" 
 title="Spark RDD Storage" 
@@ -269,8 +270,8 @@ Let's take a look at few of the matching articles using the `get(key)` operation
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val articleIds2 = articleIdsRDD2.take(10)
-articleIds2.foreach(key => {
+val articleIds4 = articleIdsRDD4.take(10)
+articleIds4.foreach(key => {
 	val valueBuf = succinctWikiKV2.get(key)
 	println("articleID = " + key + " article = " + new String(valueBuf))
 })
@@ -301,9 +302,9 @@ concat (`(R1)(R2)`) and wildcard (`R1.*R2`). The API is quite similar to the `se
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val articleIdsRDD3= succinctWikiKV3.regexSearch("(stanford|berkeley)\\.edu")
-val articleIds3 = articleIdsRDD3.take(10)
-articleIds2.foreach(key => {
+val articleIdsRDD5 = succinctWikiKV2.regexSearch("(stanford|berkeley)\\.edu")
+val articleIds5 = articleIdsRDD4.take(10)
+articleIds5.foreach(key => {
 	val valueBuf = succinctWikiKV2.get(key)
 	println("articleID = " + key + " article = " + new String(valueBuf))
 })
