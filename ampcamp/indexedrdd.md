@@ -109,6 +109,7 @@ var views = articles.mapValues(title => 0)
 </div>
 
 In a real application, the view data might come from web server logs, but here we have it in a series of files. Let's load each file, then update the view counts using a join:
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
