@@ -216,8 +216,18 @@ Again, note the time taken to execute this query.
 
 Now lets see how we can perform the same operations on a SuccinctKVRDD. In
 the interest of time, we also preprocessed the larger Wikipedia dataset into Succinct 
-data structures and stored it on your USB drive. Lets try loading the preprocessed data
-and running queries on it:
+data structures and stored it on your USB drive. Before we load the Succinct data structures,
+lets uncache the previous RDD:
+ 
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+wikiKV2.unpersist()
+~~~
+</div>
+</div>
+
+Now we'll try loading the preprocessed data and running queries on it:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -231,7 +241,7 @@ succinctWikiKV2.count
 The command above directs Spark to load the `SuccinctKVRDD` with `Long` keys 
 from the specified location on disk. We have the same number of articles as 
 the uncompressed RDD, but _with a much lower storage footprint_. To see how much
-smaller, go back to http://localhost:8080/; it might look something like this:
+smaller, go back to http://localhost:4040/; it might look something like this:
 
 <img src="img/succinct-storage.png" 
 title="Spark RDD Storage" 
