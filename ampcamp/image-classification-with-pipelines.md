@@ -40,12 +40,12 @@ You should find the following items in the directory:
 </div>
 </div>
 
-Now, you can launch your Spark Shell using KeystoneML as follows from the spark subdirectory of the USB directory:
+Now, you can launch your Spark Shell using KeystoneML as follows from the Spark subdirectory of the USB directory:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-#Make sure you do this in the root of the USB directory.
+# Make sure you do this in the Spark subdirectory of the USB directory.
 usb/$ ./bin/spark-shell --master local[4] --jars ../ampcamp-keystoneml/ampcamp-keystoneml.jar --driver-memory 2G --driver-class-path ../ampcamp-keystoneml/ampcamp-keystoneml.jar
 </pre>
 </div>
@@ -573,6 +573,7 @@ As we can see, this technique has improved our classification accuracy noticeabl
 
 ###An Even Better Pipeline
 It just so happens that we can keep adding more of the random features shown above using the following Pipeline:
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
