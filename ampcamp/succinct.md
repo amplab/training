@@ -167,9 +167,7 @@ by loading the dataset and caching it in memory:
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val wikiKV2 = sc.textFile("data/succinct/wiki-large.txt")
-	.map(_.split('|'))
-  	.map(t => (t(0).toLong, t(1)))
+val wikiKV2 = sc.textFile("data/succinct/wiki-large.txt").map(_.split('|')).map(t => (t(0).toLong, t(1)))
 wikiKV2.count
 ~~~
 </div>
