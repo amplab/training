@@ -1,31 +1,56 @@
 ---
 layout: global
-title: Time series analysis on taxi data in New York
+title: Time Series Analysis on Taxi Data in New York
 categories: [module]
 navigation:
   weight: 100
   show: true
-skip-chapter-toc: true
 ---
 
-# Time series analysis on taxi data in New York.
+{:toc}
 
-## Compilation notes:
-Compile by typing in time series folder: sbt assembly .
-Run by typing in this folder: sbt console .
+# Time Series Analysis on Taxi Data in New York
 
+## Getting Started
+In the shell, from the usb/spark/, please enter
+
+<pre class="prettyprint lang-bsh">
+usb/$ ./bin/spark-shell --master "local[4]" --jars ../timeseries/sparkgeots.jar --driver-memory 2G
+</pre>
+
+and then please copy and paste the following in the Spark shell:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+    import breeze.linalg._
+    import breeze.stats.distributions.Gaussian
+    import breeze.numerics.sqrt
+    import org.apache.spark.rdd.RDD
+    import org.apache.spark.{SparkConf, SparkContext}
+    import main.scala.overlapping._
+    import containers._
+    import timeSeries._
+    import main.scala.ioTools.ReadCsv
+
+    implicit def signedDistMillis = (t1: TSInstant, t2: TSInstant) => (t2.timestamp.getMillis - t1.timestamp.getMillis).toDouble
+</div>
+</div>
+
+
+In this tutorial we are going to practice on artificially generated data
+and show that we are able to successfully identify autoregressive models.
 In this tutorial we are going to practice on actual data
 and calibrate a multivariate autoregressive model.
 
-## Loading the data
+## Loading the Data
 
 Let's first load the data. This is taxi earnings in New York
 grouped into spatial cells and 5 minute time buckets.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-    val inSampleFilePath = "./data/taxis.csv"
-    val (inSampleDataHD, _, nSamples) = ReadCsv.TS(inSampleFilePath)
+    val inSampleFilePath = "../data/timeseries/taxis.csv"
+    val (inSampleDataHD, _, nSamples) = ReadCsv.TS(inSampleFilePath)(sc)
 </div>
 </div>
 
@@ -38,7 +63,7 @@ You can try with more dimensions, things will just be longer.
 </div>
 </div>
 
-## Configuring the time series
+## Configuring the Time Series
 
 Let's specify the configuration of the time series
 
@@ -51,6 +76,16 @@ Let's specify the configuration of the time series
     implicit val config = TSConfig(deltaTMillis, d, nSamples, paddingMillis.toDouble)
 </div>
 </div>
+
+Let's have an overlap between partitions of 100 ms.
+The data in our partitions will overlap as follows:
+<pre class="prettyprint lang-bsh">
+------------------------------------
+                                -----------------------------------
+                                                              ---------------------------------
+</pre>
+This is necessary to estimate our models without shuffling data between nodes.
+With this setup, we will be able to calibrate models of any order lower that 100.
 
 Let's see how many samples and dimensions we have.
 
@@ -67,11 +102,15 @@ Let's gather the data with seasonality into overlapping blocks.
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
     val (rawTimeSeries: RDD[(Int, SingleAxisBlock[TSInstant, DenseVector[Double]])], _) =
-      SingleAxisBlockRDD((paddingMillis, paddingMillis), nPartitions, inSampleData)
+        SingleAxisBlockRDD((paddingMillis, paddingMillis), nPartitions, inSampleData)
+    PlotTS(rawTimeSeries, Some("In Sample Data"), Some(Array(15, 30, 45)))
 </div>
 </div>
 
-## Identifying seasonality.
+We can see on the plot that has been generated for three regions that there is strong seasonal component to the earnings of taxis.
+
+
+## Identifying Seasonality
 
 Let's get rid of seasonality. We group all the data in the same 5 minute window of the week together.
 
@@ -90,7 +129,7 @@ If we want to visualize the seasonal profile.
     val matrixMeanProfile = DenseMatrix.zeros[Double](7 * 24 * 12, d)
     val meanProfile = MeanProfileEstimator(rawTimeSeries, hashFunction)
     for(k <- meanProfile.keys){
-      matrixMeanProfile(k, ::) := meanProfile(k).t
+        matrixMeanProfile(k, ::) := meanProfile(k).t
     }
     PlotTS.showProfile(matrixMeanProfile, Some("Weekly demand profile"), Some("Weekly_demand_profile.png"))
 </div>
@@ -102,11 +141,11 @@ Let's remove the seasonal component from the data and put it in overlaping block
 <div data-lang="scala" markdown="1">
     val noSeason = MeanProfileEstimator.removeSeason(inSampleData, hashFunction, meanProfile)
     val (timeSeriesRDD: RDD[(Int, SingleAxisBlock[TSInstant, DenseVector[Double]])], _) =
-        SingleAxisBlockRDD((paddingMillis, paddingMillis), nPartitions, noSeason)
+    SingleAxisBlockRDD((paddingMillis, paddingMillis), nPartitions, noSeason)
 </div>
 </div>
 
-## Analysis of the data without seasonality
+## Analysis of the Data Without Seasonality
 
 Now we take a look at the auto-correlation structure of the data.
 
@@ -126,10 +165,15 @@ And proceed similarly with partial auto-correlation.
 </div>
 </div>
 
-## Autoregressive model estimation
+## Autoregressive Model Estimation
 
 We'll try and calibrate an AR(3) model on that data.
-val chosenP = 3
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+    val chosenP = 3
+</div>
+</div>
 
 Let's first proceed with an univariate model.
 
@@ -193,17 +237,24 @@ and their variance-covariance matrix. Once again we want to avoid extra-diagonal
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
     val residualSecondMomentVAR = SecondMomentEstimator(residualVAR)
-    PlotTS.showCovariance(residualSecondMomentAR, Some("Monovariate residual covariance"), Some("Monovariate_res_covariance_taxis.png"))
+    PlotTS.showCovariance(residualSecondMomentAR, Some("Monovariate residual covariance"),  Some("Monovariate_res_covariance_taxis.png"))
     PlotTS.showCovariance(residualSecondMomentVAR, Some("Multivariate residual covariance"), Some("Multivariate_res_covariance_taxis.png"))
 </div>
 </div>
 
-Now let's take a look at the mean squared error of the residuals.
+Now let's take a look at the mean squared error of the residuals. We compute the mean squared errors which sum all 
+squared errors along the sensing dimensions. The averate error we make when predicting is therefore obtained 
+by dividing by the number of sensors and taking the square root of the result.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
     println("AR in sample error = " + trace(residualSecondMomentAR))
+    println("Monovariate average error magnitude = " + sqrt(trace(residualSecondMomentAR) / d))
     println("VAR in sample error = " + trace(residualSecondMomentVAR))
+    println("Multivariate average error magnitude = " + sqrt(trace(residualSecondMomentVAR) / d))
     println()
 </div>
 </div>
+
+We can see that we can improve the prediction of demand by a couple of cents per spatial unit and 
+5 minute window if we use a multivariate model.
