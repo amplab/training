@@ -20,17 +20,18 @@ However, reading through that whole tutorial and trying the examples at the cons
 so we will provide a basic introduction to the Scala shell here. Do as much as you feel you need 
 (in particular you might want to skip the final "bonus" question).
 
-<p class="alert alert-warn">
+<!--<p class="alert alert-warn">
     <i class="icon-info-sign">    </i>
     Note that we will be using the sbt program to launch the scala interpreter here. This is a non-standard way of
     launching a scala REPL, so be aware that it is only a convenience based on what was packaged
     on the USB.
     </p>
+-->
 
-1. Launch the Scala console by typing:
+1. You can launch the scala console by typing `scala` if you already have it installed. Otherwise, you can use spark-shell to launch a scala console. 
 
    ~~~
-   usb/$ sbt/sbt console
+   usb/$ ./spark/bin/spark-shell
    ~~~
 
 1. Declare a list of integers as a variable called "myNumbers".
