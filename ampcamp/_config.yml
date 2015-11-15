@@ -1,4 +1,3 @@
-relative_permalinks: true
 markdown: kramdown
 title: Hands-on Exercises
 exclude: [README.md, where-to-go-from-here.md, less]
