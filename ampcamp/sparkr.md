@@ -4,7 +4,7 @@ title: Interactive Data Analytics in SparkR
 categories: [module]
 navigation:
   weight: 75
-  show: true
+  show: false
 skip-chapter-toc: true
 ---
 

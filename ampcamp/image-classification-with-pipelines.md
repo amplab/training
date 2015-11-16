@@ -24,29 +24,20 @@ Additionally we've included a rich library of example pipelines and the operator
 
 We've packaged KeystoneML specially for these exercises, so that you can use it interactively from the Spark Shell.
 
-<div class="codetabs">
-
-<div data-lang="scala">
-<div class="prettyprint" style="margin-bottom:10px">
-<ul style="margin-bottom:0px">
-Unzip to your USB root and navigate to the directory "ampcamp-keystoneml"
-
-You should find the following items in the directory:
+Change directories to your USB root and navigate to the directory "keystoneml". You should find the following items in the directory:
+<ul>
 <li><code>ampcamp-keystoneml.jar</code>: A specially packaged KeystoneML jar for these exercises</li>
 <li><code>20news-bydate</code>: Directory containing "20news-bydate-test" and "20news-bydate-train" as subdirectories.</li>
 <li><code>mnist</code>: Directory containing "test-mnist-dense-with-labels.data" and "train-mnist-dense-with-labels.data".</li>
 </ul>
-</div>
-</div>
-</div>
 
-Now, you can launch your Spark Shell using KeystoneML as follows from the Spark subdirectory of the USB directory:
+Now, you can launch your Spark Shell using KeystoneML as follows from the `keystoneml` subdirectory of the USB directory:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-# Make sure you do this in the Spark subdirectory of the USB directory.
-usb/$ ./bin/spark-shell --master local[4] --jars ../ampcamp-keystoneml/ampcamp-keystoneml.jar --driver-memory 2G --driver-class-path ../ampcamp-keystoneml/ampcamp-keystoneml.jar
+usb/$ cd keystoneml
+keystoneml/$ ../spark/bin/spark-shell --master local[4] --driver-memory 2G
 </pre>
 </div>
 </div>
@@ -374,7 +365,7 @@ import nodes.nlp._
 import nodes.stats._
 import nodes.util._
 
-val (trainData, trainLabels) = loadNewsgroupsData(sc, "../ampcamp-keystoneml/20news-bydate/20news-bydate-train")
+val (trainData, trainLabels) = loadNewsgroupsData(sc, "20news-bydate/20news-bydate-train")
 
 val pipeline = {
   Tokenizer("[\\s]+") andThen
@@ -383,7 +374,7 @@ val pipeline = {
   (LogisticRegressionEstimator(newsgroupsClasses.length, regParam = 0, numIters = 10), trainData, trainLabels)
 }
 
-evalNewsgroupsPipeline(pipeline, sc, "../ampcamp-keystoneml/20news-bydate/20news-bydate-test")
+evalNewsgroupsPipeline(pipeline, sc, "20news-bydate/20news-bydate-test")
 
 ~~~
 </div>
@@ -420,7 +411,7 @@ val pipeline = {
   (LogisticRegressionEstimator(newsgroupsClasses.length, regParam = 0, numIters = 10), trainData, trainLabels)
 }
 
-evalNewsgroupsPipeline(pipeline, sc, "../ampcamp-keystoneml/20news-bydate/20news-bydate-test")
+evalNewsgroupsPipeline(pipeline, sc, "20news-bydate/20news-bydate-test")
 
 ~~~
 </div>
@@ -462,7 +453,7 @@ val pipeline = {
   (LogisticRegressionEstimator(newsgroupsClasses.length, regParam = 0, numIters = 10), trainData, trainLabels)
 }
 
-evalNewsgroupsPipeline(pipeline, sc, "../ampcamp-keystoneml/20news-bydate/20news-bydate-test")
+evalNewsgroupsPipeline(pipeline, sc, "20news-bydate/20news-bydate-test")
 
 ~~~
 </div>
@@ -509,7 +500,7 @@ import nodes.util._
 import breeze.linalg.DenseVector
 import workflow._
 
-val (trainData, trainLabels) = loadMnistData(sc, "../ampcamp-keystoneml/mnist/train-mnist-dense-with-labels.data")
+val (trainData, trainLabels) = loadMnistData(sc, "mnist/train-mnist-dense-with-labels.data")
 
 val pipeline = {
   Identity() andThen
@@ -517,7 +508,7 @@ val pipeline = {
   MaxClassifier
 }
 
-evalMnistPipeline(pipeline, sc, "../ampcamp-keystoneml/mnist/test-mnist-dense-with-labels.data")
+evalMnistPipeline(pipeline, sc, "mnist/test-mnist-dense-with-labels.data")
 
 ~~~
 </div>
@@ -557,7 +548,7 @@ val pipeline = {
   MaxClassifier
 }
 
-evalMnistPipeline(pipeline, sc, "../ampcamp-keystoneml/mnist/test-mnist-dense-with-labels.data")
+evalMnistPipeline(pipeline, sc, "mnist/test-mnist-dense-with-labels.data")
 
 ~~~
 </div>
@@ -590,7 +581,7 @@ val pipeline = {
   MaxClassifier
 }
 
-evalMnistPipeline(pipeline, sc, "../ampcamp-keystoneml/mnist/test-mnist-dense-with-labels.data")
+evalMnistPipeline(pipeline, sc, "mnist/test-mnist-dense-with-labels.data")
 
 ~~~
 </div>
