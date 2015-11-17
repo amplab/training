@@ -306,13 +306,12 @@ var file = sc.textFile("tachyon://localhost:19998/LICENSE")
 val counts = file.flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey(_ + _)
 counts.persist(org.apache.spark.storage.StorageLevel.OFF_HEAP)
 counts.take(10)
-counts.take(10)
 ~~~
 </div>
 </div>
 
-You will notice the second time take(10) is much faster than the first time because that the counts
-RDD has been stored OFF_HEAP in Tachyon.
+Now, try running `counts.take(10)` again and you will see that it's much faster than the first time because the `counts`
+RDD has been stored `OFF_HEAP` in Tachyon.
 
 This brings us to the end of the Tachyon chapter of the tutorial. We encourage you to continue
 playing with the code and to check out the [project website](http://tachyon-project.org/), Github
