@@ -302,7 +302,7 @@ concat (`(R1)(R2)`) and wildcard (`R1.*R2`). The API is quite similar to the `se
 <div data-lang="scala" markdown="1">
 ~~~
 val articleIdsRDD5 = succinctWikiKV2.regexSearch("(stanford|berkeley)\\.edu")
-val articleIds5 = articleIdsRDD4.take(10)
+val articleIds5 = articleIdsRDD5.take(10)
 articleIds5.foreach(key => {
 	val valueBuf = succinctWikiKV2.get(key)
 	println("articleID = " + key + " article = " + new String(valueBuf))
