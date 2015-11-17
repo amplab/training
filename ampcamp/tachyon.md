@@ -87,13 +87,10 @@ For more information on configuration values, you can visit the Tachyon
 
 ### Format the storage
 
-Note that if you are running Linux, Tachyon will need root permission to create
-and use a RAM disk. To start a superuser shell, run `sudo su` and enter your
-password.
-
-Before starting Tachyon for the first time, we need to format the system. It can
-be done by using `tachyon` script in the `tachyon/bin` folder. Please type the
-following command:
+Before starting Tachyon for the first time, we need to format the system using
+using the `tachyon` script in the `tachyon/bin` folder. Please type the
+following command. Note that if you are running Linux or MacOS, Tachyon
+will request root permissions using `sudo` when creating the RAM disk.
 
 ~~~
 $ ./bin/tachyon format
@@ -312,6 +309,11 @@ counts.take(10)
 
 Now, try running `counts.take(10)` again and you will see that it's much faster than the first time because the `counts`
 RDD has been stored `OFF_HEAP` in Tachyon.
+
+To shutdown tachyon, issue the following command:
+
+    bin/tachyon-stop.sh
+
 
 This brings us to the end of the Tachyon chapter of the tutorial. We encourage you to continue
 playing with the code and to check out the [project website](http://tachyon-project.org/), Github
