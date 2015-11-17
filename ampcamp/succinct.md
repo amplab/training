@@ -10,8 +10,7 @@ navigation:
 {:toc}
 
 Succinct is a distributed data store that supports a wide range of point 
-queries directly on a compressed representation of the input data. We are very
-excited to announce the release Succinct Spark, as a Spark package, that enables
+queries directly on a compressed representation of the input data. We recently released Succinct Spark, as a Spark package, that enables
 search, range and random access queries on compressed RDDs. This release allows 
 users to use Apache Spark as a document store (with search on documents) similar 
 to ElasticSearch, a key-value interface (with search on values) similar to 
