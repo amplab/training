@@ -38,7 +38,10 @@ skip-chapter-toc: true
 
 # Download the example package
 
-First, download the [Splash Example package](https://github.com/zhangyuc/splash/blob/master/examples/SplashExample.tar.gz?raw=true) and extract it at any directory. The source code locates at `/src/main/scala/`. The Splash library file is at `/lib/`, which puts Splash in your project classpath. For your convenience, we have provided a pre-built JAR named `splashexample.jar` in the root of the `splash` directory. To recompile the code with changes, `cd` into the directory where you extract the package and type:
+First, download the [Splash Example package](https://github.com/zhangyuc/splash/blob/master/examples/SplashExample.tar.gz?raw=true) and extract it at any directory. The source code locates at `/src/main/scala/`. The Splash library file is at `/lib/`, which puts Splash in your project classpath.
+
+For your convenience, we have provided a pre-built JAR named `splashexample.jar` in the root of the `splash` directory.
+To recompile the code after making changes, type:
 
 {% highlight bash %}
 ../sbt/sbt package
