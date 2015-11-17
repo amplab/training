@@ -73,8 +73,8 @@ it. For more information, please visit Tachyon's [website](http://tachyon-projec
 ### Configurations
 
 All system's configuration is under `tachyon/conf` folder. You configure the system by specifying
-your own environment variables in `tachyon/conf/tachyon-env.sh`. Copy the template and then modify
-`TACHYON_WORKER_MEMORY_SIZE` to 1GB.
+your own environment variables in `tachyon/conf/tachyon-env.sh`. For this exercise, we have provided
+a preconfigured Tachyon installation.
 
 <div class="solution" markdown="1">
 ~~~
