@@ -37,7 +37,7 @@ Now, you can launch your Spark Shell using KeystoneML as follows from the `keyst
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
 usb/$ cd keystoneml
-keystoneml/$ ../spark/bin/spark-shell --master local[4] --driver-memory 2G
+keystoneml/$ ../spark/bin/spark-shell --master local[4] --jars ampcamp-keystoneml.jar --driver-memory 2G --driver-class-path ampcamp-keystoneml.jar
 </pre>
 </div>
 </div>
