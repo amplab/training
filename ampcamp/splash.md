@@ -38,22 +38,22 @@ skip-chapter-toc: true
 
 # Download the example package
 
-First, download the [Splash Example package](https://github.com/zhangyuc/splash/blob/master/examples/SplashExample.tar.gz?raw=true) and extract it at any directory. The source code locates at `/src/main/scala/`. The Splash library file is at `/lib/`, which puts Splash in your project classpath. To compile the code, `cd` into the directory where you extract the package and type:
+First, download the [Splash Example package](https://github.com/zhangyuc/splash/blob/master/examples/SplashExample.tar.gz?raw=true) and extract it at any directory. The source code locates at `/src/main/scala/`. The Splash library file is at `/lib/`, which puts Splash in your project classpath. For your convenience, we have provided a pre-built JAR named `splashexample.jar` in the root of the `splash` directory. To recompile the code with changes, `cd` into the directory where you extract the package and type:
 
 {% highlight bash %}
-sbt package
+../sbt/sbt package
 {% endhighlight %}
 
-This generates a jar file at `./target/scala-2.10/splashexample.jar`. To run the code, submit this jar file as a Spark job:
+This generates a jar file at `./target/scala-2.10/splashexample.jar`. To run the code, submit this jar file as a Spark job from within the `splash` directory:
 
 {% highlight bash %}
-YOUR_SPARK_HOME/bin/spark-submit --class ExampleName \
+splash/$ ../spark/bin/spark-submit --class ExampleName \
   --driver-memory 4G \
-  --jars lib/splash-0.1.0.jar target/scala-2.10/splashexample.jar \
+  --jars lib/splash-0.2.0.jar target/scala-2.10/splashexample.jar \
   [data files] > output.txt
 {% endhighlight %}
 
-Here, **YOUR_SPARK_HOME** should be replaced by the directory that Spark is installed; **ExampleName** should be replaced by the name of the example (see the following sections). The file `splash-0.1.0.jar` is the Splash library and `splashexample.jar` is the compiled code to be executed. The arguments `[data files]` should be replaced by the path of data files (see the following sections). The result is written to `output.txt`.
+Here, **ExampleName** should be replaced by the name of the example (see the following sections). The file `splash-0.2.0.jar` is the Splash library and `splashexample.jar` is the compiled code to be executed. The arguments `[data files]` should be replaced by the path of data files (see the following sections). The result is written to `output.txt`.
 
 <br>
 
