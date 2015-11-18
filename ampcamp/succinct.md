@@ -261,7 +261,7 @@ Again, contrast the performance of `get(key)` for SuccinctKVRDD and Spark's
 native RDD -- the benefits arise due to Succinct's native support for 
 _random access_ as opposed to scan based data retrieval in regular RDDs.
 
-In addition, SuccinctKVRDD also supports random access _within values_. For instance,
+In addition, SuccinctKVRDD also supports random access _within values_ (that is, extracting a subset of the Wikipedia article rather than the entire article). For instance,
 we can extract the first 100 bytes for the `article` with `articleId` 42 as follows:
 
 <div class="codetabs">
@@ -272,7 +272,9 @@ val extractedData = new String(succinctWikiKV2.extract(42, 0, 100))
 </div>
 </div>
 
-Our goal with the Succinct project is to push the boundaries of queries that can be executed
+So far we have focused on exact matches and random access on compressed RDDs. The [Succinct Spark page] (http://succinct.cs.berkeley.edu/wp/wordpress/?page_id=8) lists a set of interfaces and corresponding APIs in Succinct Spark package. 
+
+Our goal with the Succinct project is to push the boundaries of executing queries
 directly on compressed data. To this end, we've added support for _regular expression queries_ 
 directly on compressed RDDs! The supported operators include union (`R1|R2`), repeat (`R1+`, `R1*`), 
 concat (`(R1)(R2)`) and wildcard (`R1.*R2`). The API is quite similar to the `search(query)` before:
@@ -290,5 +292,5 @@ articleIds5.foreach(key => {
 </div>
 </div>
 
-And that's it! This brings us to the end of this Succinct chapter of the tutorial. To find out
-more about Succinct, we encourage you to visit our [website](http://succinct.cs.berkeley.edu).
+And that is it! This brings us to the end of the Succinct Spark chapter of the exercise. To find out
+more about Succinct, we encourage you to visit our [website](http://succinct.cs.berkeley.edu). We would love to hear your feedback on this release of Succinct Spark, as well as, what new things you would like to see in future releases!
