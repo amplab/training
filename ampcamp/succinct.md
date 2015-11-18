@@ -12,22 +12,20 @@ navigation:
 [Succinct](http://succinct.cs.berkeley.edu) is a distributed data store that supports a wide range of point 
 queries directly on a compressed representation of the input data. In this exercise, we will work with Succinct Spark, a Spark package that enables search, range and random access queries directly on compressed RDDs. The package allows users to use Spark as a document store (with search on documents) similar to ElasticSearch, a key-value interface (with search on values) similar to HyperDex, and an experimental DataFrame interface (with search along columns in a table).
 
-The exercise is in three steps. First, we will practice constructing a Succinct RDD using a small Wikipedia dataset. Next, we will practice executing a set of queries directly on this compressed RDD will a focus on understanding the API exposed by Succinct Spark. Finally, we will work with a much larger Wikipedia dataset and observe some of the benefits of Succinct Spark.
+In this exercise, we will work with the key-value interface for a collection of Wikipedia articles, stored as an RDD of `(articleID, article)` pairs. The exercise is in three steps. First, we will practice constructing a Succinct RDD using a smaller Wikipedia dataset. Next, we will practice executing a set of queries directly on this compressed RDD will a focus on understanding the API exposed by Succinct Spark. Finally, we will work with a much larger Wikipedia dataset and observe some of the (memory and latency) benefits of Succinct Spark compared to native Spark.
 
 ## Creating a Succinct RDD
 
-To start using Succinct's API, we need to start up the Spark Shell with the 
+Let us begin by starting up the Spark Shell, with the 
 Succinct Spark package jars available to it. The following command directs the Spark
 Shell to load the jar for the Succinct Spark package, and increases the executor
-memory to 2GB (since we'll be working with large datasets later in the exercise):
+memory to 2GB (since we will be working with large datasets later in the exercise):
 
 <pre class="prettyprint lang-bsh">
 usb/$ bin/spark-shell --jars jars/succinct/succinct-0.1.5.jar --executor-memory 2G --conf "spark.driver.extraJavaOptions=-XX:MaxPermSize=256m"
 </pre>
 
-Now that we have the Spark shell loaded with the Succinct Spark package, we'll
-take a look at how we can query _compressed wikipedia articles_ using Succinct's
-key-value API.  Let's start with importing the required classes:
+To work with Succinct Spark later, we will need to import the required classes using the following:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -37,14 +35,13 @@ import edu.berkeley.cs.succinct.kv._
 </div>
 </div>
 
-The Succinct Spark package compresses certain regular RDDs into Succinct RDDs
-creates data structures to enable queries on them. In this exercise we will
+As mentioned earlier, we will
 work with an RDD of `(articleID, article)` pairs, where each entry corresponds
-to a single Wikipedia article.
+to a single Wikipedia article. The first step to using Succinct Spark is to create a regular RDD comprising of the Wikipedia articles.
 
-Let's start with loading the Wikipedia articles into a regular RDD. The dataset
+The dataset
 provided is stored as a CSV file of `(articleID, article)` pairs. The following
-snippet loads the dataset and creates an RDD of key value pairs pairs:
+snippet loads the dataset and creates an RDD of key-value pairs:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -108,6 +105,10 @@ That's it! We now have a _compressed version of the RDD_ that supports a number
 of interesting queries directly on the compressed RDD.
 
 ## Querying Succinct RDDs
+
+we'll
+take a look at how we can query _compressed wikipedia articles_ using Succinct's
+key-value API.  
 
 Lets start querying our new compressed RDD. One of the key operations
 on compressed RDDs in Succinct is `search(query)` -- similar to the filter 
