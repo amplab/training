@@ -142,12 +142,11 @@ The exercise so far allowed us to take a collection of Wikipedia articles, const
 
 ## Working with Larger RDDs
 
-In practice, we would want to work with much larger datasets. In order to 
-analyze relatively larger datasets, we've pre-processed ~600MB of Wikipedia
-articles on your USB drive.
+One of the current limitations of Succinct Spark is the preprocessing speed (converting an original Spark RDD into a compressed Succinct RDD), and we are continually working to make preprocessing faster and more memory efficient. For the purpose of this exercise, we have pre-processed ~600MB of Wikipedia
+articles (available on your USB drive).
 
-Lets first analyze the dataset using Spark's native RDDs as before; we'll start
-by loading the dataset and caching it in memory:
+In this part of the exercise, we will repeat the operations above but on a much larger dataset. Let us start
+by loading the dataset into an RDD and caching it in memory:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -158,7 +157,7 @@ wikiKV2.count
 </div>
 </div>
 
-The dataset contains 300000 articles -- much more than before. We can take a look at the
+Note that the dataset now contains many more articles that before (300,000). Let us start by taking a look at the
 storage footprint of the RDD at http://localhost:4040/storage/. This is what it should look like:
 
 <img src="img/spark-storage.png" 
@@ -167,10 +166,10 @@ alt="Spark RDD Storage"
 id="spark-storage"
 />
 
-Depending on the configuration of the machine you're running on, the number of 
-partitions or the amount of data cached may vary.
+Note that, depending on the configuration of your machine, the number of 
+partitions and/or the amount of data cached may vary.
 
-Lets try executing the same search query as before on this dataset, using the 
+Let us try executing the same search query as before on this dataset, using the 
 filter operation:
 
 <div class="codetabs">
@@ -182,10 +181,9 @@ articleIdsRDD3.count
 </div>
 </div>
 
-Take a note of how long the query took to execute.
+Please take a note of the query execution time. This should not be surprising as Spark has to scan all the 300,000 Wikipedia articles to find the ones that actually contain "Berkeley".
 
-Another important query for document and key-value stores is `get(key)`. We can
-emulate this on a Spark RDD using the following snippet:
+We are still working with original uncompressed Spark RDD. Let us now extract the corresponding articles (the `get(key)` functionality) using using the following snippet:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -195,12 +193,10 @@ val article = wikiKV2.filter(kvPair => kvPair._1 == 0).map(_._2).collect()(0)
 </div>
 </div>
 
-Again, note the time taken to execute this query.
+Again, please note the query execution time.
 
-Now lets see how we can perform the same operations on a SuccinctKVRDD. In the 
-interest of time, we also preprocessed the larger Wikipedia dataset into 
-Succinct data structures and stored it on your USB drive. Before we load the 
-Succinct data structures, lets uncache the previous RDD:
+As earlier, let us now perform these queries on SuccinctKVRDD. We will use the preprocessed dataset (again, available on the USB drive). Before we load the 
+SuccinctKVRDD, lets uncache the previous RDD:
  
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -210,7 +206,7 @@ wikiKV2.unpersist()
 </div>
 </div>
 
-Now we'll try loading the preprocessed data and running queries on it:
+Now let us load SuccinctKVRDD and execute queries on it:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -222,8 +218,8 @@ succinctWikiKV2.count
 </div>
 
 The command above directs Spark to load the `SuccinctKVRDD` with `Long` keys 
-from the specified location on disk. We have the same number of articles as 
-the uncompressed RDD, but _with a much lower storage footprint_. To see how much
+from the specified location on disk. The first thing we would like to note is that we have the same number of articles as in 
+the uncompressed RDD, and that SuccinctKVRDD requires much lower storage footprint compared to original Spark RDD. To see how much
 smaller, go back to http://localhost:4040/storage/; it might look something like 
 this:
 
@@ -233,8 +229,7 @@ alt="Spark RDD Storage"
 id="spark-storage"
 />
 
-Now we'll try running the same set of queries as before on the SuccinctKVRDD.
-Let's start with search:
+In terms of the query execution latency, let us start with search:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -245,12 +240,10 @@ articleIdsRDD4.count
 </div>
 </div>
 
-Note the time taken to execute the query; as we described earlier, Succinct avoids having to _scan_
-all 300000 articles to obtain the ones that contain "Bekeley" -- it embeds all necessary information to obtain
-the query results directly from the compressed representation. This leads to both _reduced storage overheads_
+Note the time taken to execute the query; as we described earlier, Succinct avoids _full data scans_ to obtain the articles that contain "Bekeley" -- it embeds all the necessary indexing information within the compressed representation. This leads to both _reduced storage overheads_
 as well as _low latency_ for search queries.
 
-Let's take a look at few of the matching articles using the `get(key)` operation:
+Let us take a look at few of the matching articles using the `get(key)` operation:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -266,7 +259,7 @@ articleIds4.foreach(key => {
 
 Again, contrast the performance of `get(key)` for SuccinctKVRDD and Spark's 
 native RDD -- the benefits arise due to Succinct's native support for 
-_random access_ as opposed to performing data scans in regular RDDs.
+_random access_ as opposed to scan based data retrieval in regular RDDs.
 
 In addition, SuccinctKVRDD also supports random access _within values_. For instance,
 we can extract the first 100 bytes for the `article` with `articleId` 42 as follows:
