@@ -4,8 +4,7 @@ title: Interactive Data Analytics in SparkR
 categories: [module]
 navigation:
   weight: 75
-  show: false
-skip-chapter-toc: true
+  show: true
 ---
 
 In this chapter, we will use the SparkR shell for interactive data exploration.
