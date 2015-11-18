@@ -91,7 +91,12 @@ val succinctWikiKV = wikiKV.map(t => (t._1, t._2.getBytes)).succinctKV
 </div>
 </div>
 
-Lets make sure we still have all the documents:
+We now have a _compressed version of the RDD_ that supports a number
+of interactive point queries directly on a compressed representation of the original RDD.
+
+## Querying Succinct RDDs
+
+Let us make sure that SuccinctKVRDD contains all the documents in the original uncompressed RDD:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -101,16 +106,9 @@ succinctWikiKV.count
 </div>
 </div>
 
-That's it! We now have a _compressed version of the RDD_ that supports a number
-of interesting queries directly on the compressed RDD.
+The output should be 250, as earlier. 
 
-## Querying Succinct RDDs
-
-we'll
-take a look at how we can query _compressed wikipedia articles_ using Succinct's
-key-value API.  
-
-Lets start querying our new compressed RDD. One of the key operations
+Let us start querying our new compressed RDD. One of the key operations
 on compressed RDDs in Succinct is `search(query)` -- similar to the filter 
 operation on the uncompressed RDD before, the following query obtains an RDD 
 of `articleID`s corresponding to all `article`s containing "Berkeley":
