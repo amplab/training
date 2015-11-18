@@ -96,7 +96,7 @@ of interactive point queries directly on a compressed representation of the orig
 
 ## Querying Succinct RDDs
 
-Let us make sure that SuccinctKVRDD contains all the documents in the original uncompressed RDD:
+Given the compressed SuccinctKVRDD from above, we can now execute the same queries that we executed on the original RDD above. Let us start by ensuring that SuccinctKVRDD contains all the documents in the original uncompressed RDD:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -106,12 +106,10 @@ succinctWikiKV.count
 </div>
 </div>
 
-The output should be 250, as earlier. 
+The output should be 250, same as that is the original RDD. 
 
-Let us start querying our new compressed RDD. One of the key operations
-on compressed RDDs in Succinct is `search(query)` -- similar to the filter 
-operation on the uncompressed RDD before, the following query obtains an RDD 
-of `articleID`s corresponding to all `article`s containing "Berkeley":
+Let us now find all `articleId`s whose corresponding `article`s contain
+"Berkeley", as we did earlier for the original RDD. SuccinctKVRDD exposes a simple API to do so -- `search(query)`, which provides functionality similar to the filter operation on the original uncompressed RDD, but avoids data scans while executing directly on the compressed representation:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -122,17 +120,9 @@ articleIdsRDD2.count
 </div>
 </div>
 
-As before, we've obtained the 3 articles containing "Berkeley", but 
-_without having to scan all 250 articles_. We don't use indexes either,
-all the information required to search for any arbitrary term is 
-_embedded within the compressed representation_.
-
-The `articleIds` themselves don't reveal much; we need to look at the
-article text for them...
-
-SuccinctKVRDD allows you to fetch the value corresponding to any key
-through the familiar `get(key)` API. We'll use this API to fetch the
-article contents corresponding to each of these `articleIds`: 
+As before, the number of articles containing "Berkeley" is 3. Now suppose we want to look at the articles that contain "Berkeley". SuccinctKVRDD allows one to fetch the value corresponding to any key
+through the usual `get(key)` API. We'll use this API to fetch the
+text for the articles that contain "Berkeley" : 
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -146,9 +136,9 @@ articleIds.foreach(key => {
 </div>
 </div>
 
-We've taken a look at how we can compress data on Spark into a SuccinctKVRDD,
-and seen how we can execute queries directly on these compressed RDDs. However,
-we've only worked with a small dataset size of 250 Wikipedia articles.
+Note that reading the original data requires data decompression, of course. This is in fact a slow operation in Succinct Spark. We, hence, do not recommend using Succinct Spark for cases where the application needs to perform large (in tens or hundreds of megabytes) sequential reads of the original data.
+
+The exercise so far allowed us to take a collection of Wikipedia articles, construct a Spark RDD, and compress this RDD into a SuccinctKVRDD that allows executing search and random access directly on compressed representation of the RDD. Let us now work with larger dataset sizes.
 
 ## Working with Larger RDDs
 
