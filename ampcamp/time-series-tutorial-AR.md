@@ -12,10 +12,10 @@ navigation:
 # Time Series Analysis on Surrogate Data
 
 ## Getting Started
-In the shell, from the usb/spark/, please enter
+In the shell, from the usb directory, please enter
 
 <pre class="prettyprint lang-bsh">
-usb/$ ./bin/spark-shell --master "local[4]" --jars ../timeseries/sparkgeots.jar --driver-memory 2G
+usb/$ ./spark/bin/spark-shell --master "local[4]" --jars timeseries/sparkgeots.jar --driver-memory 2G
 </pre>
 
 and then please copy and paste the following in the Spark shell:
@@ -79,11 +79,11 @@ Let's specify that there is one millisecond between each sample.
 
 Let's have an overlap between partitions of 100 ms.
 The data in our partitions will overlap as follows:
-<pre class="prettyprint lang-bsh">
-------------------------------------
-                                -----------------------------------
-                                                              ---------------------------------
-</pre>
+
+    ------------------------------------
+                                    -----------------------------------
+                                                                  ---------------------------------
+
 This is necessary to estimate our models without shuffling data between nodes.
 With this setup, we will be able to calibrate models of any order lower that 100 ms / 1 ms = 100.
 

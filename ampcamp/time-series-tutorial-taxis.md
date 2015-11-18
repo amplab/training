@@ -15,7 +15,7 @@ navigation:
 In the shell, from the usb/spark/, please enter
 
 <pre class="prettyprint lang-bsh">
-usb/$ ./bin/spark-shell --master "local[4]" --jars ../timeseries/sparkgeots.jar --driver-memory 2G
+usb/$ ./spark/bin/spark-shell --master "local[4]" --jars timeseries/sparkgeots.jar --driver-memory 2G
 </pre>
 
 and then please copy and paste the following in the Spark shell:
@@ -49,7 +49,7 @@ grouped into spatial cells and 5 minute time buckets.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-    val inSampleFilePath = "../data/timeseries/taxis.csv"
+    val inSampleFilePath = "timeseries/taxis.csv"
     val (inSampleDataHD, _, nSamples) = ReadCsv.TS(inSampleFilePath)(sc)
 </div>
 </div>
@@ -79,11 +79,11 @@ Let's specify the configuration of the time series
 
 Let's have an overlap between partitions of 100 ms.
 The data in our partitions will overlap as follows:
-<pre class="prettyprint lang-bsh">
-------------------------------------
-                                -----------------------------------
-                                                              ---------------------------------
-</pre>
+
+    ------------------------------------
+                                    -----------------------------------
+                                                                  ---------------------------------
+
 This is necessary to estimate our models without shuffling data between nodes.
 With this setup, we will be able to calibrate models of any order lower that 100.
 

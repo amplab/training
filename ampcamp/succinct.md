@@ -25,7 +25,8 @@ Shell to load the jar for the Succinct Spark package, and increases the executor
 memory to 2GB (since we'll be working with large datasets later in the exercise):
 
 <pre class="prettyprint lang-bsh">
-usb/$ spark/bin/spark-shell --executor-memory 2G --conf "spark.driver.extraJavaOptions=-XX:MaxPermSize=256m"
+usb/$ spark/bin/spark-shell --executor-memory 2G --conf "spark.driver.extraJavaOptions=-XX:MaxPermSize=256m" \
+  --jars spark/lib/succinct-0.1.5.jar
 </pre>
 
 Now that we have the Spark shell loaded with the Succinct Spark package, we'll
@@ -302,7 +303,7 @@ concat (`(R1)(R2)`) and wildcard (`R1.*R2`). The API is quite similar to the `se
 <div data-lang="scala" markdown="1">
 ~~~
 val articleIdsRDD5 = succinctWikiKV2.regexSearch("(stanford|berkeley)\\.edu")
-val articleIds5 = articleIdsRDD4.take(10)
+val articleIds5 = articleIdsRDD5.take(10)
 articleIds5.foreach(key => {
 	val valueBuf = succinctWikiKV2.get(key)
 	println("articleID = " + key + " article = " + new String(valueBuf))

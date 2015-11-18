@@ -36,7 +36,7 @@ much more slowly.
     </p>
 
 2. Rename the folder containing all exercise content (either on your hard-drive
-   or on the USB key) to `AMPCAMP` (or any other pathname without spaces).  If you
+   or on the USB key) to `ampcamp6` (or any other pathname without spaces).  If you
    skip this step, you will see your sbt builds fail.
 
 3. Change directories in to the folder containing all exercise content (either on your hard-drive or on the USB key)
@@ -48,51 +48,3 @@ much more slowly.
  content (either on your hard-drive or on the USB key) . Moreover, [usb root
  directory] refers to the full path to this directory.
     </p>
-
-
-4. Check your setup by building a toy application. To do this, run the following commands,
-and confirm the results match. If they do, you just built a simple spark application - go look at the
-source code to get a feel for what happened.
-
-   ~~~
-usb/$ cd simple-app
-$ ../sbt/sbt package
-$ ../spark/bin/spark-submit --class "SimpleApp" --master local[*] target/scala-2.10/simple-project_2.10-1.0.jar
-2014-06-27 15:40:44.788 java[15324:1607] Unable to load realm info from SCDynamicStore
-Lines with a: 73, Lines with b: 35
-   ~~~
-
-Please ask a TA if you are having trouble getting the simple application to build.
-
-## Additional Required Download
-
-Some of the exercises require you to download addtional project templates and/or data. The
-following instructions explain how to incorporate this material with the content of the USB drive.
-
-1. Download the following zip file:
-    - Link for on-site participants: <a href="http://10.225.217.159/training-downloads.zip">training-downloads.zip</a>
-    - Link for remote participants: <a href="http://d12yw77jruda6f.cloudfront.net/training-downloads.zip">training-downloads.zip</a>
-
-2. Unzip the `training-downloads.zip` file to your [usb root directory].
-
-## USB Contents
-
-You'll find the following contents in the USB drive (this info is taken from the README):
-
- * **spark** - spark binary distribution
-     * conf/log4j.properties - WARN used for default level, Snappy warnings silenced
- * **tachyon** - tachyon 0.5.0
- * **data** - example and lab data
-     * graphx - graphx lab data
-     * movielens - MLlib lab data
-     * wiki_parquet - SparkSQL lab data
-     * examples-data - examples directory from Spark src
-     * join - example files for joins
- * **sbt** - a fresh copy of sbt (v. 0.13.5)
-     * sbt-launcher-lib.bash - modified to understand non-default location of bin scripts
-     * sbt.bat - modified to understand non-default location of bin scripts [Windows]
-     * conf/sbtopts - modified to point to embeded ivy cache
-     * conf/sbtconfig.txt - modified to point to embeded ivy cache for [Windows]
-     * ivy/cache - a pre-populated cache, pointed to via conf/sbtopts
-     * bin - removed and all files moved into sbt's home directory so users can run sbt/sbt similar to working with spark's source code
- * **simple-app** - a simple example app to build (based on the Spark quick start docs)

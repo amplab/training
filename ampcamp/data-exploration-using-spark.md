@@ -35,19 +35,17 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    <div class="codetabs">
      <div data-lang="scala" markdown="1">
        scala> sc
-       res: spark.SparkContext = spark.SparkContext@470d1f30
+       res: org.apache.spark.SparkContext = org.apache.spark.SparkContext@2504d0cd
 
        scala> val pagecounts = sc.textFile("data/pagecounts")
-       12/08/17 23:35:14 INFO mapred.FileInputFormat: Total input paths to process : 74
-       pagecounts: spark.RDD[String] = MappedRDD[1] at textFile at <console>:12
+       pagecounts: org.apache.spark.rdd.RDD[String] = MapPartitionsRDD[1] at textFile at <console>:21
      </div>
      <div data-lang="python" markdown="1">
        >>> sc
-       <pyspark.context.SparkContext object at 0x7f7570783350>
+       <pyspark.context.SparkContext object at 0x10ea7d4d0>
        >>> pagecounts = sc.textFile("data/pagecounts")
-       13/02/01 05:30:43 INFO mapred.FileInputFormat: Total input paths to process : 74
        >>> pagecounts
-       <pyspark.rdd.RDD object at 0x217d510>
+       MapPartitionsRDD[1] at textFile at NativeMethodAccessorImpl.java:-2
      </div>
    </div>
 
@@ -66,7 +64,7 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    </div>
    </div>
 
-   Unfortunately this is not very readable because `take()` returns an array and Scala simply prints the array with each element separated by a comma.
+   Unfortunately this is not very readable because `take()` returns an array and Scala (or Python) simply prints the array with each element separated by a comma.
    We can make it prettier by traversing the array to print each record on its own line.
 
    <div class="codetabs">
@@ -157,7 +155,7 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    <div class="codetabs">
    <div data-lang="scala" markdown="1">
        scala> val enPages = pagecounts.filter(_.split(" ")(1) == "en").cache
-       enPages: spark.RDD[String] = FilteredRDD[2] at filter at <console>:14
+       enPages: org.apache.spark.rdd.RDD[String] = MapPartitionsRDD[2] at filter at <console>:23
    </div>
    <div data-lang="python" markdown="1">
        >>> enPages = pagecounts.filter(lambda x: x.split(" ")[1] == "en").cache()
@@ -185,7 +183,7 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    The first time this command is run, similar to the last count we did, it will take 2 - 3 minutes while Spark scans through the entire data set on disk.
    __But since enPages was marked as "cached" in the previous step, if you run count on the same RDD again, it should return an order of magnitude faster__.
 
-   If you examine the console log closely, you will see lines like this, indicating some data was added to the cache:
+   If you examine the Spark logs closely, you will see lines like this, indicating some data was added to the cache:
 
        13/02/05 20:29:01 INFO storage.BlockManagerMasterActor$BlockManagerInfo: Added rdd_2_172 in memory on ip-10-188-18-127.ec2.internal:42068 (size: 271.8 MB, free: 5.5 GB)
 
@@ -197,10 +195,10 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    <div class="codetabs">
    <div data-lang="scala" markdown="1">
        scala> val enTuples = enPages.map(line => line.split(" "))
-       enTuples: spark.RDD[Array[java.lang.String]] = MappedRDD[3] at map at <console>:16
+       enTuples: org.apache.spark.rdd.RDD[Array[String]] = MapPartitionsRDD[3] at map at <console>:25
 
        scala> val enKeyValuePairs = enTuples.map(line => (line(0).substring(0, 8), line(3).toInt))
-       enKeyValuePairs: spark.RDD[(java.lang.String, Int)] = MappedRDD[4] at map at <console>:18
+       enKeyValuePairs: org.apache.spark.rdd.RDD[(String, Int)] = MapPartitionsRDD[4] at map at <console>:27
    </div>
    <div data-lang="python" markdown="1">
        >>> enTuples = enPages.map(lambda x: x.split(" "))
@@ -211,14 +209,11 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    Next, we shuffle the data and group all values of the same key together.
    Finally we sum up the values for each key.
    There is a convenient method called `reduceByKey` in Spark for exactly this pattern.
-   Note that the second argument to `reduceByKey` determines the number of reducers to use.
    By default, Spark assumes that the reduce function is commutative and associative and applies combiners on the mapper side.
-   Since we know there is a very limited number of keys in this case (because there are only 3 unique dates in our data set), let's use only one reducer.
 
    <div class="codetabs">
    <div data-lang="scala" markdown="1">
-       scala> enKeyValuePairs.reduceByKey(_+_, 1).collect
-       ...
+       scala> enKeyValuePairs.reduceByKey(_ + _).collect
        res: Array[(String, Int)] = Array((20090507,6175726), (20090505,7076855))
 
      The `collect` method at the end converts the result from an RDD to an array.
@@ -226,7 +221,6 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    </div>
    <div data-lang="python" markdown="1">
        >>> enKeyValuePairs.reduceByKey(lambda x, y: x + y, 1).collect()
-       ...
        [(u'20090507', 6175726), (u'20090505', 7076855)]
 
      The `collect` method at the end converts the result from an RDD to an array.
@@ -283,9 +277,4 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
 
 Because of time constraints, in this tutorial we focus on ad-hoc style analytics using the Spark shell.
 However, for many tasks, it makes more sense to write a standalone Spark program.
-We will return to this in the section on Spark Streaming below, where you will actually write a standalone Spark Streaming job.
-We aren't going to cover how to structure, build, and run standalone Spark jobs here, but before we move on, we list here a few resources about standalone Spark jobs for you to come back and explore later.
-
-First, on the AMI for this tutorial we have included "template" projects for Scala and Java standalone programs for both Spark and Spark streaming.
-The Spark ones can be found in the `/root/scala-app-template` and `/root/java-app-template` directories (we will discuss the Streaming ones later).
-Feel free to browse through the contents of those directories. You can also find examples of building and running Spark standalone jobs <a href="http://www.spark-project.org/docs/latest/quick-start.html#a-standalone-job-in-java">in Java</a> and <a href="http://www.spark-project.org/docs/latest/quick-start.html#a-standalone-job-in-scala">in Scala</a> as part of the Spark Quick Start Guide. For even more details, see Matei Zaharia's <a href="http://ampcamp.berkeley.edu/wp-content/uploads/2012/06/matei-zaharia-part-2-amp-camp-2012-standalone-programs.pdf" target="_blank">slides</a> and <a href="http://www.youtube.com/watch?v=7k4yDKBYOcw&t=59m37s" target="_blank">talk video</a> about Standalone Spark jobs at the <a href="http://ampcamp.berkeley.edu/agenda-2012" target="blank">first AMP Camp</a>.
+You can find examples of building and running Spark standalone jobs <a href="http://www.spark-project.org/docs/latest/quick-start.html#a-standalone-job-in-java">in Java</a> and <a href="http://www.spark-project.org/docs/latest/quick-start.html#a-standalone-job-in-scala">in Scala</a> as part of the Spark Quick Start Guide. For even more details, see Matei Zaharia's <a href="http://ampcamp.berkeley.edu/wp-content/uploads/2012/06/matei-zaharia-part-2-amp-camp-2012-standalone-programs.pdf" target="_blank">slides</a> and <a href="http://www.youtube.com/watch?v=7k4yDKBYOcw&t=59m37s" target="_blank">talk video</a> about Standalone Spark jobs at the <a href="http://ampcamp.berkeley.edu/agenda-2012" target="blank">first AMP Camp</a>.

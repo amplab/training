@@ -24,40 +24,19 @@ usb/$ spark/bin/pyspark</pre>
 </div>
 
 
-Once you have launched the Spark shell, the next step is to create a SQLContext.  A SQLConext wraps the SparkContext, which you used in the previous lesson, and adds functions for working with structured data.
+Now we can load a data frame in that is stored in the Parquet format.  Parquet is a self-describing columnar file format.  Since it is self-describing, Spark SQL will automatically be able to infer all of the column names and their datatypes. For this exercise we have provided a set of data that contains all of the pages on wikipedia that contain the word "berkeley".  You can load this data using the input methods provided by `SQLContext`.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-scala> val sqlContext = new org.apache.spark.sql.SQLContext(sc)
-sqlContext: org.apache.spark.sql.SQLContext = org.apache.spark.sql.SQLContext@52955821
-scala> sqlContext.setConf("spark.sql.parquet.binaryAsString", "true")
+scala> val wikiData = sqlContext.read.parquet("data/wiki.parquet")
+...
+wikiData: org.apache.spark.sql.DataFrame = [id: int, title: string, modified: bigint, text: string, username: string]
 </pre>
 </div>
 <div data-lang="python" markdown="1">
 <pre class="prettyprint lang-bsh">
-from pyspark.sql import SQLContext
-sqlCtx = SQLContext(sc)
-sqlCtx.sql("SET spark.sql.parquet.binaryAsString=true")
-</pre>
-</div>
-</div>
-
-Now we can load a set of data in that is stored in the Parquet format.  Parquet is a self-describing columnar format.  Since it is self-describing, Spark SQL will automatically be able to infer all of the column names and their datatypes. The `spark.sql.parquet.binaryAsString` flag tells Spark SQL to treat binary-encoded data as strings ([more doc](http://spark.apache.org/docs/1.1.0/sql-programming-guide.html#configuration)). For this exercise we have provided a set of data that contains all of the pages on wikipedia that contain the word "berkeley".  You can load this data using the parquetFile method provided by the SQLContext.
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-<pre class="prettyprint lang-bsh">
-scala> val wikiData = sqlContext.parquetFile("data/wiki_parquet")
-wikiData: org.apache.spark.sql.SchemaRDD = 
-SchemaRDD[0] at RDD at SchemaRDD.scala:98
-== Query Plan ==
-ParquetTableScan [id#0,title#1,modified#2L,text#3,username#4], (ParquetRelation data/wiki_parquet), []
-</pre>
-</div>
-<div data-lang="python" markdown="1">
-<pre class="prettyprint lang-bsh">
->>> wikiData = sqlCtx.parquetFile("data/wiki_parquet")
+>>> wikiData = sqlContext.read.parquet("data/wiki.parquet")
 </pre>
 </div>
 </div>
@@ -68,13 +47,13 @@ The result of loading in a parquet file is a SchemaRDD.  A SchemaRDD has all of 
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
 scala> wikiData.count()
-res9: Long = 39365
+res: Long = 39365
 </pre>
 </div>
 <div data-lang="python" markdown="1">
 <pre class="prettyprint lang-bsh">
 >>> wikiData.count()
-39365L
+39365
 </pre>
 </div>
 </div>
@@ -92,7 +71,7 @@ countResult: Array[org.apache.spark.sql.Row] = Array([39365])
 <div data-lang="python" markdown="1">
 <pre class="prettyprint lang-bsh">
 >>> wikiData.registerTempTable("wikiData")
->>> result = sqlCtx.sql("SELECT COUNT(*) AS pageCount FROM wikiData").collect()
+>>> result = sqlContext.sql("SELECT COUNT(*) AS pageCount FROM wikiData").collect()
 </pre>
 </div>
 </div>
@@ -113,7 +92,7 @@ sqlCount: Long = 39365
 </div>
 </div>
 
-SQL can be a powerfull tool from performing complex aggregations.  For example, the following query returns the top 10 usersnames by the number of pages they created.
+SQL can be a powerful tool from performing complex aggregations.  For example, the following query returns the top 10 usersnames by the number of pages they created.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -133,8 +112,8 @@ scala> sqlContext.sql("SELECT username, COUNT(*) AS cnt FROM wikiData WHERE user
 </div>
 <div data-lang="python" markdown="1">
 <pre class="prettyprint lang-bsh">
->>> sqlCtx.sql("SELECT username, COUNT(*) AS cnt FROM wikiData WHERE username <> '' GROUP BY username ORDER BY cnt DESC LIMIT 10").collect()
-[{u'username': u'Waacstats', u'cnt': 2003}, {u'username': u'Cydebot', u'cnt': 949}, {u'username': u'BattyBot', u'cnt': 939}, {u'username': u'Yobot', u'cnt': 890}, {u'username': u'Addbot', u'cnt': 853}, {u'username': u'Monkbot', u'cnt': 668}, {u'username': u'ChrisGualtieri', u'cnt': 438}, {u'username': u'RjwilmsiBot', u'cnt': 387}, {u'username': u'OccultZone', u'cnt': 377}, {u'username': u'ClueBot NG', u'cnt': 353}]</pre>
+>>> sqlContext.sql("SELECT username, COUNT(*) AS cnt FROM wikiData WHERE username <> '' GROUP BY username ORDER BY cnt DESC LIMIT 10").collect()
+[Row(username=u'Waacstats', cnt=2003), Row(username=u'Cydebot', cnt=949), Row(username=u'BattyBot', cnt=939), Row(username=u'Yobot', cnt=890), Row(username=u'Addbot', cnt=853), Row(username=u'Monkbot', cnt=668), Row(username=u'ChrisGualtieri', cnt=438), Row(username=u'RjwilmsiBot', cnt=387), Row(username=u'OccultZone', cnt=377), Row(username=u'ClueBot NG', cnt=353)]
 </div>
 </div>
 

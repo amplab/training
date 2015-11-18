@@ -4,7 +4,7 @@ title: Appendix - Introduction to the Scala Shell
 categories: [appendix]
 navigation:
   weight: 600
-  show: true
+  show: false
 skip-chapter-toc: true
 ---
 

@@ -73,8 +73,8 @@ it. For more information, please visit Tachyon's [website](http://tachyon-projec
 ### Configurations
 
 All system's configuration is under `tachyon/conf` folder. You configure the system by specifying
-your own environment variables in `tachyon/conf/tachyon-env.sh`. Copy the template and then modify
-`TACHYON_WORKER_MEMORY_SIZE` to 1GB.
+your own environment variables in `tachyon/conf/tachyon-env.sh`. For this exercise, we have provided
+a preconfigured Tachyon installation.
 
 <div class="solution" markdown="1">
 ~~~
@@ -87,13 +87,10 @@ For more information on configuration values, you can visit the Tachyon
 
 ### Format the storage
 
-Note that if you are running Linux, Tachyon will need root permission to create
-and use a RAM disk. To start a superuser shell, run `sudo su` and enter your
-password.
-
-Before starting Tachyon for the first time, we need to format the system. It can
-be done by using `tachyon` script in the `tachyon/bin` folder. Please type the
-following command:
+Before starting Tachyon for the first time, we need to format the system using
+using the `tachyon` script in the `tachyon/bin` folder. Please type the
+following command. Note that if you are running Linux or MacOS, Tachyon
+will request root permissions using `sudo` when creating the RAM disk.
 
 ~~~
 $ ./bin/tachyon format
@@ -306,13 +303,17 @@ var file = sc.textFile("tachyon://localhost:19998/LICENSE")
 val counts = file.flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey(_ + _)
 counts.persist(org.apache.spark.storage.StorageLevel.OFF_HEAP)
 counts.take(10)
-counts.take(10)
 ~~~
 </div>
 </div>
 
-You will notice the second time take(10) is much faster than the first time because that the counts
-RDD has been stored OFF_HEAP in Tachyon.
+Now, try running `counts.take(10)` again and you will see that it's much faster than the first time because the `counts`
+RDD has been stored `OFF_HEAP` in Tachyon.
+
+To shutdown tachyon, issue the following command:
+
+    bin/tachyon-stop.sh
+
 
 This brings us to the end of the Tachyon chapter of the tutorial. We encourage you to continue
 playing with the code and to check out the [project website](http://tachyon-project.org/), Github
