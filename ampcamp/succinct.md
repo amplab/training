@@ -9,13 +9,10 @@ navigation:
 
 {:toc}
 
-Succinct is a distributed data store that supports a wide range of point 
-queries directly on a compressed representation of the input data. We recently released Succinct Spark, as a Spark package, that enables
-search, range and random access queries on compressed RDDs. This release allows 
-users to use Apache Spark as a document store (with search on documents) similar 
-to ElasticSearch, a key-value interface (with search on values) similar to 
-HyperDex, and an experimental DataFrame interface (with search along columns in
-a table).
+[Succinct](http://succinct.cs.berkeley.edu) is a distributed data store that supports a wide range of point 
+queries directly on a compressed representation of the input data. In this exercise, we will work with Succinct Spark, a Spark package that enables search, range and random access queries directly on compressed RDDs. The package allows users to use Spark as a document store (with search on documents) similar to ElasticSearch, a key-value interface (with search on values) similar to HyperDex, and an experimental DataFrame interface (with search along columns in a table).
+
+The exercise is in three steps. First, we will practice constructing a Succinct RDD using a small Wikipedia dataset. Next, we will practice executing a set of queries directly on this compressed RDD will a focus on understanding the API exposed by Succinct Spark. Finally, we will work with a much larger Wikipedia dataset and observe some of the benefits of Succinct Spark.
 
 ## Creating a Succinct RDD
 
