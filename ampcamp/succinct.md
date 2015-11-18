@@ -52,7 +52,7 @@ val wikiKV = wikiData.map(entry => (entry(0).toLong, entry(1)))
 </div>
 </div>
 
-Lets take a look at the number of documents we have in the RDD:
+Let us take a look at the number of documents we have in the RDD:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -62,10 +62,10 @@ wikiKV.count
 </div>
 </div>
 
-Not too many. 
+Note that the number of articles in the smaller dataset is just 250. 
 
-If we wanted to find all `articleId`s corresponding to `article`s containing the term
-"Berkeley", we can use the filter operation as follows:
+Now, let us do something more interesting. Suppose we want to find all `articleId`s whose corresponding `article`s contain
+"Berkeley". One way to do this using a regular Spark RDD is to use the filter operation. For example, as follows:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -76,12 +76,12 @@ articleIdsRDD.count
 </div>
 </div>
 
-We've found only 3 artciles, but note that Spark had to scan through all 250 to 
-find them.
+Note that there are only three artciles that contain "Berkeley". However, to find these articles, Spark has to scan through the entire RDD. 
 
-Lets take a look at how we can now convert this RDD into a `SuccinctKVRDD`. 
-While the keys can be of arbitrary type (`Long` in this example), each array is
-an array of bytes. We can transform the RDD we created before as follows:
+Succinct Spark exposes a SuccinctKVRDD interface that enables the same functionality as above, but on a compressed representation of the RDD. Moreover, SuccinctKVRDD embeds an "index" within the compressed representation of the RDD that avoids scanning the entire RDD. 
+
+Let us start by converting the Spark RDD into a Succinct Spark RDD `SuccinctKVRDD`. Note that the keys in original RDD can be of arbitrary type (`Long` in this example); however, we require each value to be
+an array of bytes. We can transform such an RDD into a compressed representation `SuccinctKVRDD` as follows:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
