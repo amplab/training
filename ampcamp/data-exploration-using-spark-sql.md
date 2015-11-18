@@ -92,7 +92,7 @@ sqlCount: Long = 39365
 </div>
 </div>
 
-SQL can be a powerfull tool from performing complex aggregations.  For example, the following query returns the top 10 usersnames by the number of pages they created.
+SQL can be a powerful tool from performing complex aggregations.  For example, the following query returns the top 10 usersnames by the number of pages they created.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">

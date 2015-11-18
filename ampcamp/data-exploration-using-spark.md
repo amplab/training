@@ -64,7 +64,7 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    </div>
    </div>
 
-   Unfortunately this is not very readable because `take()` returns an array and Scala simply prints the array with each element separated by a comma.
+   Unfortunately this is not very readable because `take()` returns an array and Scala (or Python) simply prints the array with each element separated by a comma.
    We can make it prettier by traversing the array to print each record on its own line.
 
    <div class="codetabs">
@@ -209,13 +209,11 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    Next, we shuffle the data and group all values of the same key together.
    Finally we sum up the values for each key.
    There is a convenient method called `reduceByKey` in Spark for exactly this pattern.
-   Note that the second argument to `reduceByKey` determines the number of reducers to use.
    By default, Spark assumes that the reduce function is commutative and associative and applies combiners on the mapper side.
-   Since we know there is a very limited number of keys in this case (because there are only 3 unique dates in our data set), let's use only one reducer.
 
    <div class="codetabs">
    <div data-lang="scala" markdown="1">
-       scala> enKeyValuePairs.reduceByKey(_+_, 1).collect
+       scala> enKeyValuePairs.reduceByKey(_ + _).collect
        res: Array[(String, Int)] = Array((20090507,6175726), (20090505,7076855))
 
      The `collect` method at the end converts the result from an RDD to an array.
