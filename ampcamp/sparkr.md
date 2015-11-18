@@ -4,200 +4,182 @@ title: Interactive Data Analytics in SparkR
 categories: [module]
 navigation:
   weight: 75
-  show: false
-skip-chapter-toc: true
+  show: true
 ---
 
-In this chapter, we will use the SparkR shell to interactively explore the Wikipedia data.
+In this chapter, we will use the SparkR shell for interactive data exploration.
+While the code snippets below assume Mac OS X, Linux and Windows should be supported as well.
 
-## Prerequisites: 
+## Preparing the Environment
+Simply type in the following command from the root directory of your USB:
 
-### Installing R, rJava
-To do the SparkR exercises you will need to install R and rJava. We have included
-binaries for this in the USB stick.  Or you can also try the following in an `R` shell:
+<pre class="prettyprint lang-bsh">
+usb/$ spark/bin/sparkR
+</pre>
+
+This starts a `SparkR` shell, which by default comes with a `SparkContext` variable `sc` and a `SQLContext` variable `sqlContext`.
 
 <pre class="prettyprint lang-r">
-install.packages("rJava")
-</pre>
-
-You can check if rJava is installed correctly by running
-
-<pre class="prettyprint lang-r">
-library(rJava)
-</pre>
-
-If you get no output after the above command, it means that `rJava` has been installed successfully!
-If you get an error message while installing `rJava`, then you might need to the following to
-configure Java with R. Exit R, run the following command in a shell and relaunch R to install
-`rJava`.
-
-<pre class="prettyprint lang-bsh">
-usb/$ R CMD javareconf -e
-</pre>
-
-__NOTE__ (Mac OS Yosemite users): if you encounter issues similar to [this one](http://stackoverflow.com/questions/26489928/cant-load-x11-in-r-after-os-x-yosemite-upgrade), try re-installing XQuartz as one of the answers suggests.
-
-### Getting the dataset
-Please follow the instructions on the <a href="getting-started.html">Getting Started</a>
-page to download and unpack the `training-downloads.zip` file.
-
-Now you're good to go!
-
-## Installation and Creating a SparkContext
-The code below assumes Mac OS X, but Linux and Windows should be supported as well.
-
-<pre class="prettyprint lang-bsh">
-# the above steps should take you back to the [usb root directory]
-# now we can launch an R shell normally:
-usb/$ R
-> pkgPath <- "SparkR/mac/SparkR_0.1.tgz" # accordingly use {windows, linux} folders
-> install.packages(pkgPath)
-</pre>
-
-Now SparkR is installed and can be loaded into a normal R session:
-
-<pre class="prettyprint lang-bsh">
-> library(SparkR)
-> Sys.setenv(SPARK_MEM="1g")
-> sc <- sparkR.init(master="local[*]") # creating a SparkContext
 > sc
-[1] "Java-Object{org.apache.spark.api.java.JavaSparkContext@514f2bd7}"
+Java ref type org.apache.spark.api.java.JavaSparkContext id 0
+> sqlContext
+Java ref type org.apache.spark.sql.SQLContext id 1
 </pre>
+
+We are going to use the `iris` dataset that comes with `R` for the rest of this chapter. 
+Load this into a `DataFrame` object as follows:
+
+<pre class="prettyprint lang-r">
+> irisDF <- createDataFrame(sqlContext, iris)
+</pre>
+
+Let's take a look at the schema of `irisDF` before we start exploring it.
+<pre class="prettyprint lang-r">
+> printSchema(irisDF)
+root
+ |-- Sepal_Length: double (nullable = true)
+ |-- Sepal_Width: double (nullable = true)
+ |-- Petal_Length: double (nullable = true)
+ |-- Petal_Width: double (nullable = true)
+ |-- Species: string (nullable = true)
+</pre>
+
+At any point, you can look at the Web UI at [http://localhost:4040/](http://localhost:4040/) to see what's going on behind the scenes.
 
 ## Interactive Analysis
 
-Let's now use Spark to do some order statistics on the data set.
+### Basic Operations
 
-1. Warm up by creating an RDD (Resilient Distributed Dataset) named `data` from the input files.
-   In the SparkR shell, following the last subsection should get you a `SparkContext`, available as the variable `sc`.
+Let's take a peek at `irisDF`. 
+You can use the `take` operation to get the first K records. 
+Here, K = 2.
 
-     <pre class="prettyprint lang-r">
-> sc
-[1] "Java-Object{org.apache.spark.api.java.JavaSparkContext@7a856d3b}" 
-> data <- textFile(sc, "data/tsv_wiki")
-> data
-An object of class "RDD"
-Slot "env":
-<environment: 0x7fae86040838>
-Slot "jrdd":
-[1] "Java-Object{data/tsv_wiki MappedRDD[1] at textFile at <unknown>:0}"</pre>
+<pre class="prettyprint lang-r">
+> take(irisDF, 2)
+</pre>
 
-2. Let's take a peek at the data. You can use the take operation of an RDD to get the first K records. Here, K = 2.
+You should see that a table of two rows is printed out, where the columns are from the schema we've seen earlier.
+Each column has different datatypes. 
+For example, the `Species` column (the 5th one) is of type `character`.
 
-     <pre class="prettyprint lang-r">> take(data, 2)
-...</pre>
+<pre class="prettyprint lang-r">
+> typeof(take(irisDF, 2)[[5]])
+[1] "character"
+</pre>
 
-    You should see that a list of two strings is printed out. Each element is a
-    character vector (string) containing the content of a Wikipedia page, as you can inspect like so:
+We can refer to specific column using `$`:
 
-     <pre class="prettyprint lang-r">> typeof(take(data, 2)[[1]])
-[1] "character"</pre>
+<pre class="prettyprint lang-r">
+> take(select(irisDF,irisDF$Species), 2)
+</pre>
 
-2. Let's see how many records in total are in this data set (this command will take a while, so read ahead while it is running).
+We can also refer to multiple columns:
 
-     <pre class="prettyprint lang-r">
-> count(data)</pre>
+<pre class="prettyprint lang-r">
+> take(irisDF[, c("Petal_Length", "Sepal_Length")], 2)
+</pre>
 
-   This should take about 10-20 seconds.
+Now, let's see how many records in total are in this dataset.
 
-   This should launch 8 Spark tasks on the Spark cluster.
-   While it's running, you can open the Spark web console to see the progress.
-   To do this, open your favorite browser, and type in the following URL.
+<pre class="prettyprint lang-r">
+> count(irisDF)
+</pre>
 
-   `http://localhost:4040`
+You can visit the [Web UI](http://localhost:4040/) for further exploration.
 
-   Note that this page is only available if you have an active job or Spark shell.  
+Find the `count` job that just ran, and click on it under the description column. 
+Feel free to look at the `Event Timeline` and `DAG Visualization` tabs in this job's details page. 
 
-   ![Spark Application Status Web UI](img/sparkr-ui.png)
+### Advanced Operations
 
-   The links in this interface allow you to track the job's progress and
-   various metrics about its execution, including task durations and cache
-   statistics.
+We can filter on patterns using `like`.
 
-   When your query finishes running, it should return the following count:
+For example, let's count the number of rows for the `Species` ''setosa''.
 
-       [1] 7967
+<pre class="prettyprint lang-r">
+> count(filter(irisDF, like(irisDF$Species, "setosa")))
+</pre>
 
-4. Recall from the [SparkSQL exercise](data-exploration-using-spark-sql.html) that the schema of the data is `(pageId, title, modifiedTime, text, username)`.
-   Let's parse our data and create an RDD containing these fields in a list. 
-   This can be done using `lapply()` (alias to the familiar `map()`) on the RDD. For each record, we will then split it by the field delimiter (i.e. a tab) using the R function `strsplit()` .
+We can also use the `where`.
 
-   (_Hint_: to look at a function's documentation, you could enter `?functionName` into the shell.)
+For example, the number of rows with `Petal_Length` less than 1.2 are:
 
-   To avoid reading from disks each time we perform any operations on the RDD, we also __cache the RDD into memory__.
+<pre class="prettyprint lang-r">
+> count(where(irisDF, irisDF$Petal_Length < 1.2))
+</pre>
 
-   <pre class="prettyprint lang-r">
-    parseFields <- function(record) {
-      Sys.setlocale("LC_ALL", "C") # necessary for strsplit() to work correctly
-      parts <- strsplit(record, "\t")[[1]]
-      list(id=parts[1], title=parts[2], modified=parts[3], text=parts[4], username=parts[5])
-    }
-    parsedRDD <- lapply(data, parseFields)
-    cache(parsedRDD)</pre>
+Let's try to find out how many unique `Species` are there in this dataset along with their individual counts. 
 
-   When you type this command into the Spark shell, Spark defines the RDD, but because of lazy evaluation, no computation is done yet.
-   Next time any action is invoked on `parsedRDD`, Spark will cache the data set in memory.
+We can do this by using a `groupby` and followed by aggregating them using `agg`:
 
-5. How many records are there for in `parsedRDD` ?
+<pre class="prettyprint lang-r">
+> species <- agg(group_by(irisDF, irisDF$Species), count = n(irisDF$Species))
+> head(species)
+</pre>
 
-   <pre class="prettyprint lang-r">> count(parsedRDD)
-[1] 7597</pre>
+We can sort the results by `Species` name:
 
-    This should be the same number as before as we have one parsed record per line.
+<pre class="prettyprint lang-r">
+> top_species <- head(arrange(species, asc(species$Species)))
+</pre>
+
+We can use `R`'s plotting capabilities from SparkR too:
+
+<pre class="prettyprint lang-r">
+> barplot(top_species$count, names.arg=top_species$Species)
+</pre>
 
 
-6. Let's try something fancier.
-   Generate a histogram of the number of contributions by each user in our dataset.
-   The high level idea of what we'll be doing is as follows.
-   First we will take just the usernames from our dataset and filter out records which don't have any usernames. 
+### Mutate DataFrame
 
-   <pre class="prettyprint lang-r">
-usernames <- lapply(parsedRDD, function(x) { x$username })
-nonEmptyUsernames <- Filter(function(x) { !is.na(x) }, usernames)
-   </pre>
+You can create new columns on the dataframe. 
+For example, create a `Petal_Area` column as follows:
 
-   Next, we will create a tuple with (username, 1) and shuffle the data and group all values of the same key together.
-   Finally we sum up the values for each key.
-   There is a convenient method called `reduceByKey` in Spark for exactly this pattern.
-   Note that the second argument to `reduceByKey` determines the number of reducers to use.
-   By default, Spark assumes that the reduce function is commutative and associative and applies combiners on the mapper side.
-   Lets use 8 reducers in this example as it is the same number of partitions our input RDD had.
-   This is usually a good heuristic, unless you know the detailed data distribution and/or job characteristics to optimize for.
-   
-   <pre class="prettyprint lang-r">
-    userContributions <- lapply(nonEmptyUsernames, function(x) { list(x, 1) })
-    userCounts <- collect(reduceByKey(userContributions, "+", 8L))</pre>
+<pre class="prettyprint lang-r">
+> irisDF$Petal_Area <- irisDF$Petal_Length * irisDF$Petal_Width
+</pre>
 
-   Now `userCounts` is a local list and we can explore the data using any available R commands.
-   For example we can get the top 10 users by sorting this list and taking the last 10 elements.
+See the change in action:
 
-   <pre class="prettyprint lang-r">
-    top10users <- tail(userCounts[order(unlist(sapply(userCounts, `[`, 2)))], 10)
-    top10users</pre>
+<pre class="prettyprint lang-r">
+> printSchema(irisDF)
+root
+ |-- Sepal_Length: double (nullable = true)
+ |-- Sepal_Width: double (nullable = true)
+ |-- Petal_Length: double (nullable = true)
+ |-- Petal_Width: double (nullable = true)
+ |-- Species: string (nullable = true)
+ |-- Petal_Area: double (nullable = true)
+</pre>
 
-   We can also plot a histogram of user contributions using R's `plot` command
+Dropping a columns is simple as well!
 
-   <pre class="prettyprint lang-r">
-    counts <- unlist(sapply(userCounts, `[`, 2))
-    plot(sort(counts), log="y", type="h", lwd=10, lend=2)</pre>
+<pre class="prettyprint lang-r">
+> irisDF$Petal_Area <- NULL
+> printSchema(irisDF)
+root
+ |-- Sepal_Length: double (nullable = true)
+ |-- Sepal_Width: double (nullable = true)
+ |-- Petal_Length: double (nullable = true)
+ |-- Petal_Width: double (nullable = true)
+ |-- Species: string (nullable = true)
+</pre>
 
-7. As an exercise try to answer the following question using the commands from above:
-   How many articles contain the word “California”?
+### Running SQL Queries
 
-   _Hint_: You can use the R command `grepl` to determine if a word is present in a string.
+First, we need to register a table corresponding to `irisDF` DataFrame.
 
-   _Hint_: if you run into locale issues with `grepl`, the same `Sys.setlocale()` call used above should fix it.
+<pre class="prettyprint lang-r">
+> registerTempTable(irisDF, "irisTable")
+</pre>
 
-   <div class="solution" markdown="1">
-   <pre class="prettyprint lang-r">
-> calArticles <- Filter(function(item) {
-       Sys.setlocale("LC_ALL", "C")
-       grepl("California", item$text)
-     }, parsedRDD)
-> count(calArticles)
-[1] 5795</pre>
-   </div>
+Now we can perform any SparkSQL operations on the `irisTable` table.
 
-8. You can explore the full RDD API by using the command `help(package=SparkR)`.
+For example, let's count the number of rows for the `Species` ''setosa'' one more time using SQL through SparkR.
 
-This brings us to the end of the SparkR chapter of the tutorial. We encourage you to continue playing with the code and to check out the subscribe to the [SparkR Developers mailing list](https://groups.google.com/forum/#!forum/sparkr-dev) for project updates. Bug reports and feature requests are also welcomed through [JIRA](https://sparkr.atlassian.net/issues/). Finally, you can submit pull requests through [Github](https://github.com/amplab-extras/SparkR-pkg), which contains further documentation and demo programs.
+<pre class="prettyprint lang-r">
+> count(sql(sqlContext, "SELECT Species FROM irisTable WHERE Species LIKE 'setosa'"))
+</pre>
+
+This brings us to the end of the SparkR chapter of the tutorial.
+You can explore the full API by using the command `help(package=SparkR)`.
