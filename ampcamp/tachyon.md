@@ -70,9 +70,9 @@ it. For more information, please visit Tachyon's [website](http://tachyon-projec
  * Your laptop has Java 6 or 7 installed
  * Mac OS or Linux (Windows is not supported)
 
-## Launch Tachyon
+# Launch Tachyon
 
-### Configurations
+## Configurations
 
 All system's configuration is under `tachyon/conf` folder. You configure the system by specifying
 your own environment variables in `tachyon/conf/tachyon-env.sh`. For this exercise, we have provided
@@ -87,7 +87,7 @@ $ cp conf/tachyon-env.sh.template conf/tachyon-env.sh
 For more information on configuration values, you can visit the Tachyon
 [Configuration Settings Docs](http://tachyon-project.org/documentation/Configuration-Settings.html).
 
-### Format the storage
+## Format the storage
 
 Before starting Tachyon for the first time, we need to format the system using
 using the `tachyon` script in the `tachyon/bin` folder. Please type the
@@ -104,7 +104,7 @@ Formatting UNDERFS_DATA_FOLDER: /Users/haoyuan/Downloads/test/tachyon/libexec/..
 Formatting UNDERFS_WORKERS_FOLDER: /Users/haoyuan/Downloads/test/tachyon/libexec/../../data/tmp/tachyon/workers
 ~~~
 
-### Start the system
+## Start the system
 
 After formatting the storage, we can try to start the system. This can be done by using
 `tachyon/bin/tachyon-start.sh` script.
@@ -118,7 +118,7 @@ Starting master @ localhost
 Starting worker @ HYMac-2.local
 ~~~
 
-## Interacting with Tachyon
+# Interacting with Tachyon
 
 In this section, we will go over three approaches to interact with Tachyon:
 
@@ -126,7 +126,7 @@ In this section, we will go over three approaches to interact with Tachyon:
 2. Application Programming Interface
 3. Web User Interface
 
-### Command Line Interface
+## Command Line Interface
 
 You can interact with Tachyon using the following command:
 
@@ -198,7 +198,7 @@ $ ./bin/tachyon tfs cat /LICENSE
 ~~~
 </div>
 
-### Application Programming Interface
+## Application Programming Interface
 
 After using command line to interact with Tachyon, you can also use its API. We have several sample
 [applications](https://github.com/amplab/tachyon/tree/master/examples/src/main/java/tachyon/examples).
@@ -227,7 +227,7 @@ $ Passed the test!
 $ ...
 ~~~
 
-### Web User Interface
+## Web User Interface
 
 After using commands and API to interact with Tachyon, let's take a look at its web user interface.
 The URI is [http://localhost:19999](http://localhost:19999).
@@ -239,9 +239,9 @@ If you click on the `Browse File System`, it shows you all the files you just cr
 You can also click a particular file or folder. e.g. `/LICENSE` file, and then you will see the
 detailed information about it.
 
-## Run Spark on Tachyon
+# Run Spark on Tachyon
 
-### Input/Output with Tachyon
+## Input/Output with Tachyon
 
 In this section, we run a Spark program to interact with Tachyon. The first one is to do a word
 count on `/LICENSE` file. In `/root/spark` folder, execute the following command to start
@@ -291,7 +291,7 @@ Because `/LICENSE` is in memory, when a new Spark program comes up, it can load 
 directly from Tachyon. In the meantime, we are also working on other features to make Tachyon
 further enhance Spark's performance.
 
-### Store RDD OFF_HEAP in Tachyon
+## Store RDD OFF_HEAP in Tachyon
 
 Storing RDD as OFF_HEAP storage in Tachyon has several advantages ([more info](http://spark.apache.org/docs/latest/programming-guide.html)):
 
@@ -299,7 +299,7 @@ Storing RDD as OFF_HEAP storage in Tachyon has several advantages ([more info](h
 * It significantly reduces garbage collection costs.
 * Cached data is not lost if individual executors crash.
 
-Please try to the following example:
+Please try the following example:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -315,6 +315,112 @@ counts.take(10)
 
 Now, try running `counts.take(10)` again and you will see that it's much faster than the first time because the `counts`
 RDD has been stored `OFF_HEAP` in Tachyon.
+
+# Mounting a Storage System in Tachyon
+
+In this section, we will discover how to mount a part of the local file system to a Tachyon
+directory. Doing so will allow Tachyon to transparently access all the data of the mounted storage
+system without manually copying data, as we previously did with `copyFromLocal`. In addition,
+multiple storage systems can be mounted to different Tachyon paths, allowing Tachyon to provide
+a [unified namespace](http://tachyon-project.org/documentation/master/Unified-and-Transparent-Namespace.html)
+for an arbitrary number of storage systems.
+
+## Using the Mount Command
+
+To mount a under storage system to a path in Tachyon, use the `mount` command of the Tachyon shell.
+Try mounting the `ampcamp6/tachyon` folder to `/local` in Tachyon.
+
+<div class="solution" markdown="1">
+~~~
+$ ./bin/tachyon tfs mount /local /root/ampcamp6/tachyon
+Mounted /root/ampcamp6/tachyon at /local
+~~~
+</div>
+
+Now that the the ampcamp6/tachyon directory has been mounted to `/local` in Tachyon, you can try to
+list the contents of the folder.
+
+<div class="solution" markdown="1">
+~~~
+$ ./bin/tachyon tfs ls /local
+~~~
+</div>
+
+You will see that there are no files in the folder. By default, Tachyon loads data lazily from
+mounted storage systems, fetching the files on demand to prevent a performance penalty when mounting
+a storage system with many objects.
+
+## Loading data from a Mounted Storage System
+
+To fetch data from the mounted storage system, we simply need to access it. Try using the `load`
+command in the Tachyon shell to load the `NOTICE` file.
+
+<div class="solution" markdown="1">
+~~~
+$ ./bin/tachyon tfs load /local/NOTICE
+/local/NOTICE loaded
+~~~
+</div>
+
+You can now verify the `NOTICE` file has been fetched from the mounted storage with `ls` or through
+the web UI.
+
+<div class="solution" markdown="1">
+~~~
+$ ./bin/tachyon tfs ls /local
+4111.00B  11-19-2015 10:02:03:013  In Memory      /local/NOTICE
+~~~
+</div>
+
+`load` is just one way to fetch the data, we can also directly access the data through a Spark
+program to pull the data from the underlying storage.
+
+Run spark-shell again in the spark directory.
+
+    bin/spark-shell
+
+Now we will run wordcount on the `README.md` file which has not been loaded into Tachyon but exists
+in the mounted storage system.
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+sc.hadoopConfiguration.set("fs.tachyon.impl", "tachyon.hadoop.TFS")
+var file = sc.textFile("tachyon://localhost:19998/local/README.md")
+val counts = file.flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey(_ + _)
+counts.saveAsTextFile("tachyon://localhost:19998/result2")
+~~~
+</div>
+<div data-lang="java" markdown="1">
+~~~
+JavaRDD<String> file = spark.textFile("tachyon://localhost:19998/local/README.md");
+JavaRDD<String> words = file.flatMap(new FlatMapFunction<String, String>()
+  public Iterable<String> call(String s) { return Arrays.asList(s.split(" ")); }
+});
+JavaPairRDD<String, Integer> pairs = words.map(new PairFunction<String, String, Integer>()
+  public Tuple2<String, Integer> call(String s) { return new Tuple2<String, Integer>(s, 1); }
+});
+JavaPairRDD<String, Integer> counts = pairs.reduceByKey(new Function2<Integer, Integer>()
+  public Integer call(Integer a, Integer b) { return a + b; }
+});
+counts.saveAsTextFile("tachyon://localhost:19998/result2");
+~~~
+</div>
+<div data-lang="python" markdown="1">
+~~~
+file = sc.textFile("tachyon://localhost:19998/local/README.md")
+counts = file.flatMap(lambda line: line.split(" ")) \
+             .map(lambda word: (word, 1)) \
+             .reduceByKey(lambda a, b: a + b)
+counts.saveAsTextFile("tachyon://localhost:19998/result2")
+~~~
+</div>
+</div>
+
+You can view the result of the operation through the web UI or Tachyon shell. You can also see that
+the `README.md` file appears in `/local`.
+
+# Shutting down Tachyon
 
 To shutdown tachyon, issue the following command:
 
