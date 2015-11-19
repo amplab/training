@@ -7,27 +7,29 @@ navigation:
   show: true
 ---
 
-{:toc}
-<!--
-<p style="text-align: center;">
-  <img src="img/tachyon-logo.jpg"
-       title="Tachyon Logo"
-       alt="Tachyon"
-       width="65%" />
-</p>
- -->
+# What is Tachyon
 
 Memory is the key to fast Big Data processing. This has been realized by many, and frameworks such
 as Spark already leverage memory performance. As data sets continue to grow, storage is increasingly
 becoming a critical bottleneck in many workloads.
 
-To address this need, we have developed [Tachyon](http://tachyon-project.org/), a memory centric
-fault-tolerant distributed file system, which enables reliable file sharing at memory-speed across
-cluster frameworks, such as Spark and MapReduce. The result of over two years of research, Tachyon
-achieves memory-speed and fault-tolerance by using memory aggressively and leveraging lineage
-information. Tachyon caches working set files in memory, and enables different jobs/queries and
-frameworks to access cached files at memory speed. Thus, Tachyon avoids going to disk to load
-datasets that are frequently read.
+To address this need, we have developed [Tachyon](http://tachyon-project.org/). Tachyon is an open
+source memory-centric distributed storage system enabling reliable data sharing at memory-speed
+across cluster jobs, possibly written in different computation frameworks, such as Apache Spark and
+Apache MapReduce. In the big data ecosystem, Tachyon lies between computation frameworks or jobs,
+such as Apache Spark, Apache MapReduce, or Apache Flink, and various kinds of storage systems, such
+as Amazon S3, OpenStack Swift, GlusterFS, HDFS, or Ceph. Tachyon brings significant performance
+improvement to the stack; for example, [Baidu](https://www.baidu.com) uses Tachyon to improve their
+data analytics performance by 30 times. Beyond performance, Tachyon bridges new workloads with data
+stored in traditional storage systems. Users can run Tachyon using its standalone cluster mode, for
+example on Amazon EC2, or launch Tachyon with Apache Mesos or Apache Yarn.
+
+<p style="text-align: center;">
+  <img src="img/tachyon-stack.png"
+       title="Tachyon Logo"
+       alt="Tachyon"
+       width="65%" />
+</p>
 
 Tachyon is Hadoop compatible. Existing Spark and MapReduce programs can run on top of it without any
 code changes. Tachyon is the default off-heap option in Spark, which means that RDDs can
@@ -135,23 +137,34 @@ $ ./bin/tachyon tfs
 Then, it will return a list of options:
 
 ~~~
-Usage: java TFsShell
+Usage: java TfsShell
        [cat <path>]
+       [copyFromLocal <src> <remoteDst>]
+       [copyToLocal <src> <localDst>]
        [count <path>]
+       [du <path>]
+       [fileinfo <path>]
+       [free <file path|folder path>]
+       [getUsedBytes]
+       [getCapacityBytes]
+       [load <path>]
+       [loadMetadata <path>]
+       [location <path>]
        [ls <path>]
        [lsr <path>]
        [mkdir <path>]
-       [rm <path>]
-       [tail <path>]
-       [touch <path>]
+       [mount <tachyonPath> <ufsURI>]
        [mv <src> <dst>]
-       [copyFromLocal <src> <remoteDst>]
-       [copyToLocal <src> <localDst>]
-       [fileinfo <path>]
-       [location <path>]
+       [pin <path>]
        [report <path>]
        [request <tachyonaddress> <dependencyId>]
-       [pin <path>]
+       [rm <path>]
+       [rmr <path>]
+       [setTTL <path> <time to live(in milliseconds)>]
+       [unsetTTL <path>]
+       [tail <path>]
+       [touch <path>]
+       [unmount <tachyonPath>]
        [unpin <path>]
 ~~~
 
@@ -193,30 +206,23 @@ For example, [BasicOperations.java](https://github.com/amplab/tachyon/blob/maste
 shows how to user file create, write, and read operations.
 
 Using the Tachyon script, you can simply use the following command to run this sample program. The
-following command runs [BasicOperations.java], and also verifies Tachyon's installation.
+following command runs several tests like BasicOperations.java, and also verifies Tachyon's
+installation.
 
 ~~~
 $ ./bin/tachyon runTests
-$ /root/tachyon/bin/tachyon runTest Basic MUST_CACHE
-$ /BasicFile_MUST_CACHE has been removed
-$ 2014-02-07 23:46:57,529 INFO   (TachyonFS.java:connect) - Trying to connect master @ ec2-23-20-202-253.compute-1.amazonaws.com/10.91.151.150:19998
-$ 2014-02-07 23:46:57,599 INFO   (MasterClient.java:getUserId) - User registered at the master ec2-23-20-202-253.compute-1.amazonaws.com/10.91.151.150:19998 got UserId 6
-$ 2014-02-07 23:46:57,600 INFO   (TachyonFS.java:connect) - Trying to get local worker host : ip-10-91-151-150.ec2.internal
-$ 2014-02-07 23:46:57,618 INFO   (TachyonFS.java:connect) - Connecting local worker @ ip-10-91-151-150.ec2.internal/10.91.151.150:29998
-$ 2014-02-07 23:46:57,661 INFO   (CommonUtils.java:printTimeTakenMs) - createFile with fileId 3 took 133 ms.
-$ 2014-02-07 23:46:57,707 INFO   (TachyonFS.java:createAndGetUserTempFolder) - Folder /mnt/ramdisk/tachyonworker/users/6 was created!
-$ 2014-02-07 23:46:57,714 INFO   (BlockOutStream.java:<init>) - /mnt/ramdisk/tachyonworker/users/6/3221225472 was created!
-$ Passed the test!
-$ /root/tachyon/bin/tachyon runTest BasicRawTable MUST_CACHE
-$ /BasicRawTable_MUST_CACHE has been removed
-$ 2014-02-07 23:46:58,633 INFO   (TachyonFS.java:connect) - Trying to connect master @ ec2-23-20-202-253.compute-1.amazonaws.com/10.91.151.150:19998
-$ 2014-02-07 23:46:58,705 INFO   (MasterClient.java:getUserId) - User registered at the master ec2-23-20-202-253.compute-1.amazonaws.com/10.91.151.150:19998 got UserId 8
-$ 2014-02-07 23:46:58,706 INFO   (TachyonFS.java:connect) - Trying to get local worker host : ip-10-91-151-150.ec2.internal
-$ 2014-02-07 23:46:58,725 INFO   (TachyonFS.java:connect) - Connecting local worker @ ip-10-91-151-150.ec2.internal/10.91.151.150:29998
-$ 2014-02-07 23:46:58,859 INFO   (TachyonFS.java:createAndGetUserTempFolder) - Folder /mnt/ramdisk/tachyonworker/users/8 was created!
-$ 2014-02-07 23:46:58,866 INFO   (BlockOutStream.java:<init>) - /mnt/ramdisk/tachyonworker/users/8/8589934592 was created!
-$ 2014-02-07 23:46:58,904 INFO   (BlockOutStream.java:<init>) - /mnt/ramdisk/tachyonworker/users/8/9663676416 was created!
-$ 2014-02-07 23:46:58,914 INFO   (BlockOutStream.java:<init>) - /mnt/ramdisk/tachyonworker/users/8/10737418240 was created!
+$ /root/ampcamp6/tachyon/bin/tachyon runTest Basic CACHE_PROMOTE MUST_CACHE
+$ /default_tests_files/BasicFile_CACHE_PROMOTE_MUST_CACHE has been removed
+$ 2015-11-18 15:47:50,229 INFO   (ClientBase.java:connect) - Tachyon client (version 0.8.2) is trying to connect with FileSystemMaster master @ localhost/127.0.0.1:19998
+$ 2015-11-18 15:47:50,242 INFO   (ClientBase.java:connect) - Client registered with FileSystemMaster master @ localhost/127.0.0.1:19998
+$ 2015-11-18 15:47:50,269 INFO   (BasicOperations.java:createFile) - createFile with fileId 889192447 took 47 ms.
+$ 2015-11-18 15:47:50,279 INFO   (ClientBase.java:connect) - Tachyon client (version 0.8.2) is trying to connect with BlockMaster master @ localhost/127.0.0.1:19998
+$ 2015-11-18 15:47:50,280 INFO   (ClientBase.java:connect) - Client registered with BlockMaster master @ localhost/127.0.0.1:19998
+$ 2015-11-18 15:47:50,304 INFO   (WorkerClient.java:connect) - Connecting local worker @ /192.168.1.9:29998
+$ 2015-11-18 15:47:50,341 INFO   (FileUtils.java:createStorageDirPath) - Folder /Volumes/ramdisk/tachyonworker/3540443706671334291 was created!
+$ 2015-11-18 15:47:50,346 INFO   (LocalBlockOutStream.java:<init>) - LocalBlockOutStream created new file block, block path: /Volumes/ramdisk/tachyonworker/3540443706671334291/872415232
+$ 2015-11-18 15:47:50,392 INFO   (BasicOperations.java:writeFile) - writeFile to file /default_tests_files/BasicFile_CACHE_PROMOTE_MUST_CACHE took 123 ms.
+$ 2015-11-18 15:47:50,457 INFO   (BasicOperations.java:readFile) - readFile file /default_tests_files/BasicFile_CACHE_PROMOTE_MUST_CACHE took 65 ms.
 $ Passed the test!
 $ ...
 ~~~
@@ -224,7 +230,7 @@ $ ...
 ### Web User Interface
 
 After using commands and API to interact with Tachyon, let's take a look at its web user interface.
-The URI is `http://localhost:19999`.
+The URI is [http://localhost:19999](http://localhost:19999).
 
 The first page is the overview of the running system. The second page is the system configuration
 
