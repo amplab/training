@@ -31,9 +31,9 @@ and related projects.
 ## Assumptions
 In order to get the most out of this course, we assume:
 
- * You have experience using the core Spark APIs
+ * You have experience programming in Python or Scala
  * You have a laptop
- * Your laptop has Java 6 or 7 installed
+ * Your laptop has Java 7 or 8 installed
 
 If you would like a quick primer on Scala, check out the following doc in the appendix:
 

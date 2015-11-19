@@ -12,12 +12,20 @@ skip-chapter-toc: true
 #### On-site Participants
 You should have received a USB stick containing the training materials.  If you do not have one, please ask a TA.
 
-If you cannot use the USB stick or would prefer to download a zip file with the USB stick's contents,
-please click <a href="http://www.cs.berkeley.edu/~jey/ampcamp6/ampcamp6-rc1.zip">here</a>.
+If you cannot use the USB stick or would prefer to download an archive with the USB stick's contents,
+please click <a href="http://d2xijq8wc2iink.cloudfront.net/ampcamp6/ampcamp6-rc3.tar.gz">here</a>.
 
 #### Remote Participants
 Please download the USB stick's contents from
-<a href="http://www.cs.berkeley.edu/~jey/ampcamp6/ampcamp6-rc1.zip">here</a>.
+<a href="http://d2xijq8wc2iink.cloudfront.net/ampcamp6/ampcamp6-rc3.tar.gz">here</a>.
+
+#### MD5 Checksum
+If you would like to verify the integrity of your training materials archive, please see the MD5 checksums provided below:
+
+~~~
+    cd445a9123822e716f5e1121f8456c40  ampcamp6-rc3.tar.gz
+    95b443551159b1e6aecf309e39889c67  ampcamp6-rc3.zip
+~~~
 
 ## Quick Start
 
