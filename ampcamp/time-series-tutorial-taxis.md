@@ -10,6 +10,8 @@ skip-chapter-toc: true
 
 # Time series analysis on taxi data in New York.
 
+https://github.com/bellettif/sparkGeoTS
+
 ## Getting started:
 In the shell, from the usb/spark/, please enter
 
