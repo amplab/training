@@ -11,6 +11,8 @@ navigation:
 
 # Time Series Analysis on Taxi Data in New York
 
+https://github.com/bellettif/sparkGeoTS
+
 ## Getting Started
 In the shell, from the usb/spark/, please enter
 

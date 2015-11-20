@@ -11,6 +11,8 @@ navigation:
 
 # Time Series Analysis on Surrogate Data
 
+https://github.com/bellettif/sparkGeoTS
+
 ## Getting Started
 In the shell, from the usb directory, please enter
 
