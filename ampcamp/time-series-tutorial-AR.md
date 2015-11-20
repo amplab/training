@@ -10,6 +10,8 @@ skip-chapter-toc: true
 
 # Time series analysis on surrogate data.
 
+https://github.com/bellettif/sparkGeoTS
+
 ## Getting started:
 In the shell, from the usb/spark/, please enter
 
